@@ -10,8 +10,12 @@ ChiToGamma(Chi_matrix)
 \item{Chi_matrix}{the matrix with the chi coefficient}
 }
 \value{
-The corresponding variogram matrix $\Gamma$.
+The corresponding variogram matrix \eqn{\Gamma}.
 }
 \description{
 Transform a chi matrix to the corresponding variogram
+}
+\examples{
+ChiToGamma(matrix(c(0.5, 0.7, 0.7, 0.5), nrow = 2))
+
 }

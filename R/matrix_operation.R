@@ -217,9 +217,11 @@ compute_W <- function(data) {
 #'
 #' @param Chi_matrix the matrix with the chi coefficient
 #'
-#' @return The corresponding variogram matrix $\Gamma$.
+#' @return
+#' The corresponding variogram matrix \eqn{\Gamma}.
 #'
-#' @example
+#' @examples
+#' ChiToGamma(matrix(c(0.5, 0.7, 0.7, 0.5), nrow = 2))
 #'
 #' @export
 ChiToGamma <- function(Chi_matrix) {

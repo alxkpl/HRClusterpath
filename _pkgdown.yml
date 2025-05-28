@@ -1,0 +1,28 @@
+url: https://alxkpl.github.io/HRClusterpath/
+
+template:
+  light-switch: true
+  bootstrap: 5
+  bslib:
+    bootswatch: zephyr
+    pkgdown-nav-height: 100px
+
+navbar:
+  type: default
+  left:
+    - text: Functions
+      href: reference/index.html
+
+reference:
+  - title: Main Functions
+    desc: Tests
+    contents: 
+      - HR_Clusterpath
+      - average_hierarchy
+      - build_theta
+      - extract_R_matrix
+      - gg_cluster
+      - neg_likelihood
+      - neg_likelihood_pen 
+      - ChiToGamma
+      - penalty
