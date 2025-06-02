@@ -7,7 +7,7 @@
 HR_Clusterpath(data, zeta, lambda, eps_g = 0.001, eps_f = 0.01, it_max = 1000)
 }
 \arguments{
-\item{data}{\eqn{n /times d} matrix : the data.}
+\item{data}{\eqn{n \times d} matrix : the data.}
 
 \item{zeta}{a positive number : tuned parameter for the exponential weights.}
 
