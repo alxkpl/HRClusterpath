@@ -7,7 +7,7 @@
 penalty(weights)
 }
 \arguments{
-\item{weights}{a d x d symmetric matrix with a zero diagonal.}
+\item{weights}{a \eqn{d \times d} symmetric matrix with a zero diagonal.}
 }
 \value{
 For fixed weights, returns a function which compute the value of

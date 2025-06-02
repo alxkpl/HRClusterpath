@@ -6,7 +6,6 @@
 #' @returns Return FALSE if the clusters have not the same number of cluster. Otherwise,
 #'
 #' @keywords internal
-#' @examples
 #'
 compare_clusters <- function(clusters1, clusters2) {
   clust1 <- lapply(clusters1, sort)
@@ -29,7 +28,6 @@ compare_clusters <- function(clusters1, clusters2) {
 #' @returns Return the list of the solution where a change occurs between the list of clusters.
 #'
 #' @keywords internal
-#' @examples
 #'
 detect_merge <- function(solution_list) {
   # Initialization

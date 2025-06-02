@@ -4,7 +4,7 @@
 \alias{merge_clusters}
 \title{Function which merges clusters}
 \usage{
-merge_clusters(R, clusters, eps = 0.1, cost)
+merge_clusters(R, clusters, eps_f = 0.1, cost)
 }
 \arguments{
 \item{R}{K x K symmetric matrix.}
@@ -12,7 +12,7 @@ merge_clusters(R, clusters, eps = 0.1, cost)
 \item{clusters}{a list of vector : each vector gives the element of
 a cluster.}
 
-\item{eps}{positive value : minimal tolerance for merging clusters}
+\item{eps_f}{a positive number : minimal tolerance for merging clusters}
 
 \item{cost}{a function : Cost function of the optimisation}
 }

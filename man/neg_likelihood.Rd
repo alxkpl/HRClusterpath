@@ -7,14 +7,18 @@
 neg_likelihood(gamma)
 }
 \arguments{
-\item{gamma}{A d x d matrix: the empirical variogram matrix.}
+\item{gamma}{A \eqn{d \times d} matrix: the empirical variogram matrix.}
 }
 \value{
 For a fixed variogram gamma, compute for a set of clusters and
-corresponding R matrix, the value of the associated negative likelihood
+corresponding \eqn{R} matrix, the value of the associated negative likelihood
 defined by :
-nllh = - log(|theta|\emph{+) - 1/2 trace(gamma * theta)
-where |.|}+ is the generalised determinant.
+
+\deqn{
+     L(\Theta) = - \log(|\Theta|_+) - \frac 1 2 \text{tr}(\hat \Gamma \Theta)
+}
+
+where \eqn{|\cdot|_+} is the generalised determinant.
 }
 \description{
 Negative log-likelihood computation.

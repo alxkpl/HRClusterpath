@@ -18,11 +18,14 @@
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/get_adjacency_matrix.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/get_cluster.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/gg_cluster.html</loc></url>
+<url><loc>https://alxkpl.github.io/HRClusterpath/reference/gradient_D2.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/index.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/merge_clusters.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/neg_likelihood.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/neg_likelihood_pen.html</loc></url>
+<url><loc>https://alxkpl.github.io/HRClusterpath/reference/nloglike_grad_np.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/penalty.html</loc></url>
+<url><loc>https://alxkpl.github.io/HRClusterpath/reference/penalty_grad.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/psolve.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/semi_def.html</loc></url>
 <url><loc>https://alxkpl.github.io/HRClusterpath/reference/step_gradient.html</loc></url>

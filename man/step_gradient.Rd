@@ -4,16 +4,16 @@
 \alias{step_gradient}
 \title{Step for the gradient descent}
 \usage{
-step_gradient(gamma, weights, lambda, size_grid = 100)
+step_gradient(gamma, weights, size_grid = 100)
 }
 \arguments{
 \item{gamma}{a d x d matrix : the variogram matrix.}
 
 \item{weights}{a d x d symmetric matrix with a zero diagonal.}
 
-\item{lambda}{a positive number : the weight of the penalty.}
-
 \item{size_grid}{integer : size of the search grid for the optimal step.}
+
+\item{lambda}{a positive number : the weight of the penalty.}
 }
 \value{
 A function of clusters and R matrix which returns the next step of

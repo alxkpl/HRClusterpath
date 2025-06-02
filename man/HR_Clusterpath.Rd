@@ -2,24 +2,27 @@
 % Please edit documentation in R/optimization.R
 \name{HR_Clusterpath}
 \alias{HR_Clusterpath}
-\title{Search of optimal lambda for the penalty in optimization}
+\title{Optimization results from data}
 \usage{
-HR_Clusterpath(data, chi, lambda, it_max = 1000)
+HR_Clusterpath(data, zeta, lambda, eps_g = 0.001, eps_f = 0.01, it_max = 1000)
 }
 \arguments{
-\item{data}{n x d matrix : the data.}
+\item{data}{\eqn{n /times d} matrix : the data.}
 
-\item{chi}{a positive number : tuned parameter for the exponential weights}
+\item{zeta}{a positive number : tuned parameter for the exponential weights.}
 
-\item{l_grid}{a numerix vector of psoitive number : the grid line for lambda.}
+\item{eps_g}{d}
 
-\item{include_zero}{Boolean : if FALSE (default) avoid computation for
-non-penalization setting (i.e. lambda = 0).}
+\item{eps_f}{d}
+
+\item{it_max}{d}
+
+\item{lamda}{a numerix vector of positive number : the grid line for \eqn{\lambda}.}
 }
 \value{
-Returns the optimal optimization from get_clusters() with the best
-lambda in the grid line.
+Returns the optimization path results from \code{get_clusters()} for each
+\eqn{\lambda} from the data.
 }
 \description{
-Search of optimal lambda for the penalty in optimization
+Optimization results from data
 }

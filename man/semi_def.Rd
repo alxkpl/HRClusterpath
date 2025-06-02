@@ -7,10 +7,10 @@
 semi_def(M)
 }
 \arguments{
-\item{M}{A symmetric matrix.}
+\item{M}{A /eqn{n/times n} symmetric matrix.}
 }
 \value{
-TRUE if the matrix is semi-definite positive, FALSE otherwise. The
+\code{TRUE} if the matrix is semi-definite positive, \code{FALSE} otherwise. The
 verification is done by checking the sign of the eigen-values of the matrix.
 }
 \description{

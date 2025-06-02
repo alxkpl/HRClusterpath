@@ -4,16 +4,16 @@
 \alias{get_cluster}
 \title{Gradient descent algorithm for Husler-Reiss graphical models clustering}
 \usage{
-get_cluster(gamma, weights, lambda, ...)
+get_cluster(gamma, weights, eps_f, ...)
 }
 \arguments{
 \item{gamma}{a d x d matrix : the variogram matrix.}
 
 \item{weights}{a d x d symmetric matrix with a zero diagonal.}
 
-\item{lambda}{a positive number : the weight of the penalty.}
-
 \item{...}{}
+
+\item{lambda}{a positive number : the weight of the penalty.}
 }
 \value{
 A function which compute the maximum likelihood estimator using
@@ -37,4 +37,3 @@ Cluster_HR <- get_cluster(gamma, W, 100)
 Cluster_HR(R)
 
 }
-\keyword{internal}

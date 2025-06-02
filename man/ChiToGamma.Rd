@@ -7,7 +7,7 @@
 ChiToGamma(Chi_matrix)
 }
 \arguments{
-\item{Chi_matrix}{the matrix with the chi coefficient}
+\item{Chi_matrix}{the matrix with the chi coefficient.}
 }
 \value{
 The corresponding variogram matrix \eqn{\Gamma}.

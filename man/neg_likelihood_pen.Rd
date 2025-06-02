@@ -4,7 +4,7 @@
 \alias{neg_likelihood_pen}
 \title{Computation of the penalised negative log-likelihood}
 \usage{
-neg_likelihood_pen(gamma, weights, lambda)
+neg_likelihood_pen(gamma, weights)
 }
 \arguments{
 \item{gamma}{a d x d matrix : the variogram matrix.}

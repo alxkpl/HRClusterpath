@@ -1,12 +1,11 @@
 #' Semi-definite checker
 #'
-#' @param M A symmetric matrix.
+#' @param M A /eqn{n/times n} symmetric matrix.
 #'
-#' @returns TRUE if the matrix is semi-definite positive, FALSE otherwise. The
+#' @returns `TRUE` if the matrix is semi-definite positive, `FALSE` otherwise. The
 #' verification is done by checking the sign of the eigen-values of the matrix.
 #'
 #' @keywords internal
-#' @examples
 #'
 semi_def <- function(M) {
   !sum(Re(eigen(M)$values) < -1e-10)        # for numerical errors
@@ -195,7 +194,6 @@ psolve <- function(A, tol = 1e-12) {
 #' @returns The initial wieght matrix without fused variables.
 #'
 #' @keywords internal
-#' @example
 #'
 compute_W <- function(data) {
   Gamma_est <- graphicalExtremes::emp_vario(data)
@@ -215,7 +213,7 @@ compute_W <- function(data) {
 
 #' Transform a chi matrix to the corresponding variogram
 #'
-#' @param Chi_matrix the matrix with the chi coefficient
+#' @param Chi_matrix the matrix with the chi coefficient.
 #'
 #' @return
 #' The corresponding variogram matrix \eqn{\Gamma}.

@@ -1,6 +1,7 @@
 url: https://alxkpl.github.io/HRClusterpath/
 
 template:
+  math-rendering: mathjax
   light-switch: true
   bootstrap: 5
   bslib:
@@ -24,5 +25,6 @@ reference:
       - gg_cluster
       - neg_likelihood
       - neg_likelihood_pen 
+      - get_cluster
       - ChiToGamma
       - penalty
