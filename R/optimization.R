@@ -24,15 +24,15 @@
 #' f(R, clusters)
 #'
 #' @keywords internal
-step_gradient <- function(gamma, weights, lambda, size_grid = 100) {
+step_gradient <- function(gamma, weights, size_grid = 100) {
   # Initialization of functions
   dlog <- nloglike_grad_np(gamma)                     # Neg-lklh gradient part
   dpen <- penalty_grad(weights)                       # Penalty gradient part
 
   # Penalised negative log-likelihood
-  nllh <- neg_likelihood_pen(gamma, weights, lambda)
+  nllh <- neg_likelihood_pen(gamma, weights)
 
-  function(R, clusters) {
+  function(R, clusters, lambda) {
     # Initialization
     p <- sapply(clusters, length)           # Vector of cluster's size
 
@@ -42,7 +42,7 @@ step_gradient <- function(gamma, weights, lambda, size_grid = 100) {
     # Grid line search for optimal gradient step
     # Grid line construction
     if (max(p) == 1) {
-      s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters),
+      s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters, lambda),
                      method = "Brent", lower = 0, upper = 1)$par
       while (!semi_def(sub_theta(R - s_opt * grad, clusters))) {
         s_opt <- 0.95 * s_opt
@@ -54,7 +54,7 @@ step_gradient <- function(gamma, weights, lambda, size_grid = 100) {
       abs(((R %*% p) / (grad %*% p))[p > 1])
     )
 
-    s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters),
+    s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters, lambda),
                    method = "Brent", lower = 0, upper = min(s_max, 1))$par
     while (!semi_def(sub_theta(R - s_opt * grad, clusters))) {
       s_opt <- 0.95 * s_opt
@@ -70,7 +70,7 @@ step_gradient <- function(gamma, weights, lambda, size_grid = 100) {
 #' @param R K x K symmetric matrix.
 #' @param clusters a list of vector : each vector gives the element of
 #' a cluster.
-#' @param eps positive value : minimal tolerance for merging clusters
+#' @param eps_f a positive number : minimal tolerance for merging clusters
 #' @param cost a function : Cost function of the optimisation
 #'
 #' @returns Returns, if merging, a list of the new clusters and the
@@ -93,7 +93,7 @@ step_gradient <- function(gamma, weights, lambda, size_grid = 100) {
 #' merge_clusters(R, clusters, cost = cost)
 #'
 #' @keywords internal
-merge_clusters <- function(R, clusters, eps = 1e-1, cost) {
+merge_clusters <- function(R, clusters, eps_f = 1e-1, cost) {
   # Initialization
   D <- D_tilde2_r(R, clusters)               # Function of clusters distance
   K <- length(clusters)                      # Actual number of clusters
@@ -113,7 +113,7 @@ merge_clusters <- function(R, clusters, eps = 1e-1, cost) {
   l <- index[2]
 
   # Checking uselessness of merging
-  if (distance[k, l] > eps) {
+  if (distance[k, l] > eps_f) {
     return(
       list(
         R = R,
@@ -178,24 +178,38 @@ merge_clusters <- function(R, clusters, eps = 1e-1, cost) {
 #' Cluster_HR <- get_cluster(gamma, W, 100)
 #' Cluster_HR(R)
 #'
-#' @keywords internal
-get_cluster <- function(gamma, weights, lambda, ...) {
-  L <- neg_likelihood_pen(gamma, weights, lambda)
-  step <- step_gradient(gamma, weights, lambda, ...)
-  function(R.init, it_max = 1000, eps_g = 1e-3) {
+#' @export
+#'
+get_cluster <- function(gamma, weights, eps_f, ...) {
+  L <- neg_likelihood_pen(gamma, weights)
+  step <- step_gradient(gamma, weights, ...)
+
+  function(R.init, lambda, it_max = 1000, eps_g = 1e-3) {
     # Initialization
     d <- nrow(gamma)
     R <- R.init
     clusters <- as.list(1:d)
     gradstep <- list(gradient = eps_g + 1)
     cpt <- 1
+
+    if (lambda == 0) {
+      return(
+        list(
+          R = R,
+          clusters = clusters,
+          nllh = L(R, clusters, lambda),
+          lambda = lambda
+        )
+      )
+    }
+
     while ((cpt < it_max) && (length(R) != 1) && (sum(gradstep$gradient**2) > eps_g)) {
       # Gradient step
-      gradstep <- step(R, clusters)
+      gradstep <- step(R, clusters, lambda)
 
       R <- R - gradstep$step * gradstep$gradient
       # Try for merging
-      res.merge <- merge_clusters(R, clusters, cost = L, ...)
+      res.merge <- merge_clusters(R, clusters, cost = L, eps_f = eps_f)
 
       if (length(res.merge$R) != length(R)) {
         R <- res.merge$R
@@ -209,7 +223,8 @@ get_cluster <- function(gamma, weights, lambda, ...) {
         list(
           R = R,
           clusters = clusters,
-          nllh = -(d - 1) * (d - 2) * R
+          nllh = -(d - 1) * (d - 2) * R,
+          lambda = lambda
         )
       )
     }
@@ -217,28 +232,29 @@ get_cluster <- function(gamma, weights, lambda, ...) {
       list(
         R = R,
         clusters = clusters,
-        nllh = L(R, clusters)
+        nllh = L(R, clusters, lambda),
+        lambda = lambda
       )
     )
   }
 }
 
-#' Search of optimal lambda for the penalty in optimization
+#' Optimization results from data
 #'
-#' @param data n x d matrix : the data.
-#' @param chi a positive number : tuned parameter for the exponential weights
-#' @param l_grid a numerix vector of psoitive number : the grid line for lambda.
-#' @param include_zero Boolean : if FALSE (default) avoid computation for
-#' non-penalization setting (i.e. lambda = 0).
+#' @param data \eqn{n \times d} matrix : the data.
+#' @param zeta a positive number : tuned parameter for the exponential weights.
+#' @param lamda a numerix vector of positive number : the grid line for \eqn{\lambda}.
+#' @param eps_f d
+#' @param eps_g d
+#' @param it_max d
 #'
-#' @returns Returns the optimal optimization from get_clusters() with the best
-#'  lambda in the grid line.
+#' @returns Returns the optimization path results from `get_clusters()` for each
+#' \eqn{\lambda} from the data.
 #'
 #' @importFrom graphicalExtremes emp_vario Gamma2Theta
 #'
-#' @examples
 #' @export
-HR_Clusterpath <- function(data, chi, lambda, it_max = 1000) {
+HR_Clusterpath <- function(data, zeta, lambda, eps_g = 1e-3, eps_f = 1e-2, it_max = 1000) {
   # Initialization
   Gamma_est <- emp_vario(data)
   d <- ncol(data)
@@ -250,33 +266,23 @@ HR_Clusterpath <- function(data, chi, lambda, it_max = 1000) {
 
   for (k in 1:(d - 1)){
     for (l in (k + 1):d){
-      W[k, l] <- exp(-chi * D(k, l))
+      W[k, l] <- exp(-zeta * D(k, l))
     }
   }
   W <- W + t(W)
 
-  if (lambda == 0) {
-    L <- neg_likelihood(Gamma_est)
-    return(
-      list(
-        R = R.init,
-        clusters = as.list(1:d),
-        nllh = L(R.init, as.list(1:d)),
-        lambda = 0
-      )
-    )
-  }
+  Cluster_HR <- get_cluster(
+    gamma = Gamma_est,
+    weights = W,
+    eps_f = eps_f
+  )
 
-  Cluster_HR <- get_cluster(gamma = Gamma_est, weights = W, lambda = lambda)
-
-  res_base <- Cluster_HR(R.init, it_max = it_max)
+  purrr::plan(future::multisession, workers = parallel::detectCores() - 1)
 
   return(
-    list(
-      R = res_base$R,
-      clusters = res_base$clusters,
-      nllh = res_base$nllh,
-      lambda = lambda
+    furrr::future_map(
+      lambda,
+      \(.) Cluster_HR(data = data, lambda = ., it_max = it_max, eps_g = eps_g)
     )
   )
 
