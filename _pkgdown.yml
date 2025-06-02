@@ -15,16 +15,29 @@ navbar:
       href: reference/index.html
 
 reference:
-  - title: Main Functions
-    desc: Tests
+  - title: Matrices computation
+    desc: Functions which computes some particular matrix usefull for the models.
+    contents: 
+      - average_hierarchy
+      - extract_R_matrix
+      - ChiToGamma
+      - build_theta
+
+  - title: Likelihood functions
+    desc: Computation of the used likelihood.
+    contents:
+      - neg_likelihood
+      - neg_likelihood_pen
+      - penalty 
+
+  - title: Optimization
+    desc: Several functions for optimization.
     contents: 
       - HR_Clusterpath
-      - average_hierarchy
-      - build_theta
-      - extract_R_matrix
-      - gg_cluster
-      - neg_likelihood
-      - neg_likelihood_pen 
       - get_cluster
-      - ChiToGamma
-      - penalty
+
+  - title: Graphical functions
+    desc: Tools for plotting graphs.
+    contents:
+      - gg_cluster
+      - average_hierarchy
