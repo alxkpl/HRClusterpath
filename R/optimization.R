@@ -21,7 +21,7 @@
 #'                   1, 4, 0, 7,
 #'                   0, 1, 7, 0), nc = 4)
 #' f <- step_gradient(gamma, W, 0.5)
-#' f(R, clusters)
+#' f(R, clusters, 1)
 #'
 #' @keywords internal
 step_gradient <- function(gamma, weights, size_grid = 100) {
@@ -41,12 +41,17 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
 
     # Grid line search for optimal gradient step
     # Grid line construction
+    check_pos <- \(.) !semi_def(sub_theta(R - . * grad, clusters))
     if (max(p) == 1) {
       s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters, lambda),
                      method = "Brent", lower = 0, upper = 1)$par
-      while (!semi_def(sub_theta(R - s_opt * grad, clusters))) {
-        s_opt <- 0.95 * s_opt
-      }
+
+      # while (!semi_def(sub_theta(R - s_opt * grad, clusters))) {
+      #   s_opt <- 0.95 * s_opt
+      # }
+
+      s_opt <- s_optimal(s_opt, check_pos)
+
       return(list(step = s_opt, gradient = grad))
     }
     s_max <- min(
@@ -56,10 +61,11 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
 
     s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters, lambda),
                    method = "Brent", lower = 0, upper = min(s_max, 1))$par
-    while (!semi_def(sub_theta(R - s_opt * grad, clusters))) {
-      s_opt <- 0.95 * s_opt
-    }
 
+    # while (!semi_def(sub_theta(R - s_opt * grad, clusters))) {
+    #   s_opt <- 0.95 * s_opt
+    # }
+    s_opt <- s_opt <- s_optimal(s_opt, check_pos)
     # Returning results : size step and gradient matrix
     list(step = s_opt, gradient = grad)
   }
@@ -89,7 +95,7 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
 #'                   2,0,4,1,
 #'                   1,4,0,7,
 #'                   0,1,7,0), nc = 4)
-#' cost <- neg_likelihood_pen(gamma, weights, 100000)
+#' cost <- neg_likelihood_pen(gamma, weights)
 #' merge_clusters(R, clusters, cost = cost)
 #'
 #' @keywords internal
@@ -99,13 +105,7 @@ merge_clusters <- function(R, clusters, eps_f = 1e-1, cost) {
   K <- length(clusters)                      # Actual number of clusters
 
   # Computation of the distance matrix
-  distance <- matrix(rep(Inf, K * K), nc = K)
-
-  for (k in 1:(K - 1)) {
-    for (l in (k + 1):K) {
-      distance[k, l] <- D(k, l)
-    }
-  }
+  distance <- distance_matrix(K, D)
 
   # Search of the two potential clusters to merge
   index <- as.numeric(which(distance == min(distance), arr.ind = TRUE))
