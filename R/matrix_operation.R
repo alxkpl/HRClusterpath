@@ -122,53 +122,13 @@ gamma_function <- function(sigma) {
   tcrossprod(diag(sigma), indic) + tcrossprod(indic, diag(sigma)) - 2 * sigma
 }
 
-
-#' Crout factorization algorithm.
-#'
-#' @param A a d x d symmetric positive matrix.
-#' @param tol a positive value : tolerance for the zero diagonal
-#'
-#' @returns The LU Crout decomposition of a matrix A. For A a symmetric
-#' positive matrix, there exists a LU decomposition such that :
-#'                                   A = L' L
-#'
-#' @keywords internal
-#' @examples
-#'A <- matrix(c(1,2,3,
-#'              2,5,6,
-#'              3,6,9), nc = 3)
-#' L <- crout_factorisation(A)
-#' L %*% t(L)
-crout_factorisation <- function(A, tol = 1e-12) {
-  A <- unname(as.matrix(A))
-  n <- nrow(A)
-  if (n != ncol(A)) {
-    stop("no square matrix.")
-  }
-  if (!semi_def(A)) {
-    stop("no positive semi definite matrix.")
-  }
-  # d <- rep(0, n)
-  # L <- diag(rep(1, n))
-  # d[1] <- A[1, 1]
-  # for (i in 2:n) {
-  #   for (j in 1:(i - 1)) {
-  #     L[i, j] <- (1 / d[j]) * (A[i, j] - sum(L[i, ] * L[j, ] * d))
-  #   }
-  #   d[i] <- A[i, i] - sum(d * (L[i, ])**2)
-  # }
-
-  # return(L %*% diag(sqrt(d * (d > tol))))
-  crout_decomposition_rcpp(A, tol)
-}
-
 #' Moore-Penrose pseudo inverse
 #'
 #' @param A a d x d symmetric positive semi-definite matrix.
 #'
 #' @returns Computes the Moore-Penrose inverse of a matrix. The calculation is
 #' done thanks to an article and if  :
-#'                                A = L L^t
+#'                                A = L L^t       (e.g. Crout decomposition)
 #' (with L having no zero-columns) then we have :
 #'                        A^+ = L (L^t L)^-1 (L^t L)^-1 L^t
 #'
@@ -180,13 +140,24 @@ crout_factorisation <- function(A, tol = 1e-12) {
 #' psolve(A)
 psolve <- function(A, tol = 1e-12) {
 
-  S <- crout_factorisation(A, tol = tol)
+  A <- unname(as.matrix(A))
+
+  n <- nrow(A)
+  if (n != ncol(A)) {
+    stop("no square matrix.")
+  }
+  if (!semi_def(A)) {
+    stop("no positive semi definite matrix.")
+  }
+
+  S <- crout_decomposition_rcpp(A, tol = tol)
 
   L <- S[, which(diag(S) != 0)]         # to get no null columns
 
-  return(
-    L %*% solve(t(L) %*% L) %*% solve(t(L) %*% L) %*% t(L)
-  )
+  # return(
+  #   L %*% solve(t(L) %*% L) %*% solve(t(L) %*% L) %*% t(L)
+  # )
+  psolve_rcpp(L)
 }
 
 #' Computation of the first weight matrix
