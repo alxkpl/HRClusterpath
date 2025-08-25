@@ -148,17 +148,18 @@ crout_factorisation <- function(A, tol = 1e-12) {
   if (!semi_def(A)) {
     stop("no positive semi definite matrix.")
   }
-  d <- rep(0, n)
-  L <- diag(rep(1, n))
-  d[1] <- A[1, 1]
-  for (i in 2:n) {
-    for (j in 1:(i - 1)) {
-      L[i, j] <- (1 / d[j]) * (A[i, j] - sum(L[i, ] * L[j, ] * d))
-    }
-    d[i] <- A[i, i] - sum(d * (L[i, ])**2)
-  }
+  # d <- rep(0, n)
+  # L <- diag(rep(1, n))
+  # d[1] <- A[1, 1]
+  # for (i in 2:n) {
+  #   for (j in 1:(i - 1)) {
+  #     L[i, j] <- (1 / d[j]) * (A[i, j] - sum(L[i, ] * L[j, ] * d))
+  #   }
+  #   d[i] <- A[i, i] - sum(d * (L[i, ])**2)
+  # }
 
-  return(L %*% diag(sqrt(d * (d > tol))))
+  # return(L %*% diag(sqrt(d * (d > tol))))
+  crout_decomposition_rcpp(A, tol)
 }
 
 #' Moore-Penrose pseudo inverse
@@ -230,17 +231,47 @@ ChiToGamma <- function(Chi_matrix) {
 
 
 
-#' Function to extract the coefficient of the reduced matrix R
+#' Function to extract the coefficients of the reduced matrix R.
 #'
-#' @param matrix A block matrix which can be factorizable.
+#' The block matrix models is defined from two elements : the cluster's partition
+#' \eqn{\{C_1, \dots, C_K\}}, included in \eqn{V} and the \eqn{R} matrix which belongs
+#' to \eqn{\mathcal S_K(\mathbb R)}, the set of symmetric \eqn{K \times K} matrix.
+#'The expression of the precision \eqn{\Theta} which statisfies the block matrix model is 
+#' \deqn{
+#'    \Theta = U R U^t + A
+#' }
+#' where \eqn{U} is the cluster matrix and \eqn{A} a diagonal matrix such that the rows of
+#' theta sum to zero :
+#' \eqn{
+#' a_{ii} = - \sum_l p_l r_{kl}
+#' }
+#' for \eqn{i} in cluster \eqn{C_k}.
+#'
+#' @param Theta A block matrix which can be factorizable.
 #' @param clusters a list of vectors : the variable index per clusters.
 #'
-#' @return A matrix on size the number of clusters (length(clusters)). It
-#' corresponds to the reduced matrix R of the original matrix (see clusters document
-#' for definition).)
+#' @return A matrix on size the number of clusters (i.e. \eqn{K}). It
+#' corresponds to the reduced matrix \eqn{R} of the original matrix.
+#'
+#' @examples
+#' # We can build a Theta which is a block matrix as described upper :
+#' Theta <- matrix(
+#'  c(4.5, .5, .5, .5, -2, -2, -2,
+#'    .5, 4.5, .5, .5, -2, -2, -2,
+#'    .5, .5, 4.5, .5, -2, -2, -2,
+#'    .5, .5, .5, 4.5, -2, -2, -2,
+#'    -2, -2, -2, -2, 6, 1, 1,
+#'    -2, -2, -2, -2, 1, 6, 1,
+#'    -2, -2, -2, -2, 1, 1, 6),
+#'  nc = 7
+#' )
+#'
+#' clusters <- list(c(1,2,3,4), c(5,6,7))
+#'
+#' extract_R_matrix(Theta, clusters)
 #'
 #' @export
-extract_R_matrix <- function(matrix, clusters) {
+extract_R_matrix <- function(Theta, clusters) {
 
   K <- length(clusters)
   indx <- 1:K
@@ -250,11 +281,11 @@ extract_R_matrix <- function(matrix, clusters) {
     k <- clusters[[i]][1]
     if (length(clusters[[i]]) > 1) {
       l <- clusters[[i]][2]
-      R[i, i] <- matrix[k, l]
+      R[i, i] <- Theta[k, l]
     }
     for (j in indx[-i]){
       l <- clusters[[j]][1]
-      R[i, j] <- matrix[k, l]
+      R[i, j] <- Theta[k, l]
     }
   }
 
