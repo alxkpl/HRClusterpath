@@ -17,7 +17,7 @@ semi_def <- function(M) {
 #' @param clusters a list of vector : each vector gives the element of
 #' a cluster.
 #'
-#' @returns A function of cluster number : compute the square distance between
+#' @returns A matrix of K x K : compute the square distance between
 #' two clusters for the distance defined in section 4.2 in cluster document.
 #'
 #' @keywords internal
@@ -26,23 +26,7 @@ semi_def <- function(M) {
 #' R <- matrix(c(0.5, -1,
 #'               -1, -1), nr = 2)
 #' clusters <- list(c(1,3), c(2,4))
-#' D2 <- D_tilde2_r(R, clusters)
-#' D2(1, 2)
-D_tilde2_r <- function(R, clusters) {
-  function(k, l) {
-    if (k == l) {
-      # 0 distance for the same cluster even with the symmetry of the matrix
-      0
-    }else {
-      # Parameters of clusters
-      K <- length(clusters)               # Number of clusters
-      p <- sapply(clusters, length)       # Vector of cluster's size
-
-      # for fixed k, l the square difference is multiplied by 1-p_k and 1-p_l
-      sum((p - ((1:K) %in% c(k, l))) * (R[k, ] - R[l, ])**2)
-    }
-  }
-}
+#' distance_matrix(R, clusters)
 
 #' Computation of the matrix of clusters
 #'
@@ -172,12 +156,12 @@ compute_W <- function(data) {
   d <- ncol(data)
   R.init <- graphicalExtremes::Gamma2Theta(Gamma_est)
   # Exponential weights construction
-  D <- D_tilde2_r(R.init, as.list(1:d))
+  D <- distance_matrix(R.init, as.list(1:d))
   W <- matrix(rep(0, d * d), nc = d)
 
   for (k in 1:(d - 1)) {
     for (l in (k + 1):d){
-      W[k, l] <- exp(-1 * D(k, l))
+      W[k, l] <- exp(-1 * D[k, l])
     }
   }
   W + t(W)

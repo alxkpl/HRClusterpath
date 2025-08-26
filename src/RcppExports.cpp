@@ -35,15 +35,24 @@ BEGIN_RCPP
 END_RCPP
 }
 // distance_matrix
-NumericMatrix distance_matrix(int n, Function f);
-RcppExport SEXP _HRClusterpath_distance_matrix(SEXP nSEXP, SEXP fSEXP) {
+NumericMatrix distance_matrix(NumericMatrix R, List clusters);
+RcppExport SEXP _HRClusterpath_distance_matrix(SEXP RSEXP, SEXP clustersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< Function >::type f(fSEXP);
-    rcpp_result_gen = Rcpp::wrap(distance_matrix(n, f));
+    Rcpp::traits::input_parameter< NumericMatrix >::type R(RSEXP);
+    Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
+    rcpp_result_gen = Rcpp::wrap(distance_matrix(R, clusters));
     return rcpp_result_gen;
+END_RCPP
+}
+// step
+void step();
+RcppExport SEXP _HRClusterpath_step() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    step();
+    return R_NilValue;
 END_RCPP
 }
 // s_optimal
@@ -86,6 +95,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HRClusterpath_add_matrices_inplace", (DL_FUNC) &_HRClusterpath_add_matrices_inplace, 2},
     {"_HRClusterpath_crout_decomposition_rcpp", (DL_FUNC) &_HRClusterpath_crout_decomposition_rcpp, 2},
     {"_HRClusterpath_distance_matrix", (DL_FUNC) &_HRClusterpath_distance_matrix, 2},
+    {"_HRClusterpath_step", (DL_FUNC) &_HRClusterpath_step, 0},
     {"_HRClusterpath_s_optimal", (DL_FUNC) &_HRClusterpath_s_optimal, 2},
     {"_HRClusterpath_penalty_grad_rcpp", (DL_FUNC) &_HRClusterpath_penalty_grad_rcpp, 2},
     {"_HRClusterpath_psolve_rcpp", (DL_FUNC) &_HRClusterpath_psolve_rcpp, 1},

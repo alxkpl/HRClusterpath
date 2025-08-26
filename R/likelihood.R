@@ -66,7 +66,6 @@ penalty <- function(weights) {
   function(R, clusters) {
     # Initialization
     K <- length(clusters)              # Number of clusters
-    D2 <- D_tilde2_r(R, clusters)      # Function for distance between clusters
     W <- get_W(clusters)               # Weights clustered
     # D <- matrix(rep(0, K * K), nc = K) # Distance matrix for clusters
 
@@ -76,7 +75,7 @@ penalty <- function(weights) {
     #     D[k, l] <- D2(k, l)
     #   }
     # }
-    D <- distance_matrix(K, D2)
+    D <- distance_matrix(R, clusters)
 
     sum(D * W)
   }

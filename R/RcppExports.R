@@ -9,8 +9,12 @@ crout_decomposition_rcpp <- function(A, tol = 1e-8) {
     .Call(`_HRClusterpath_crout_decomposition_rcpp`, A, tol)
 }
 
-distance_matrix <- function(n, f) {
-    .Call(`_HRClusterpath_distance_matrix`, n, f)
+distance_matrix <- function(R, clusters) {
+    .Call(`_HRClusterpath_distance_matrix`, R, clusters)
+}
+
+step <- function() {
+    invisible(.Call(`_HRClusterpath_step`))
 }
 
 s_optimal <- function(s, f) {

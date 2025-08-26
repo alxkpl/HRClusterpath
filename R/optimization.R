@@ -102,11 +102,10 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
 #' @keywords internal
 merge_clusters <- function(R, clusters, eps_f = 1e-1, cost) {
   # Initialization
-  D <- D_tilde2_r(R, clusters)               # Function of clusters distance
   K <- length(clusters)                      # Actual number of clusters
 
   # Computation of the distance matrix
-  distance <- distance_matrix(K, D)
+  distance <- distance_matrix(R, clusters)
   distance[distance == 0] <- Inf
 
   # distance <- matrix(rep(Inf, K * K), nc = K)
@@ -119,8 +118,8 @@ merge_clusters <- function(R, clusters, eps_f = 1e-1, cost) {
 
   # Search of the two potential clusters to merge
   index <- as.numeric(which(distance == min(distance), arr.ind = TRUE))
-  k <- index[1]
-  l <- index[2]
+  k <- min(index)
+  l <- max(index)
 
   # Checking uselessness of merging
   if (distance[k, l] > eps_f) {
@@ -271,12 +270,12 @@ HR_Clusterpath <- function(data, zeta, lambda, eps_g = 1e-3, eps_f = 1e-2, it_ma
   R.init <- Gamma2Theta(Gamma_est)
 
   # Exponential weights construction
-  D <- D_tilde2_r(R.init, as.list(1:d))
+  D <- distance_matrix(R.init, as.list(1:d))
   W <- matrix(rep(0, d * d), nc = d)
 
   for (k in 1:(d - 1)){
     for (l in (k + 1):d){
-      W[k, l] <- exp(-zeta * D(k, l))
+      W[k, l] <- exp(-zeta * D[k, l])
     }
   }
   W <- W + t(W)
@@ -294,5 +293,5 @@ HR_Clusterpath <- function(data, zeta, lambda, eps_g = 1e-3, eps_f = 1e-2, it_ma
     \(.) Cluster_HR(R.init = R.init, lambda = ., it_max = it_max, eps_g = eps_g),
     .options = furrr::furrr_options(seed = TRUE)
   )
-
+ # Cluster_HR(R.init = R.init, lambda = lambda[1], it_max = it_max, eps_g = eps_g)
 }
