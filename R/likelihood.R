@@ -78,8 +78,6 @@ penalty <- function(weights) {
     # }
     D <- distance_matrix(K, D2)
 
-    D[is.na(D)] <- 0
-
     sum(D * W)
   }
 }

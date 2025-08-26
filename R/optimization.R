@@ -42,6 +42,7 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
     # Grid line search for optimal gradient step
     # Grid line construction
     check_pos <- \(.) !semi_def(sub_theta(R - . * grad, clusters))
+
     if (max(p) == 1) {
       s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters, lambda),
                      method = "Brent", lower = 0, upper = 1)$par
@@ -65,7 +66,7 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
     # while (!semi_def(sub_theta(R - s_opt * grad, clusters))) {
     #   s_opt <- 0.95 * s_opt
     # }
-    s_opt <- s_opt <- s_optimal(s_opt, check_pos)
+    s_opt <- s_optimal(s_opt, check_pos)
     # Returning results : size step and gradient matrix
     list(step = s_opt, gradient = grad)
   }
@@ -106,6 +107,15 @@ merge_clusters <- function(R, clusters, eps_f = 1e-1, cost) {
 
   # Computation of the distance matrix
   distance <- distance_matrix(K, D)
+  distance[distance == 0] <- Inf
+
+  # distance <- matrix(rep(Inf, K * K), nc = K)
+
+  # for (k in 1:(K - 1)) {
+  #   for (l in (k + 1):K) {
+  #     distance[k, l] <- D(k, l)
+  #   }
+  # }
 
   # Search of the two potential clusters to merge
   index <- as.numeric(which(distance == min(distance), arr.ind = TRUE))
@@ -277,13 +287,12 @@ HR_Clusterpath <- function(data, zeta, lambda, eps_g = 1e-3, eps_f = 1e-2, it_ma
     eps_f = eps_f
   )
 
-  purrr::plan(future::multisession, workers = parallel::detectCores() - 1)
+  future::plan(future::multisession, workers = parallel::detectCores() - 1)
 
-  return(
-    furrr::future_map(
-      lambda,
-      \(.) Cluster_HR(data = data, lambda = ., it_max = it_max, eps_g = eps_g)
-    )
+  furrr::future_map(
+    lambda,
+    \(.) Cluster_HR(R.init = R.init, lambda = ., it_max = it_max, eps_g = eps_g),
+    .options = furrr::furrr_options(seed = TRUE)
   )
 
 }
