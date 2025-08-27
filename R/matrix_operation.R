@@ -11,23 +11,6 @@ semi_def <- function(M) {
   !sum(Re(eigen(M)$values) < -1e-10)        # for numerical errors
 }
 
-#' Cluster distance squared function
-#'
-#' @param R K x K symmetric matrix.
-#' @param clusters a list of vector : each vector gives the element of
-#' a cluster.
-#'
-#' @returns A matrix of K x K : compute the square distance between
-#' two clusters for the distance defined in section 4.2 in cluster document.
-#'
-#' @keywords internal
-#' @examples
-#'
-#' R <- matrix(c(0.5, -1,
-#'               -1, -1), nr = 2)
-#' clusters <- list(c(1,3), c(2,4))
-#' distance_matrix(R, clusters)
-
 #' Computation of the matrix of clusters
 #'
 #' @param clusters a list of vector : each vector gives the element of a
@@ -138,10 +121,8 @@ psolve <- function(A, tol = 1e-12) {
 
   L <- S[, which(diag(S) != 0)]         # to get no null columns
 
-  # return(
-  #   L %*% solve(t(L) %*% L) %*% solve(t(L) %*% L) %*% t(L)
-  # )
   psolve_rcpp(L)
+
 }
 
 #' Computation of the first weight matrix

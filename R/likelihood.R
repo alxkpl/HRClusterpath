@@ -65,19 +65,11 @@ penalty <- function(weights) {
   get_W <- weight_clustered(weights)
   function(R, clusters) {
     # Initialization
-    K <- length(clusters)              # Number of clusters
     W <- get_W(clusters)               # Weights clustered
-    # D <- matrix(rep(0, K * K), nc = K) # Distance matrix for clusters
-
-    # # Computation of the distance matrix
-    # for (l in 2:K) {
-    #   for (k in 1:(l - 1)) {        # we keep only the lower triangular part
-    #     D[k, l] <- D2(k, l)
-    #   }
-    # }
     D <- distance_matrix(R, clusters)
 
     sum(D * W)
+
   }
 }
 
@@ -235,15 +227,7 @@ penalty_grad <- function(weights) {
     # Function of gradient of indices
     f <- function(k, l) W[k, l] * gradient_D2(R, clusters)(k, l)
 
-    # res <- matrix(rep(0, K * K), nc = K)
-
-    # for (k in 1:(K - 1)) {
-    #   for (l in (k + 1):K) {
-    #     res <- res + f(k, l)        # Weighted sum
-    #   }
-    # }
-
-    # res
     penalty_grad_rcpp(K, f)
+
   }
 }

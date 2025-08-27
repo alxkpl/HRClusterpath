@@ -1,5 +1,14 @@
 #include "distance_matrix.hpp"
 
+//' Cluster distance squared function
+//'
+//' @param R K x K symmetric matrix.
+//' @param clusters a list of vector : each vector gives the element of
+//' a cluster.
+//'
+//' @returns A matrix of K x K : compute the square distance between
+//' two clusters for the distance defined in section 4.2 in cluster document.
+//'
 double D_tilde2_r_term(NumericMatrix R, NumericVector p, int k, int l) {
   
   int K = p.size();

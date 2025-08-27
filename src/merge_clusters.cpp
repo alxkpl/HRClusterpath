@@ -8,7 +8,7 @@ IntegerVector which_min_upper(NumericMatrix mat) {
   int min_j = -1;
   double min_val = R_PosInf;
 
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n - 1; i++) {
     for (int j = i + 1; j < n; j++) {  // diagonale supérieure
       if (mat(i, j) < min_val) {
         min_val = mat(i, j);
@@ -21,25 +21,29 @@ IntegerVector which_min_upper(NumericMatrix mat) {
   return IntegerVector::create(min_i, min_j);
 }
 
-List merge_lists(List a, List b) {
-  int na = a.size();
-  int nb = b.size();
+NumericVector merge_vector(NumericVector a, NumericVector b) {
   
-  List out(na + nb); // liste finale de taille totale
-
-  // Copier les éléments de a
-  for(int i = 0; i < na; i++) {
-      out[i] = a[i];
-  }
+  NumericVector out = a;
 
   // Copier les éléments de b
-  for(int i = 0; i < nb; i++) {
-      out[na + i] = b[i];
+  for(int i = 0; i < b.size(); i++) {
+      out.push_back(b[i]);
   }
 
   return out;
 }
 
+//' Function which merges clusters
+//'
+//' @param R K x K symmetric matrix.
+//' @param clusters a list of vector : each vector gives the element of
+//' a cluster.
+//' @param eps_f a positive number : minimal tolerance for merging clusters
+//'
+//' @returns Returns, if merging, a list of the new clusters and the
+//' corresponding R matrix, where the coefficient of the new clustered
+//' is computing by averaging the coefficient of the two previous clusters.
+//'
 //[[Rcpp::export]]
 List merge_clusters_rcpp(NumericMatrix R, List clusters, double eps_f)
 {
@@ -72,7 +76,7 @@ List merge_clusters_rcpp(NumericMatrix R, List clusters, double eps_f)
     NumericMatrix R_new(1,1);
     R_new(0,0) =(p[0] * R(0, 0) + p[1] * R(0, 1)) / (p[0] + p[1]);
     return List::create(_["R"] = R_new,
-        _["clusters"] = merge_lists(clusters[0], clusters[1])); 
+        _["clusters"] = merge_vector(clusters[0], clusters[1])); 
   }
 
   // New clusters
@@ -82,9 +86,8 @@ List merge_clusters_rcpp(NumericMatrix R, List clusters, double eps_f)
     if (i != l) { // enlever l
       if (i == k) 
       {
-        // fusionner clusters[[k]] et clusters[[l]]
-        List merged = clone(List(clusters[k]));
-        List to_add = clusters[l];
+        NumericVector merged = clusters[k];
+        NumericVector to_add = clusters[l];
         for (int j = 0; j < to_add.size(); j++) {
         merged.push_back(to_add[j]);
         }
