@@ -44,6 +44,8 @@ NumericVector merge_vector(NumericVector a, NumericVector b) {
 //' corresponding R matrix, where the coefficient of the new clustered
 //' is computing by averaging the coefficient of the two previous clusters.
 //'
+//' @keywords internal
+//' @noRd
 //[[Rcpp::export]]
 List merge_clusters_rcpp(NumericMatrix R, List clusters, double eps_f)
 {

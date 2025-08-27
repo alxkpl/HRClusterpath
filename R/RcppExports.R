@@ -9,6 +9,17 @@ crout_decomposition_rcpp <- function(A, tol = 1e-8) {
     .Call(`_HRClusterpath_crout_decomposition_rcpp`, A, tol)
 }
 
+#' Cluster distance squared matrix
+#'
+#' @param R K x K symmetric matrix.
+#' @param clusters a list of vector : each vector gives the element of
+#' a cluster.
+#'
+#' @returns A matrix of K x K : compute the square distance between
+#' two clusters for the distance defined in section 4.2 in cluster document.
+#'
+#' @keywords internal
+#' @noRd
 distance_matrix <- function(R, clusters) {
     .Call(`_HRClusterpath_distance_matrix`, R, clusters)
 }
@@ -21,6 +32,19 @@ s_optimal <- function(s, f) {
     .Call(`_HRClusterpath_s_optimal`, s, f)
 }
 
+#' Function which merges clusters
+#'
+#' @param R K x K symmetric matrix.
+#' @param clusters a list of vector : each vector gives the element of
+#' a cluster.
+#' @param eps_f a positive number : minimal tolerance for merging clusters
+#'
+#' @returns Returns, if merging, a list of the new clusters and the
+#' corresponding R matrix, where the coefficient of the new clustered
+#' is computing by averaging the coefficient of the two previous clusters.
+#'
+#' @keywords internal
+#' @noRd
 merge_clusters_rcpp <- function(R, clusters, eps_f) {
     .Call(`_HRClusterpath_merge_clusters_rcpp`, R, clusters, eps_f)
 }
