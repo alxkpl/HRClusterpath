@@ -1,6 +1,4 @@
-#include <Rcpp.h>
-using namespace Rcpp;
-
+#include "distance_matrix.hpp"
 
 double D_tilde2_r_term(NumericMatrix R, NumericVector p, int k, int l) {
   

@@ -13,12 +13,16 @@ distance_matrix <- function(R, clusters) {
     .Call(`_HRClusterpath_distance_matrix`, R, clusters)
 }
 
-step <- function() {
-    invisible(.Call(`_HRClusterpath_step`))
+gradient_descent_rcpp <- function(R, clusters, step, lambda, it_max, eps_g, eps_f) {
+    .Call(`_HRClusterpath_gradient_descent_rcpp`, R, clusters, step, lambda, it_max, eps_g, eps_f)
 }
 
 s_optimal <- function(s, f) {
     .Call(`_HRClusterpath_s_optimal`, s, f)
+}
+
+merge_clusters_rcpp <- function(R, clusters, eps_f) {
+    .Call(`_HRClusterpath_merge_clusters_rcpp`, R, clusters, eps_f)
 }
 
 penalty_grad_rcpp <- function(K, f) {

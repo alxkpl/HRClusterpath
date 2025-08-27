@@ -78,7 +78,6 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
 #' @param clusters a list of vector : each vector gives the element of
 #' a cluster.
 #' @param eps_f a positive number : minimal tolerance for merging clusters
-#' @param cost a function : Cost function of the optimisation
 #'
 #' @returns Returns, if merging, a list of the new clusters and the
 #' corresponding R matrix, where the coefficient of the new clustered
@@ -100,7 +99,7 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
 #' merge_clusters(R, clusters, cost = cost)
 #'
 #' @keywords internal
-merge_clusters <- function(R, clusters, eps_f = 1e-1, cost) {
+merge_clusters <- function(R, clusters, eps_f = 1e-1) {
   # Initialization
   K <- length(clusters)                      # Actual number of clusters
 
@@ -212,20 +211,37 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
       )
     }
 
-    while ((cpt < it_max) && (length(R) != 1) && (sum(gradstep$gradient**2) > eps_g)) {
-      # Gradient step
-      gradstep <- step(R, clusters, lambda)
+    res <- gradient_descent_rcpp(
+      R = R.init,
+      clusters = as.list(1:d),
+      step = step,
+     # merge_clusters = merge_clusters,
+      lambda = lambda,
+      it_max = it_max,
+      eps_g = eps_g,
+      eps_f = eps_f
+    )
 
-      R <- R - gradstep$step * gradstep$gradient
-      # Try for merging
-      res.merge <- merge_clusters(R, clusters, cost = L, eps_f = eps_f)
+    R <- res$R
+    clusters <- res$clusters
 
-      if (length(res.merge$R) != length(R)) {
-        R <- res.merge$R
-        clusters <- res.merge$clusters
-      }
-      cpt <- cpt + 1
-    }
+    # while ((cpt < it_max) && (length(R) != 1) && (sum(gradstep$gradient**2) > eps_g)) {
+    #   # Gradient step
+    #   gradstep <- step(R, clusters, lambda)
+
+    #   R <- R - gradstep$step * gradstep$gradient
+    #   # Try for merging
+    #   res.merge <- merge_clusters(R, clusters, eps_f = eps_f)
+
+    #   #res.merge <- merge_clusters_rcpp(R, clusters, eps_f = eps_f)
+
+
+    #   if (length(res.merge$R) != length(R)) {
+    #     R <- res.merge$R
+    #     clusters <- res.merge$clusters
+    #   }
+    #   cpt <- cpt + 1
+    # }
 
     if (length(R) == 1) {
       return(

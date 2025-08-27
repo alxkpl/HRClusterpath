@@ -46,13 +46,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// step
-void step();
-RcppExport SEXP _HRClusterpath_step() {
+// gradient_descent_rcpp
+List gradient_descent_rcpp(NumericMatrix R, List clusters, Function step, double lambda, int it_max, double eps_g, double eps_f);
+RcppExport SEXP _HRClusterpath_gradient_descent_rcpp(SEXP RSEXP, SEXP clustersSEXP, SEXP stepSEXP, SEXP lambdaSEXP, SEXP it_maxSEXP, SEXP eps_gSEXP, SEXP eps_fSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    step();
-    return R_NilValue;
+    Rcpp::traits::input_parameter< NumericMatrix >::type R(RSEXP);
+    Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
+    Rcpp::traits::input_parameter< Function >::type step(stepSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< int >::type it_max(it_maxSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_g(eps_gSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_f(eps_fSEXP);
+    rcpp_result_gen = Rcpp::wrap(gradient_descent_rcpp(R, clusters, step, lambda, it_max, eps_g, eps_f));
+    return rcpp_result_gen;
 END_RCPP
 }
 // s_optimal
@@ -64,6 +72,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
     Rcpp::traits::input_parameter< Function >::type f(fSEXP);
     rcpp_result_gen = Rcpp::wrap(s_optimal(s, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_clusters_rcpp
+List merge_clusters_rcpp(NumericMatrix R, List clusters, double eps_f);
+RcppExport SEXP _HRClusterpath_merge_clusters_rcpp(SEXP RSEXP, SEXP clustersSEXP, SEXP eps_fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type R(RSEXP);
+    Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_f(eps_fSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_clusters_rcpp(R, clusters, eps_f));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -95,8 +116,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HRClusterpath_add_matrices_inplace", (DL_FUNC) &_HRClusterpath_add_matrices_inplace, 2},
     {"_HRClusterpath_crout_decomposition_rcpp", (DL_FUNC) &_HRClusterpath_crout_decomposition_rcpp, 2},
     {"_HRClusterpath_distance_matrix", (DL_FUNC) &_HRClusterpath_distance_matrix, 2},
-    {"_HRClusterpath_step", (DL_FUNC) &_HRClusterpath_step, 0},
+    {"_HRClusterpath_gradient_descent_rcpp", (DL_FUNC) &_HRClusterpath_gradient_descent_rcpp, 7},
     {"_HRClusterpath_s_optimal", (DL_FUNC) &_HRClusterpath_s_optimal, 2},
+    {"_HRClusterpath_merge_clusters_rcpp", (DL_FUNC) &_HRClusterpath_merge_clusters_rcpp, 3},
     {"_HRClusterpath_penalty_grad_rcpp", (DL_FUNC) &_HRClusterpath_penalty_grad_rcpp, 2},
     {"_HRClusterpath_psolve_rcpp", (DL_FUNC) &_HRClusterpath_psolve_rcpp, 1},
     {NULL, NULL, 0}
