@@ -16,28 +16,33 @@ navbar:
 
 reference:
   - title: Matrices computation
-    desc: Functions which computes some particular matrix usefull for the models.
+    desc: |
+      Functions which can be used to extract/give the block model structure to 
+      a matrix with a given clustering, and other tools...
     contents: 
-      - average_hierarchy
       - extract_R_matrix
       - ChiToGamma
       - build_theta
 
   - title: Likelihood functions
-    desc: Computation of the used likelihood.
+    desc: |
+      Computation of the likelihood function for a Hüsler-Reiss graphical model, 
+      as well ass the penalised version of the latter.
     contents:
       - neg_likelihood
       - neg_likelihood_pen
       - penalty 
 
   - title: Optimization
-    desc: Several functions for optimization.
+    desc: |
+      We give two way for the optimization : the one studied with exponential
+      weights ans a softer one with customizable weights.
     contents: 
       - HR_Clusterpath
       - get_cluster
 
   - title: Graphical functions
-    desc: Tools for plotting graphs.
+    desc: Tools for making graphs and analyze results.
     contents:
       - gg_cluster
       - average_hierarchy

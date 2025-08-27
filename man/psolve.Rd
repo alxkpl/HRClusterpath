@@ -12,7 +12,7 @@ psolve(A, tol = 1e-12)
 \value{
 Computes the Moore-Penrose inverse of a matrix. The calculation is
 done thanks to an article and if  :
-A = L L^t
+A = L L^t       (e.g. Crout decomposition)
 (with L having no zero-columns) then we have :
 A^+ = L (L^t L)^-1 (L^t L)^-1 L^t
 }

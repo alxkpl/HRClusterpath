@@ -35,7 +35,7 @@ gamma <- matrix(c(0, 2, 1, 0,
                   1, 4, 0, 7,
                   0, 1, 7, 0), nc = 4)
 f <- step_gradient(gamma, W, 0.5)
-f(R, clusters)
+f(R, clusters, 1)
 
 }
 \keyword{internal}
