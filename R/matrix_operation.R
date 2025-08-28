@@ -148,15 +148,24 @@ compute_W <- function(data) {
   W + t(W)
 }
 
-#' Transform a chi matrix to the corresponding variogram
+#' ChiToGamma
 #'
-#' @param Chi_matrix the matrix with the chi coefficient.
+#' Transform a \eqn{\chi} matrix to the corresponding variogram \eqn{\Gamma}
 #'
-#' @return
-#' The corresponding variogram matrix \eqn{\Gamma}.
+#' @param Chi_matrix The matrix with \eqn{\chi_{ij}} entries.
+#'
+#' @return Gives the variogram \eqn{\Gamma} according to the \eqn{\chi} matrix for 
+#' Hüsler-Reiss MGDP. In a such case, there exists a closed equation which
+#' link the variogram and the extremal coefficients, given by :
+#' \deqn{
+#'    \chi_{ij} = 2 - 2 \phi(\sqrt{\Gamma_{ij}/2})
+#' }
+#' where \eqn{\phi} is the standard normal distribution function.
 #'
 #' @examples
-#' ChiToGamma(matrix(c(0.5, 0.7, 0.7, 0.5), nrow = 2))
+#' ChiToGamma(matrix(c(1, 0.7,
+#'                     0.7, 1),
+#'            nrow = 2))
 #'
 #' @export
 ChiToGamma <- function(Chi_matrix) {
@@ -164,8 +173,6 @@ ChiToGamma <- function(Chi_matrix) {
   (2 * qnorm((2 - Chi_matrix) / 2))**2
 
 }
-
-
 
 #' Function to extract the coefficients of the reduced matrix R.
 #'
