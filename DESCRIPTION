@@ -1,6 +1,6 @@
 Package: HRClusterpath
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.1
+Title: Clusterpath for Hüsler-Reiss
+Version: 0.1.0
 Authors@R: 
     person("Alexandre", "CAPEL", , "alexandre.capel@umonptllier.fr", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
