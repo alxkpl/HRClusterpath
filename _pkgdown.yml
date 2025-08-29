@@ -46,3 +46,6 @@ reference:
     contents:
       - gg_cluster
       - average_hierarchy
+
+development:
+  mode: release

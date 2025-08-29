@@ -74,16 +74,65 @@ we choose a sequence \eqn{(\zeta_n)_{n\in \mathbb N^*}} which grows slower than
 }
 
 \examples{
+############################################################################
+#                            With get_clusters
+############################################################################
+# Customizable weights
 W <- matrix(c(0, 1, 1, 1,
               1, 0, 1, 1,
               1, 1, 0, 1,
               1, 1, 1, 0), nc = 4)
-gamma <- generate_random_Gamma(d = 4)
-R <- matrix(c(1,0,0,-1,
-              0,1,1,-2,
-              0,1,1,-1,
-              -1,-2,-1,1), nc = 4)
+
+# Free choice of variogram
+gamma <- graphicalExtremes::generate_random_Gamma(d = 4)
+
+# Choice of initial condition for the optimization
+R <- matrix(c(1, 0, 0, -1,
+              0, 1, 1, -2,
+              0, 1, 1, -1,
+              -1, -2, -1, 1), nc = 4)
+lambda <- 2.2
+
 Cluster_HR <- get_cluster(gamma, W, 100)
-Cluster_HR(R)
+
+Cluster_HR(R, 2.2)
+
+############################################################################
+#                            With HR_Clusterpath
+############################################################################
+# Construction of clusters and R matrix for simulation
+R <- matrix(c(1, -3, 0,
+              -3, 2, -2,
+              0, -2, 1), nc = 3)
+clusters <- list(1:5, 6:10, 11:15)
+
+# Construction of induced theta and corresponding variogram gamma
+Theta <- build_theta(R, clusters)
+Gamma <- graphicalExtremes::Theta2Gamma(Theta)
+
+gr3_bal_sim_param_cluster <-
+  list(
+    R = R,
+    clusters = clusters,
+    Theta = Theta,
+    Gamma = Gamma,
+    chi = 1,
+    n = 1e3,
+    d = 15
+  )
+
+# Simulation of the data
+set.seed(804)
+data <- graphicalExtremes::rmpareto(n = gr3_bal_sim_param_cluster$n,
+                                    model = "HR",
+                                    par = gr3_bal_sim_param_cluster$Gamma)
+
+# Optimization with Clusterpath algorithm with empirical variogram and exponential weights
+lambda <- seq(0, 3, 1e-3)
+
+HR_Clusterpath(data = data,
+               zeta = gr3_bal_sim_param_cluster$chi,
+               lambda = lambda,
+               eps_f = 1e-1)
 
 }
