@@ -8,7 +8,15 @@
 \usage{
 get_cluster(gamma, weights, eps_f, ...)
 
-HR_Clusterpath(data, zeta, lambda, eps_g = 0.001, eps_f = 0.01, it_max = 1000)
+HR_Clusterpath(
+  data,
+  zeta,
+  lambda,
+  p = NULL,
+  eps_g = 0.001,
+  eps_f = 0.01,
+  it_max = 1000
+)
 }
 \arguments{
 \item{gamma}{For \code{get_clusters()}, a \eqn{d \times d} matrix : the variogram matrix \eqn{\Gamma}.}
@@ -24,6 +32,10 @@ HR_Clusterpath(data, zeta, lambda, eps_g = 0.001, eps_f = 0.01, it_max = 1000)
 \item{lambda}{For \code{get_clusters()}, a positive number : the weight of the penalty.
 
 For \code{HR_Clusterpath()}, a numerix vector of positive number : the grid line for \eqn{\lambda}.}
+
+\item{p}{For \code{HR_Clusterapth()}, a numeric between 0 and 1, or \code{NULL}.  If \code{NULL} (default), it is
+assumed that the data are already on multivariate Pareto scale. Else, \code{p} is used as the probability
+in the function \code{data2mpareto()} to standardize the data (see \code{graphicalExtremes} documentation).}
 
 \item{eps_g}{A positive number : tolerance threshold for the convergence of the gradient descent.}
 

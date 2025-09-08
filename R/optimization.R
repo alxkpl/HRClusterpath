@@ -173,13 +173,16 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
 #'
 #' @param data For `HR_Clusterapth()`, a \eqn{n \times d} matrix : the matrix of data.
 #' @param zeta For `HR_Clusterapth()`, a positive number : tuned parameter for the exponential weights.
+#' @param p For `HR_Clusterapth()`, a numeric between 0 and 1, or `NULL`.  If `NULL` (default), it is
+#' assumed that the data are already on multivariate Pareto scale. Else, `p` is used as the probability
+#' in the function `data2mpareto()` to standardize the data (see `graphicalExtremes` documentation).
 #'
 #' @importFrom graphicalExtremes emp_vario Gamma2Theta
 #'
 #' @export
-HR_Clusterpath <- function(data, zeta, lambda, eps_g = 1e-3, eps_f = 1e-2, it_max = 1000) {
+HR_Clusterpath <- function(data, zeta, lambda, p = NULL, eps_g = 1e-3, eps_f = 1e-2, it_max = 1000) {
   # Initialization
-  Gamma_est <- emp_vario(data)
+  Gamma_est <- emp_vario(data, p = p)
   d <- ncol(data)
   R.init <- Gamma2Theta(Gamma_est)
 
