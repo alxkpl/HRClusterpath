@@ -129,7 +129,7 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
         list(
           R = R.init,
           clusters = as.list(1:d),
-          nllh = L(R, clusters, lambda),
+          nllh = L(R, as.list(1:d), lambda),
           lambda = lambda
         )
       )
