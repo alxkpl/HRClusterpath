@@ -1,3 +1,129 @@
+#' Functions to navigate between \eqn{R} and \eqn{\Theta} for given clusters
+#'
+#' The block matrix models is defined from two elements : the cluster's partition
+#' \eqn{\{C_1, \dots, C_K\}}, included in \eqn{V} and the \eqn{R} matrix which belongs
+#' to \eqn{\mathcal S_K(\mathbb R)}, the set of symmetric \eqn{K \times K} matrix.
+#'The expression of the precision \eqn{\Theta} which statisfies the block matrix model is 
+#' \deqn{
+#'    \Theta = U R U^t + A
+#' }
+#' where \eqn{U} is the cluster matrix and \eqn{A} a diagonal matrix such that the rows of
+#' theta sum to zero :
+#' \eqn{
+#' a_{ii} = - \sum_l p_l r_{kl}
+#' }
+#' for \eqn{i} in cluster \eqn{C_k}.
+#'
+#' @name theta-r
+#'
+#' @param Theta For `extract_R_matrix()`, a \eqn{d \times d} block matrix which can be factorizable.
+#' @param R For `build_theta()`, the \eqn{K \times K} matrix of the clusters.
+#' @param clusters A list of indices associated to a partition of \eqn{V}.
+#'
+#' @return For `extract_R_matrix()`, a matrix on size the number of clusters (i.e. \eqn{K})
+#' corresponding to the reduced matrix \eqn{R} of the original matrix \eqn{\Theta}.
+#'
+#' For `build_theta()`, a matrix on size the number of variables (i.e. \eqn{d})
+#' corresponding to the precision matrix \eqn{\Theta} induced by \eqn{R}.
+#'
+#' @examples
+#' ##############################################################
+#' #                       FROM THETA TO R
+#' ##############################################################
+#' Theta <- matrix(
+#'  c(4.5, .5, .5, .5, -2, -2, -2,
+#'    .5, 4.5, .5, .5, -2, -2, -2,
+#'    .5, .5, 4.5, .5, -2, -2, -2,
+#'    .5, .5, .5, 4.5, -2, -2, -2,
+#'    -2, -2, -2, -2, 6, 1, 1,
+#'    -2, -2, -2, -2, 1, 6, 1,
+#'    -2, -2, -2, -2, 1, 1, 6),
+#'  nc = 7
+#' )
+#'
+#' clusters <- list(c(1,2,3,4), c(5,6,7))
+#'
+#' extract_R_matrix(Theta, clusters)
+#'
+#' ##############################################################
+#' #                       FROM R TO THETA
+#' ##############################################################
+#'
+#' R <- matrix(c(1, -3, 0,
+#'               -3, 2, -2,
+#'               0, -2, 1), nc = 3)
+#'
+#' clusters <- list(1:4, 5:8, 9:12)
+#'
+#' build_theta(R, clusters)
+#'
+#'
+NULL
+
+#' @rdname theta-r
+#'
+#' @export
+build_theta <- function(R, clusters) {
+  U <- U_matrix(clusters)
+  URUt <- U %*% R %*% t(U)
+  a <-  - rowSums(URUt)
+
+  URUt + diag(a)
+
+}
+
+#' @rdname theta-r
+#'
+#' @export
+extract_R_matrix <- function(Theta, clusters) {
+
+  K <- length(clusters)
+  indx <- 1:K
+  R <- matrix(rep(NA, K * K), nc = K)
+
+  for (i in indx) {
+    k <- clusters[[i]][1]
+    if (length(clusters[[i]]) > 1) {
+      l <- clusters[[i]][2]
+      R[i, i] <- Theta[k, l]
+    }
+    for (j in indx[-i]){
+      l <- clusters[[j]][1]
+      R[i, j] <- Theta[k, l]
+    }
+  }
+
+  R
+}
+
+#' ChiToGamma
+#'
+#' Transform a \eqn{\chi} matrix to the corresponding variogram \eqn{\Gamma}
+#'
+#' @param Chi_matrix The matrix with \eqn{\chi_{ij}} entries.
+#'
+#' @return Gives the variogram \eqn{\Gamma} according to the \eqn{\chi} matrix for
+#' Hüsler-Reiss MGDP. In a such case, there exists a closed equation which
+#' link the variogram and the extremal coefficients, given by :
+#' \deqn{
+#'    \chi_{ij} = 2 - 2 \phi(\sqrt{\Gamma_{ij}/2})
+#' }
+#' where \eqn{\phi} is the standard normal distribution function.
+#'
+#' @examples
+#' ChiToGamma(matrix(c(1, 0.7,
+#'                     0.7, 1),
+#'            nrow = 2))
+#'
+#' @export
+ChiToGamma <- function(Chi_matrix) {
+
+  (2 * qnorm((2 - Chi_matrix) / 2))**2
+
+}
+
+# internal --------------------------------------------------------------------------
+
 #' Semi-definite checker
 #'
 #' @param M A /eqn{n/times n} symmetric matrix.
@@ -38,38 +164,7 @@ U_matrix <- function(clusters) {
   U
 }
 
-#' From R matrix compute theta matrix
-#'
-#' @param R a K x K matrix : the matrix of the clusters coefficients
-#' @param clusters a list of vector : each vector gives the element of a
-#' cluster.
-#'
-#' @returns Return the theta matrix from the value of the R matrix of clusters
-#' coefficient using :
-#'
-#'                            theta = U R U^t + A
-#'
-#' where U is the cluster matrix and a diagonal matrix such that the rows of
-#' theta sum to zero :
-#'                            a_ii = - sum_l p_l r_kl
-#' for i in cluster C_k.
-#'
-#' @examples
-#'
-#' R <- matrix(c(1, 2,
-#'               2, 5), nr = 2)
-#' clusters <- list(c(1,2,3),c(4,5))
-#' build_theta(R, clusters)
-#'
-#' @export
-build_theta <- function(R, clusters) {
-  U <- U_matrix(clusters)
-  URUt <- U %*% R %*% t(U)
-  a <-  - rowSums(URUt)
 
-  URUt + diag(a)
-
-}
 
 #' Variogram transformation application gamma
 #'
@@ -146,86 +241,6 @@ compute_W <- function(data) {
     }
   }
   W + t(W)
-}
-
-#' Transform a chi matrix to the corresponding variogram
-#'
-#' @param Chi_matrix the matrix with the chi coefficient.
-#'
-#' @return
-#' The corresponding variogram matrix \eqn{\Gamma}.
-#'
-#' @examples
-#' ChiToGamma(matrix(c(0.5, 0.7, 0.7, 0.5), nrow = 2))
-#'
-#' @export
-ChiToGamma <- function(Chi_matrix) {
-
-  (2 * qnorm((2 - Chi_matrix) / 2))**2
-
-}
-
-
-
-#' Function to extract the coefficients of the reduced matrix R.
-#'
-#' The block matrix models is defined from two elements : the cluster's partition
-#' \eqn{\{C_1, \dots, C_K\}}, included in \eqn{V} and the \eqn{R} matrix which belongs
-#' to \eqn{\mathcal S_K(\mathbb R)}, the set of symmetric \eqn{K \times K} matrix.
-#'The expression of the precision \eqn{\Theta} which statisfies the block matrix model is 
-#' \deqn{
-#'    \Theta = U R U^t + A
-#' }
-#' where \eqn{U} is the cluster matrix and \eqn{A} a diagonal matrix such that the rows of
-#' theta sum to zero :
-#' \eqn{
-#' a_{ii} = - \sum_l p_l r_{kl}
-#' }
-#' for \eqn{i} in cluster \eqn{C_k}.
-#'
-#' @param Theta A block matrix which can be factorizable.
-#' @param clusters a list of vectors : the variable index per clusters.
-#'
-#' @return A matrix on size the number of clusters (i.e. \eqn{K}). It
-#' corresponds to the reduced matrix \eqn{R} of the original matrix.
-#'
-#' @examples
-#' # We can build a Theta which is a block matrix as described upper :
-#' Theta <- matrix(
-#'  c(4.5, .5, .5, .5, -2, -2, -2,
-#'    .5, 4.5, .5, .5, -2, -2, -2,
-#'    .5, .5, 4.5, .5, -2, -2, -2,
-#'    .5, .5, .5, 4.5, -2, -2, -2,
-#'    -2, -2, -2, -2, 6, 1, 1,
-#'    -2, -2, -2, -2, 1, 6, 1,
-#'    -2, -2, -2, -2, 1, 1, 6),
-#'  nc = 7
-#' )
-#'
-#' clusters <- list(c(1,2,3,4), c(5,6,7))
-#'
-#' extract_R_matrix(Theta, clusters)
-#'
-#' @export
-extract_R_matrix <- function(Theta, clusters) {
-
-  K <- length(clusters)
-  indx <- 1:K
-  R <- matrix(rep(NA, K * K), nc = K)
-
-  for (i in indx) {
-    k <- clusters[[i]][1]
-    if (length(clusters[[i]]) > 1) {
-      l <- clusters[[i]][2]
-      R[i, i] <- Theta[k, l]
-    }
-    for (j in indx[-i]){
-      l <- clusters[[j]][1]
-      R[i, j] <- Theta[k, l]
-    }
-  }
-
-  R
 }
 
 #' Computation of the clustered weight matrix

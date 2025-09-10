@@ -1,27 +1,85 @@
-#' Negative log-likelihood computation.
+#' Negative log-likelihood for Hüsler-Reiss graphical models
 #'
-#' @param gamma A \eqn{d \times d} matrix: the empirical variogram matrix.
-#'
-#' @returns For a fixed variogram gamma, compute for a set of clusters and
-#' corresponding \eqn{R} matrix, the value of the associated negative likelihood
-#' defined by :
-#'
+#' The penalised negative loglikelihood of the Hüsler-Reiss graphical models can be
+#' written as follow :
 #' \deqn{
-#'      L(\Theta) = - \log(|\Theta|_+) - \frac 1 2 \text{tr}(\hat \Gamma \Theta)
+#'  L_{\mathcal P}^{(n)}(\Theta, \lambda) = \underbrace{-\log(|\Theta|_+) -
+#'  \frac 12 \text{tr}(\hat \Gamma^{(n)}\Theta)}_{L^{(n)}(\Theta)} + \lambda
+#'  \underbrace{\sum_{i<j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)}
 #' }
+#' where \eqn{|\cdot|_+} is the generalised determinant, \eqn{n} is the sample size,
+#' \eqn{\hat \Gamma^{(n)}} an estimation of the variogram matrix \eqn{\Gamma} and \eqn{w_{ij}>0} the weights.
 #'
-#' where \eqn{|\cdot|_+} is the generalised determinant.
+#' We use the block matrix structure to compute the likelihood here (see \code{\link{build_theta}()} and
+#' \code{\link{extract_R_matrix}()}), that is why we use two parameters for the computation
+#' instead of only one matrix \eqn{\Theta}.
+#'
+#' @name likelihood
+#'
+#' @param gamma A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.
+#' @param weights The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal.
+#'
+#' @returns For `neg_likelihood()`, it produces a function with two parameters :
+#' - **R** the \eqn{K \times K} clusters matrix
+#' - **clusters** a list of indices associated to a partition of \eqn{V}
+#' and compute the value of the non penalised negative log-likelihood \eqn{L^{(n)}(\Theta)}.
+#'
+#' For `penalty()`, it produces a function with two parameters :
+#' - **R** the \eqn{K \times K} clusters matrix
+#' - **clusters** a list of indices associated to a partition of \eqn{V}
+#' and compute the value of the penalty \eqn{\mathcal P(\Theta)}.
+#'
+#' For `neg_likelihood_pen()`, it produces a function with three parameters :
+#' - **R** : the \eqn{K \times K} clusters matrix
+#' - **clusters** : a list of indices associated to a partition of \eqn{V}
+#' - **lambda** : a positive number, the weight of the penalty.
+#' and compute the value of the penalised negative log-likelihood \eqn{L_{\mathcal P}^{(n)}(\Theta, \lambda)}.
 #'
 #' @examples
+#' ############################################################
+#' #                      INITIALIZATION
+#' ############################################################
+#' # Block matrix structure
 #' R <- matrix(c(0.5, -1,
 #'               -1, -1), nr = 2)
 #' clusters <- list(c(1,3), c(2,4))
+#'
+#' # Weight matrix
+#' W <- matrix(c(0, 1, 1, 1,
+#'               1, 0, 1, 1,
+#'               1, 1, 0, 1,
+#'               1, 1, 1, 0), nc = 4)
+#'
+#' # Random variogram
 #' gamma <- matrix(c(0, 2, 1, 0,
 #'                   2, 0, 4, 1,
 #'                   1, 4, 0, 7,
 #'                   0, 1, 7, 0), nc = 4)
+#'
+#' # Regularization parameter
+#' lambda <- 2.5
+#'
+#' ############################################################
+#' #                   NEGATIVE LOG-LIKEHOOD
+#' ############################################################
 #' nllh <- neg_likelihood(gamma)
 #' nllh(R, clusters)
+#'
+#' ############################################################
+#' #                          PENALTY
+#' ############################################################
+#' pen <- penalty(W)
+#' pen(R, clusters)
+#'
+#' ############################################################
+#' #             PENALISED NEGATIVE LOG-LIKELIHOOD
+#' ############################################################
+#' nllh_pen <- neg_likelihood_pen(gamma, W)
+#' nllh_pen(R, clusters, lambda)
+#'
+NULL
+
+#' @rdname likelihood
 #'
 #' @export
 neg_likelihood <- function(gamma) {
@@ -40,26 +98,9 @@ neg_likelihood <- function(gamma) {
   }
 }
 
-#' Penalty function.
+#' @rdname likelihood
 #'
-#' @param weights a \eqn{d \times d} symmetric matrix with a zero diagonal.
-#'
-#' @returns For fixed weights, returns a function which compute the value of
-#' the penalty for chosen clusters and corresponding R matrix. We recall the
-#' penalty is given by :
-#'                    P(R) = sum_{k<l} W_kl D^2(r_.k, r_.l)
-#' with W_kl the clustered weight for clusters k and l.
-#'
-#' @examples
-#' R <- matrix(c(0.5, -1,
-#'               -1, -1), nr = 2)
-#' clusters <- list(c(1,3), c(2,4))
-#' W <- matrix(c(0, 1, 1, 1,
-#'               1, 0, 1, 1,
-#'               1, 1, 0, 1,
-#'               1, 1, 1, 0), nc = 4)
-#' P <- penalty(W)
-#' P(R, clusters)
+#' @export
 penalty <- function(weights) {
   # Fixing the weights for computing weights clustered
   get_W <- weight_clustered(weights)
@@ -73,29 +114,7 @@ penalty <- function(weights) {
   }
 }
 
-#' Computation of the penalised negative log-likelihood
-#'
-#' @param gamma a d x d matrix : the variogram matrix.
-#' @param weights a d x d symmetric matrix with a zero diagonal.
-#' @param lambda a positive number : the weight of the penalty.
-#'
-#' @returns A function of clusters and the R matrix which compute the penalised
-#' negative log-likelihood of the model.
-#'
-#' @examples
-#' R <- matrix(c(0.5, -1,
-#'               -1, -1), nr = 2)
-#' clusters <- list(c(1,3), c(2,4))
-#' W <- matrix(c(0, 1, 1, 1,
-#'               1, 0, 1, 1,
-#'               1, 1, 0, 1,
-#'               1, 1, 1, 0), nc = 4)
-#' gamma <- matrix(c(0,2,1,0,
-#'                   2,0,4,1,
-#'                   1,4,0,7,
-#'                   0,1,7,0), nc = 4)
-#' f <- neg_likelihood_pen(gamma, W, 0.5)
-#' f(R, clusters)
+#' @rdname likelihood
 #'
 #' @export
 neg_likelihood_pen <- function(gamma, weights) {
@@ -108,6 +127,8 @@ neg_likelihood_pen <- function(gamma, weights) {
 
   }
 }
+
+# internal ---------------------------------------------------------------------
 
 #' Gradient of the negative log likelihood without penalty
 #'

@@ -2,20 +2,28 @@
 % Please edit documentation in R/matrix_operation.R
 \name{ChiToGamma}
 \alias{ChiToGamma}
-\title{Transform a chi matrix to the corresponding variogram}
+\title{ChiToGamma}
 \usage{
 ChiToGamma(Chi_matrix)
 }
 \arguments{
-\item{Chi_matrix}{the matrix with the chi coefficient.}
+\item{Chi_matrix}{The matrix with \eqn{\chi_{ij}} entries.}
 }
 \value{
-The corresponding variogram matrix \eqn{\Gamma}.
+Gives the variogram \eqn{\Gamma} according to the \eqn{\chi} matrix for
+Hüsler-Reiss MGDP. In a such case, there exists a closed equation which
+link the variogram and the extremal coefficients, given by :
+\deqn{
+   \chi_{ij} = 2 - 2 \phi(\sqrt{\Gamma_{ij}/2})
+}
+where \eqn{\phi} is the standard normal distribution function.
 }
 \description{
-Transform a chi matrix to the corresponding variogram
+Transform a \eqn{\chi} matrix to the corresponding variogram \eqn{\Gamma}
 }
 \examples{
-ChiToGamma(matrix(c(0.5, 0.7, 0.7, 0.5), nrow = 2))
+ChiToGamma(matrix(c(1, 0.7,
+                    0.7, 1),
+           nrow = 2))
 
 }

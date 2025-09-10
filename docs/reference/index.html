@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">HRClusterpath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,22 +54,16 @@
 
       <dl><dt>
 
-          <code><a href="extract_R_matrix.html">extract_R_matrix()</a></code>
+          <code><a href="theta-r.html">build_theta()</a></code> <code><a href="theta-r.html">extract_R_matrix()</a></code>
 
         </dt>
-        <dd>Function to extract the coefficients of the reduced matrix R.</dd>
+        <dd>Functions to navigate between \(R\) and \(\Theta\) for given clusters</dd>
       </dl><dl><dt>
 
           <code><a href="ChiToGamma.html">ChiToGamma()</a></code>
 
         </dt>
-        <dd>Transform a chi matrix to the corresponding variogram</dd>
-      </dl><dl><dt>
-
-          <code><a href="build_theta.html">build_theta()</a></code>
-
-        </dt>
-        <dd>From R matrix compute theta matrix</dd>
+        <dd>ChiToGamma</dd>
       </dl></div><div class="section level2">
       <h2 id="likelihood-functions">Likelihood functions<a class="anchor" aria-label="anchor" href="#likelihood-functions"></a></h2>
 
@@ -83,22 +77,10 @@
 
       <dl><dt>
 
-          <code><a href="neg_likelihood.html">neg_likelihood()</a></code>
+          <code><a href="likelihood.html">neg_likelihood()</a></code> <code><a href="likelihood.html">penalty()</a></code> <code><a href="likelihood.html">neg_likelihood_pen()</a></code>
 
         </dt>
-        <dd>Negative log-likelihood computation.</dd>
-      </dl><dl><dt>
-
-          <code><a href="neg_likelihood_pen.html">neg_likelihood_pen()</a></code>
-
-        </dt>
-        <dd>Computation of the penalised negative log-likelihood</dd>
-      </dl><dl><dt>
-
-          <code><a href="penalty.html">penalty()</a></code>
-
-        </dt>
-        <dd>Penalty function.</dd>
+        <dd>Negative log-likelihood for Hüsler-Reiss graphical models</dd>
       </dl></div><div class="section level2">
       <h2 id="optimization">Optimization<a class="anchor" aria-label="anchor" href="#optimization"></a></h2>
 
@@ -112,16 +94,10 @@
 
       <dl><dt>
 
-          <code><a href="HR_Clusterpath.html">HR_Clusterpath()</a></code>
+          <code><a href="hr-clusterpath.html">get_cluster()</a></code> <code><a href="hr-clusterpath.html">HR_Clusterpath()</a></code>
 
         </dt>
-        <dd>Optimization results from data</dd>
-      </dl><dl><dt>
-
-          <code><a href="get_cluster.html">get_cluster()</a></code>
-
-        </dt>
-        <dd>Gradient descent algorithm for Husler-Reiss graphical models clustering</dd>
+        <dd>Clusterpath algorithm for Hüsler-Reiss models</dd>
       </dl></div><div class="section level2">
       <h2 id="graphical-functions">Graphical functions<a class="anchor" aria-label="anchor" href="#graphical-functions"></a></h2>
 
@@ -135,16 +111,10 @@
 
       <dl><dt>
 
-          <code><a href="gg_cluster.html">gg_cluster()</a></code>
+          <code><a href="hierarchy-graph.html">gg_cluster()</a></code> <code><a href="hierarchy-graph.html">average_hierarchy()</a></code>
 
         </dt>
-        <dd>Plot the dendrogram for the optimization</dd>
-      </dl><dl><dt>
-
-          <code><a href="average_hierarchy.html">average_hierarchy()</a></code>
-
-        </dt>
-        <dd>Plot the average dendrogram for the replicate optimization</dd>
+        <dd>Clusterpath as hierarchical clustering</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

@@ -1,3 +1,147 @@
+#' Clusterpath as hierarchical clustering
+#'
+#' `ggplot2` and `ggraph` function to plotting the results from the clusterpath algorithm.
+#'
+#' During its development in \eqn{[1]}, the clusterpath algorithm was built from a convex relaxation
+#' of hierarchical clustering that allows us to produce this kind of graphs from the results of
+#' the algorithm with a enough thin and large grid for the penalty \eqn{\lambda}.
+#'
+#' @name hierarchy-graph
+#'
+#' @returns For `gg_cluster()`, the dendrogram obtained from the optimization results from
+#' \code{\link{HR_Clusterpath}()} for each lambda.
+#' For `average_hierarchy()`, the average dendrogram obtained from the several optimization results 
+#' from \code{\link{HR_Clusterpath}()} for each lambda.
+#'
+#' @examples
+#' # Construction of clusters and R matrix
+#' R <- matrix(c(1, -3, 0,
+#'               -3, 2, -2,
+#'               0, -2, 1), nc = 3)
+#' clusters <- list(1:5, 6:10, 11:15)
+#'
+#' # Construction of induced theta and corresponding variogram gamma
+#' Theta <- build_theta(R, clusters)
+#' Gamma <- graphicalExtremes::Theta2Gamma(Theta)
+#'
+#' gr3_bal_sim_param_cluster <-
+#'   list(
+#'     R = R,
+#'     clusters = clusters,
+#'     Theta = Theta,
+#'     Gamma = Gamma,
+#'     chi = 1,
+#'     n = 1e3,
+#'     d = 15
+#'   )
+#'
+#' set.seed(804)
+#' data <- graphicalExtremes::rmpareto(n = gr3_bal_sim_param_cluster$n,
+#'                                     model = "HR",
+#'                                     par = gr3_bal_sim_param_cluster$Gamma)
+#'
+#' lambda <- seq(0, 3, 1e-3)
+#'
+#' res <- HR_Clusterpath(data = data,
+#'                       zeta = gr3_bal_sim_param_cluster$chi,
+#'                       lambda = lambda,
+#'                       eps_f = 1e-1)
+#'
+#' gg_cluster(res)
+#'
+#' @references \eqn{[1]} Hocking, T. D., Joulin, A., Bach, F., and Vert, J.-P. (2011). Clusterpath: An
+#' Algorithm for Clustering using Convex Fusion Penalties. In Proceedings of the 28th International
+#' Conference on Machine Learning, Bellevue, Washington, USA,. Omnipress.
+#'
+NULL
+
+#' @rdname hierarchy-graph
+#'
+#' @param list_results A list of results optimization from \code{\link{HR_Clusterpath}()}.
+#'
+#' @importFrom ggraph ggraph geom_edge_elbow geom_node_text geom_node_point
+#' @import ggplot2
+#' @importFrom tidygraph as_tbl_graph
+#' @export
+gg_cluster <- function(list_results) {
+
+  d <- sum(sapply(list_results[[1]]$clusters, length))
+  lambda_max <- list_results[[length(list_results)]]$lambda
+  options(warn = 1)
+  event_list <- detect_merge(list_results)
+  options(warn = 0)
+
+  A <- get_adjacency_matrix(event_list, lambda_max)
+
+  hclust_results <- hclust(as.dist(A), method = "average")
+
+  hclust_results$label <- 1:d
+
+  graph <- as_tbl_graph(hclust_results)
+
+  # Dessiner l'arbre
+  ggraph(graph, layout = "dendrogram", height = height) +
+    geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
+    geom_node_text(aes(label = ifelse(leaf, label, "")), size = 4, vjust = 1.7, color = "grey40") +
+    geom_node_point(color = "grey40", shape = 18, size = 3) +
+    ylab(expression(lambda)) +
+    theme_minimal() +
+    theme(axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid = element_blank(), axis.line.y = element_line(color = "grey50"),
+          plot.margin = margin(10, 10, 10, 10),
+          axis.title.y = element_text(angle = 0, size = 15),
+          axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),  # Couleur et taille des ticks
+          axis.ticks.length = unit(0.1, "cm"))
+}
+
+#' @rdname hierarchy-graph
+#' 
+#' @param replicates A list of results optimization replicates from \code{\link{HR_Clusterpath}()}.
+#'
+#' @importFrom ggraph ggraph geom_edge_elbow geom_node_text geom_node_point
+#' @import ggplot2
+#' @importFrom tidygraph as_tbl_graph
+#'
+#' @export
+average_hierarchy <- function(replicates) {
+
+  d <- sum(sapply(replicates[[1]][[1]]$clusters, length))
+
+  N <- length(replicates)
+
+  lambda_max <- replicates[[1]][[length(replicates[[1]])]]$lambda
+
+  list_detect <- lapply(replicates, detect_merge)
+
+  Adj_list <- lapply(list_detect, \(.) get_adjacency_matrix(., lambda_max))
+
+  A <- as.dist(Reduce("+", Adj_list) / N)
+
+  hclust_results <- hclust(as.dist(A), method = "average")
+
+  hclust_results$label <- 1:d
+
+  graph <- as_tbl_graph(hclust_results)
+
+  # Dessiner l'arbre
+  ggraph(graph, layout = "dendrogram", height = height) +
+    geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
+    geom_node_text(aes(label = ifelse(leaf, label, "")), size = 4, vjust = 1.7, color = "grey40") +
+    geom_node_point(color = "grey40", shape = 18, size = 3) +
+    ylab(expression(lambda)) +
+    theme_minimal() +
+    theme(axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid = element_blank(), axis.line.y = element_line(color = "grey50"),
+          plot.margin = margin(10, 10, 10, 10),
+          axis.title.y = element_text(angle = 0, size = 15),
+          axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),
+          axis.ticks.length = unit(0.1, "cm"))
+}
+
+# internal ----------------------------------------------------------------------------
+
 #' Compare two clusters.
 #'
 #' @param clusters1 The first cluster to compare.
@@ -98,92 +242,4 @@ get_adjacency_matrix <- function(event_list, lambda_max) {
 
   A
 
-}
-
-#' Plot the dendrogram for the optimization
-#'
-#' @param list_results A list of results optimization from best_clusters.
-#'
-#' @returns The dendrogram obtained from the simulation results for each lambda.
-#'
-#' @importFrom ggraph ggraph geom_edge_elbow
-#' @import ggplot2
-#' @importFrom tidygraph as_tbl_graph
-#' @export
-gg_cluster <- function(list_results) {
-
-  d <- sum(sapply(list_results[[1]]$clusters, length))
-  lambda_max <- list_results[[length(list_results)]]$lambda
-  options(warn = 1)
-  event_list <- detect_merge(list_results)
-  options(warn = 0)
-
-  A <- get_adjacency_matrix(event_list, lambda_max)
-
-  hclust_results <- hclust(as.dist(A), method = "average")
-
-  hclust_results$label <- 1:d
-
-  graph <- as_tbl_graph(hclust_results)
-
-  # Dessiner l'arbre
-  ggraph(graph, layout = "dendrogram", height = height) +
-    geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
-    geom_node_text(aes(label = ifelse(leaf, label, "")), size = 4, vjust = 1.7, color = "grey40") +
-    geom_node_point(color = "grey40", shape = 18, size = 3) +
-    ylab(expression(lambda)) +
-    theme_minimal() +
-    theme(axis.text.x = element_blank(),
-          axis.title.x = element_blank(),
-          panel.grid = element_blank(), axis.line.y = element_line(color = "grey50"),
-          plot.margin = margin(10, 10, 10, 10),
-          axis.title.y = element_text(angle = 0, size = 15),
-          axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),  # Couleur et taille des ticks
-          axis.ticks.length = unit(0.1, "cm"))
-}
-
-
-#' Plot the average dendrogram for the replicate optimization
-#'
-#' @param replicates A list of results optimization replicates from best_clusters.
-#'
-#' @returns The dendrogram obtained from the simulation results for each lambda
-#' @importFrom ggraph ggraph geom_edge_elbow
-#' @import ggplot2
-#' @importFrom tidygraph as_tbl_graph
-#' @export
-average_hierarchy <- function(replicates) {
-
-  d <- sum(sapply(replicates[[1]][[1]]$clusters, length))
-
-  N <- length(replicates)
-
-  lambda_max <- replicates[[1]][[length(replicates[[1]])]]$lambda
-
-  list_detect <- lapply(replicates, detect_merge)
-
-  Adj_list <- lapply(list_detect, \(.) get_adjacency_matrix(., lambda_max))
-
-  A <- as.dist(Reduce("+", Adj_list) / N)
-
-  hclust_results <- hclust(as.dist(A), method = "average")
-
-  hclust_results$label <- 1:d
-
-  graph <- as_tbl_graph(hclust_results)
-
-  # Dessiner l'arbre
-  ggraph(graph, layout = "dendrogram", height = height) +
-    geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
-    geom_node_text(aes(label = ifelse(leaf, label, "")), size = 4, vjust = 1.7, color = "grey40") +
-    geom_node_point(color = "grey40", shape = 18, size = 3) +
-    ylab(expression(lambda)) +
-    theme_minimal() +
-    theme(axis.text.x = element_blank(),
-          axis.title.x = element_blank(),
-          panel.grid = element_blank(), axis.line.y = element_line(color = "grey50"),
-          plot.margin = margin(10, 10, 10, 10),
-          axis.title.y = element_text(angle = 0, size = 15),
-          axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),  # Couleur et taille des ticks
-          axis.ticks.length = unit(0.1, "cm"))
 }
