@@ -58,12 +58,14 @@ NULL
 #' @rdname hierarchy-graph
 #'
 #' @param list_results A list of results optimization from \code{\link{HR_Clusterpath}()}.
-#'
+#' @param id_names A liste of strings for the nodes label. If `NULL` (default),
+#' the labels are integer from \eqn{1} to \eqn{d}, the number of variables.
+#' 
 #' @importFrom ggraph ggraph geom_edge_elbow geom_node_text geom_node_point
 #' @import ggplot2
 #' @importFrom tidygraph as_tbl_graph
 #' @export
-gg_cluster <- function(list_results) {
+gg_cluster <- function(list_results, id_names = NULL) {
 
   d <- sum(sapply(list_results[[1]]$clusters, length))
   lambda_max <- list_results[[length(list_results)]]$lambda
@@ -74,8 +76,13 @@ gg_cluster <- function(list_results) {
   A <- get_adjacency_matrix(event_list, lambda_max)
 
   hclust_results <- hclust(as.dist(A), method = "average")
+  if (is.null(id_names)) {
+    hclust_results$label <- 1:d
+  }else {
+    hclust_results$label <- id_names
+  }
 
-  hclust_results$label <- 1:d
+
 
   graph <- as_tbl_graph(hclust_results)
 

@@ -6,12 +6,15 @@
 \alias{average_hierarchy}
 \title{Clusterpath as hierarchical clustering}
 \usage{
-gg_cluster(list_results)
+gg_cluster(list_results, id_names = NULL)
 
 average_hierarchy(replicates)
 }
 \arguments{
 \item{list_results}{A list of results optimization from \code{\link{HR_Clusterpath}()}.}
+
+\item{id_names}{A liste of strings for the nodes label. If \code{NULL} (default),
+the labels are integer from \eqn{1} to \eqn{d}, the number of variables.}
 
 \item{replicates}{A list of results optimization replicates from \code{\link{HR_Clusterpath}()}.}
 }
