@@ -76,30 +76,44 @@ gg_cluster <- function(list_results, id_names = NULL) {
   A <- get_adjacency_matrix(event_list, lambda_max)
 
   hclust_results <- hclust(as.dist(A), method = "average")
-  if (is.null(id_names)) {
-    hclust_results$label <- 1:d
-  }else {
-    hclust_results$label <- id_names
-  }
 
+  hclust_results$label <- 1:d
 
 
   graph <- as_tbl_graph(hclust_results)
 
   # Dessiner l'arbre
-  ggraph(graph, layout = "dendrogram", height = height) +
-    geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
-    geom_node_text(aes(label = ifelse(leaf, label, "")), size = 4, vjust = 1.7, color = "grey40") +
-    geom_node_point(color = "grey40", shape = 18, size = 3) +
-    ylab(expression(lambda)) +
-    theme_minimal() +
-    theme(axis.text.x = element_blank(),
-          axis.title.x = element_blank(),
-          panel.grid = element_blank(), axis.line.y = element_line(color = "grey50"),
-          plot.margin = margin(10, 10, 10, 10),
-          axis.title.y = element_text(angle = 0, size = 15),
-          axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),  # Couleur et taille des ticks
-          axis.ticks.length = unit(0.1, "cm"))
+
+  if (is.null(id_names)) {
+    ggraph(graph, layout = "dendrogram", height = height) +
+      geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
+      geom_node_text(aes(label = ifelse(leaf, label, "")), size = 4, vjust = 1.7, color = "grey40") +
+      geom_node_point(color = "grey40", shape = 18, size = 3) +
+      ylab(expression(lambda)) +
+      theme_minimal() +
+      theme(axis.text.x = element_blank(),
+            axis.title.x = element_blank(),
+            panel.grid = element_blank(), axis.line.y = element_line(color = "grey50"),
+            plot.margin = margin(10, 10, 10, 10),
+            axis.title.y = element_text(angle = 0, size = 15),
+            axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),  # Couleur et taille des ticks
+            axis.ticks.length = unit(0.1, "cm"))
+  }else {
+    ggraph(graph, layout = "dendrogram", height = height) +
+      geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
+      geom_node_text(aes(label = ifelse(leaf, id_names[as.integer(label)], "")), size = 4, vjust = 1.7, color = "grey40") +
+      geom_node_point(color = "grey40", shape = 18, size = 3) +
+      ylab(expression(lambda)) +
+      theme_minimal() +
+      theme(axis.text.x = element_blank(),
+            axis.title.x = element_blank(),
+            panel.grid = element_blank(), axis.line.y = element_line(color = "grey50"),
+            plot.margin = margin(10, 10, 10, 10),
+            axis.title.y = element_text(angle = 0, size = 15),
+            axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),  # Couleur et taille des ticks
+            axis.ticks.length = unit(0.1, "cm"))
+  }
+
 }
 
 #' @rdname hierarchy-graph
