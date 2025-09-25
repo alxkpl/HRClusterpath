@@ -61,9 +61,10 @@ NULL
 #' @param id_names A liste of strings for the nodes label. If `NULL` (default),
 #' the labels are integer from \eqn{1} to \eqn{d}, the number of variables.
 #' 
-#' @importFrom ggraph ggraph geom_edge_elbow geom_node_text geom_node_point
+#' @importFrom ggraph ggraph geom_edge_elbow geom_node_text geom_node_point create_layout
 #' @import ggplot2
-#' @importFrom tidygraph as_tbl_graph
+#' @importFrom tidygraph as_tbl_graph activate
+#' @import dplyr
 #' @export
 gg_cluster <- function(list_results, id_names = NULL) {
 
@@ -85,7 +86,7 @@ gg_cluster <- function(list_results, id_names = NULL) {
   # Dessiner l'arbre
 
   if (is.null(id_names)) {
-    ggraph(graph, layout = "dendrogram", height = height) +
+    p <- ggraph(graph, layout = "dendrogram", height = height) +
       geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
       geom_node_text(aes(label = ifelse(leaf, label, "")), size = 4, vjust = 1.7, color = "grey40") +
       geom_node_point(color = "grey40", shape = 18, size = 3) +
@@ -99,7 +100,7 @@ gg_cluster <- function(list_results, id_names = NULL) {
             axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),  # Couleur et taille des ticks
             axis.ticks.length = unit(0.1, "cm"))
   }else {
-    ggraph(graph, layout = "dendrogram", height = height) +
+    p <- ggraph(graph, layout = "dendrogram", height = height) +
       geom_edge_elbow(linewidth = 1.5, alpha = 0.8, color = "darkorange2") +
       geom_node_text(aes(label = ifelse(leaf, id_names[as.integer(label)], "")), size = 4, vjust = 1.7, color = "grey40") +
       geom_node_point(color = "grey40", shape = 18, size = 3) +
@@ -114,6 +115,45 @@ gg_cluster <- function(list_results, id_names = NULL) {
             axis.ticks.length = unit(0.1, "cm"))
   }
 
+
+  if (!(length(event_list[[length(event_list)]]$clusters) %in% c(1, d))) {
+    layout <- create_layout(graph, layout = "dendrogram")
+    root <- layout |>
+      filter(height == lambda_max) |>
+      select(.ggraph.orig_index) |>
+      pull()
+
+    origin <- graph |>
+      activate(edges) |>
+      as_tibble() |>
+      filter(from %in% root) |>
+      pull(to)
+
+    x_point <- layout |>
+      filter(.ggraph.orig_index %in% origin, height < lambda_max) |>
+      pull(x)
+
+    df_rect <- data.frame(
+      xmin = 0,
+      xmax = d,
+      ymin = lambda_max,
+      ymax = 1.01 * lambda_max
+    )
+
+    df_point <- data.frame(x = x_point, y = lambda_max)
+    return(
+      p +
+        geom_rect(data = df_rect,
+                  aes(xmin = xmin,
+                      xmax = xmax,
+                      ymin = ymin,
+                      ymax = ymax),
+                  linewidth = 3, col = "white", fill = "white") +
+        geom_point(data = df_point, aes(x = x, y = y),
+                   color = "grey40", shape = 18, size = 6)
+    )
+  }
+  return(p)
 }
 
 #' @rdname hierarchy-graph
