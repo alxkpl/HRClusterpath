@@ -35,6 +35,7 @@
 #'  - $clusters : a list of the variable indices, clustered.
 #'  - $nllh : the value of the negative penalised negative loglikelihood.
 #'  - $lambda : the value of lambda.
+#'  - $message : a message about the optimization results.
 #'
 #' In the case of `HR_Clusterpath()` it is a list of the previous list.
 #'
@@ -102,7 +103,7 @@
 #'                                     par = gr3_bal_sim_param_cluster$Gamma)
 #'
 #' # Optimization with Clusterpath algorithm with empirical variogram and exponential weights
-#' lambda <- seq(0, 3, 1e-3)
+#' lambda <- c(0, 0.1, 0.5, 1, 2)
 #'
 #' HR_Clusterpath(data = data,
 #'                zeta = gr3_bal_sim_param_cluster$chi,
@@ -129,8 +130,9 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
         list(
           R = R.init,
           clusters = as.list(1:d),
-          nllh = L(R, as.list(1:d), lambda),
-          lambda = lambda
+          nllh = L(R.init, as.list(1:d), lambda),
+          lambda = lambda,
+          message = "Initial guess for null lambda."
         )
       )
     }
@@ -148,13 +150,20 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
     R <- res$R
     clusters <- res$clusters
 
+    if (semi_def(build_theta(R, clusters))) {
+      message <- NULL
+    }else {
+      message <- "The precision matrix is not positive."
+    }
+
     if (length(R) == 1) {
       return(
         list(
           R = R,
           clusters = clusters,
           nllh = -(d - 1) * (d - 2) * R,
-          lambda = lambda
+          lambda = lambda,
+          message = message
         )
       )
     }
@@ -163,7 +172,8 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
         R = R,
         clusters = clusters,
         nllh = L(R, clusters, lambda),
-        lambda = lambda
+        lambda = lambda,
+        message = message
       )
     )
   }

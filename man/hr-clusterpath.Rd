@@ -56,6 +56,7 @@ Both of them produce a list of results :
 \item $clusters : a list of the variable indices, clustered.
 \item $nllh : the value of the negative penalised negative loglikelihood.
 \item $lambda : the value of lambda.
+\item $message : a message about the optimization results.
 }
 
 In the case of \code{HR_Clusterpath()} it is a list of the previous list.
@@ -140,7 +141,7 @@ data <- graphicalExtremes::rmpareto(n = gr3_bal_sim_param_cluster$n,
                                     par = gr3_bal_sim_param_cluster$Gamma)
 
 # Optimization with Clusterpath algorithm with empirical variogram and exponential weights
-lambda <- seq(0, 3, 1e-3)
+lambda <- c(0, 0.1, 0.5, 1, 2)
 
 HR_Clusterpath(data = data,
                zeta = gr3_bal_sim_param_cluster$chi,

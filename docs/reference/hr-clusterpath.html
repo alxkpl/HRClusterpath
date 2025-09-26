@@ -123,6 +123,7 @@ variogram \(\Gamma\) and customizable weights with the matrix \(W\).</p>
 <li><p>$clusters : a list of the variable indices, clustered.</p></li>
 <li><p>$nllh : the value of the negative penalised negative loglikelihood.</p></li>
 <li><p>$lambda : the value of lambda.</p></li>
+<li><p>$message : a message about the optimization results.</p></li>
 </ul><p>In the case of <code>HR_Clusterpath()</code> it is a list of the previous list.</p>
     </div>
     <div class="section level2">
@@ -171,7 +172,7 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-in"><span><span class="va">Cluster_HR</span> <span class="op">&lt;-</span> <span class="fu">get_cluster</span><span class="op">(</span><span class="va">gamma</span>, <span class="va">W</span>, <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">Cluster_HR</span><span class="op">(</span><span class="va">R</span>, <span class="fl">2.2</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in psolve(build_theta(R, clusters)):</span> no positive semi definite matrix.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in U %*% R:</span> non-conformable arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">############################################################################</span></span></span>
 <span class="r-in"><span><span class="co">#                            With HR_Clusterpath</span></span></span>
@@ -204,15 +205,286 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-in"><span>                                    par <span class="op">=</span> <span class="va">gr3_bal_sim_param_cluster</span><span class="op">$</span><span class="va">Gamma</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Optimization with Clusterpath algorithm with empirical variogram and exponential weights</span></span></span>
-<span class="r-in"><span><span class="va">lambda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">1e-3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lambda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">HR_Clusterpath</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>,</span></span>
 <span class="r-in"><span>               zeta <span class="op">=</span> <span class="va">gr3_bal_sim_param_cluster</span><span class="op">$</span><span class="va">chi</span>,</span></span>
 <span class="r-in"><span>               lambda <span class="op">=</span> <span class="va">lambda</span>,</span></span>
 <span class="r-in"><span>               eps_f <span class="op">=</span> <span class="fl">1e-1</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in (function (.x, .f, ..., .progress = FALSE) {    map_("list", .x, .f, ..., .progress = .progress)})(.x = c(0, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.011, 0.012, 0.013, 0.014, 0.015, 0.016, 0.017, 0.018, 0.019, 0.02, 0.021, 0.022, 0.023, 0.024, 0.025, 0.026, 0.027, 0.028, 0.029, 0.03, 0.031, 0.032, 0.033, 0.034, 0.035, 0.036, 0.037, 0.038, 0.039, 0.04, 0.041, 0.042, 0.043, 0.044, 0.045, 0.046, 0.047, 0.048, 0.049, 0.05, 0.051, 0.052, 0.053, 0.054, 0.055, 0.056, 0.057, 0.058, 0.059, 0.06, 0.061, 0.062, 0.063, 0.064, 0.065, 0.066, 0.067, 0.068, 0.069, 0.07, 0.071, 0.072, 0.073, 0.074, 0.075, 0.076, 0.077, 0.078, 0.079, 0.08, 0.081, 0.082, 0.083, 0.084, 0.085, 0.086, 0.087, 0.088, 0.089, 0.09, 0.091, 0.092, 0.093, 0.094, 0.095, 0.096, 0.097, 0.098, 0.099, 0.1, 0.101, 0.102, 0.103, 0.104, 0.105, 0.106, 0.107, 0.108, 0.109, 0.11, 0.111, 0.112, 0.113, 0.114, 0.115, 0.116, 0.117, 0.118, 0.119, 0.12, 0.121, 0.122, 0.123, 0.124, 0.125, 0.126, 0.127, 0.128, 0.129, 0.13, 0.131, 0.132, 0.133, 0.134, 0.135, 0.136, 0.137, 0.138, 0.139, 0.14, 0.141, 0.142, 0.143, 0.144, 0.145, 0.146, 0.147, 0.148, 0.149, 0.15, 0.151, 0.152, 0.153, 0.154, 0.155, 0.156, 0.157, 0.158, 0.159, 0.16, 0.161, 0.162, 0.163, 0.164, 0.165, 0.166, 0.167, 0.168, 0.169, 0.17, 0.171, 0.172, 0.173, 0.174, 0.175, 0.176, 0.177, 0.178, 0.179, 0.18, 0.181, 0.182, 0.183, 0.184, 0.185, 0.186, 0.187, 0.188, 0.189, 0.19, 0.191, 0.192, 0.193, 0.194, 0.195, 0.196, 0.197, 0.198, 0.199, 0.2, 0.201, 0.202, 0.203, 0.204, 0.205, 0.206, 0.207, 0.208, 0.209, 0.21, 0.211, 0.212, 0.213, 0.214, 0.215, 0.216, 0.217, 0.218, 0.219, 0.22, 0.221, 0.222, 0.223, 0.224, 0.225, 0.226, 0.227, 0.228, 0.229, 0.23, 0.231, 0.232, 0.233, 0.234, 0.235, 0.236, 0.237, 0.238, 0.239, 0.24, 0.241, 0.242, 0.243, 0.244, 0.245, 0.246, 0.247, 0.248, 0.249, 0.25, 0.251, 0.252, 0.253, 0.254, 0.255, 0.256, 0.257, 0.258, 0.259, 0.26, 0.261, 0.262, 0.263, 0.264, 0.265, 0.266, 0.267, 0.268, 0.269, 0.27, 0.271, 0.272, 0.273, 0.274, 0.275, 0.276, 0.277, 0.278, 0.279, 0.28, 0.281, 0.282, 0.283, 0.284, 0.285, 0.286, 0.287, 0.288, 0.289, 0.29, 0.291, 0.292, 0.293, 0.294, 0.295, 0.296, 0.297, 0.298, 0.299, 0.3, 0.301, 0.302, 0.303, 0.304, 0.305, 0.306, 0.307, 0.308, 0.309, 0.31, 0.311, 0.312, 0.313, 0.314, 0.315, 0.316, 0.317, 0.318, 0.319, 0.32, 0.321, 0.322, 0.323, 0.324, 0.325, 0.326, 0.327, 0.328, 0.329, 0.33, 0.331, 0.332, 0.333, 0.334, 0.335, 0.336, 0.337, 0.338, 0.339, 0.34, 0.341, 0.342, 0.343, 0.344, 0.345, 0.346, 0.347, 0.348, 0.349, 0.35, 0.351, 0.352, 0.353, 0.354, 0.355, 0.356, 0.357, 0.358, 0.359, 0.36, 0.361, 0.362, 0.363, 0.364, 0.365, 0.366, 0.367, 0.368, 0.369, 0.37, 0.371, 0.372, 0.373, 0.374, 0.375, 0.376, 0.377, 0.378, 0.379, 0.38, 0.381, 0.382, 0.383, 0.384, 0.385, 0.386, 0.387, 0.388, 0.389, 0.39, 0.391, 0.392, 0.393, 0.394, 0.395, 0.396, 0.397, 0.398, 0.399, 0.4, 0.401, 0.402, 0.403, 0.404, 0.405, 0.406, 0.407, 0.408, 0.409, 0.41, 0.411, 0.412, 0.413, 0.414, 0.415, 0.416, 0.417, 0.418, 0.419, 0.42, 0.421, 0.422, 0.423, 0.424, 0.425, 0.426), .f = function (...) {    {        ...furrr_chunk_seeds_i &lt;- ...furrr_chunk_seeds_env[["i"]]        ...furrr_chunk_seeds_env[["i"]] &lt;- ...furrr_chunk_seeds_i +             1L        assign(x = ".Random.seed", value = ...furrr_chunk_seeds[[...furrr_chunk_seeds_i]],             envir = globalenv(), inherits = FALSE)    }    NULL    ...furrr_out &lt;- ...furrr_fn(...)    ...furrr_out}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `build_theta()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> could not find function "build_theta"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              [,1]        [,2]        [,3]        [,4]        [,5]      [,6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 11.62569700  0.67369437  0.14917425  0.79782350  0.81549832 -2.792292</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  0.67369437 10.53787951  1.05168936  1.42552262  1.30727908 -2.422037</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  0.14917425  1.05168936 11.22827891  1.43595090  0.79434028 -3.261501</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  0.79782350  1.42552262  1.43595090 11.32735995  0.88472654 -2.812041</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  0.81549832  1.30727908  0.79434028  0.88472654 10.20111555 -3.095132</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -2.79229153 -2.42203669 -3.26150083 -2.81204104 -3.09513159 17.386299</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -3.46255518 -2.91051426 -3.18341446 -3.42025788 -2.18772269  1.519077</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -2.06212105 -3.43386045 -2.28495826 -1.95434999 -3.35961874  1.361253</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -3.58274945 -2.74227664 -2.63255032 -2.93335439 -2.43851909  1.914010</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -1.89746317 -2.32967878 -3.03570771 -3.88542699 -2.68035986  1.838097</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] -0.23128024 -0.62256783 -0.10789576 -0.61237958  0.02556595 -2.255061</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] -0.04118799 -0.28309068 -0.03209155  0.02202898 -0.08742993 -1.676326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] -0.27531206  0.07202651  0.43777054 -0.11127959 -0.06601219 -1.981196</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] -0.15728786 -0.04916659 -0.42175823  0.18720272  0.20268767 -1.799423</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,]  0.44036110 -0.27489952 -0.13732712 -0.35152576 -0.31641930 -1.923729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             [,7]       [,8]      [,9]     [,10]       [,11]       [,12]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -3.4625552 -2.0621211 -3.582749 -1.897463 -0.23128024 -0.04118799</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -2.9105143 -3.4338605 -2.742277 -2.329679 -0.62256783 -0.28309068</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -3.1834145 -2.2849583 -2.632550 -3.035708 -0.10789576 -0.03209155</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -3.4202579 -1.9543500 -2.933354 -3.885427 -0.61237958  0.02202898</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -2.1877227 -3.3596187 -2.438519 -2.680360  0.02556595 -0.08742993</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  1.5190774  1.3612527  1.914010  1.838097 -2.25506097 -1.67632609</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 17.8097863  0.9736359  2.177892  1.908403 -1.23845305 -2.33417631</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  0.9736359 16.8615867  1.378395  1.442956 -1.47371448 -2.21745767</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  2.1778924  1.3783949 17.162554  1.861684 -1.88155578 -2.11439936</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  1.9084033  1.4429559  1.861684 16.661355 -1.85037578 -2.46393406</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] -1.2384531 -1.4737145 -1.881556 -1.850376  6.12434446  1.25874961</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] -2.3341763 -2.2174577 -2.114399 -2.463934  1.25874961  6.55382058</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] -1.5962204 -1.8417352 -2.249246 -1.825178  0.84281588  0.83285285</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] -2.0294652 -1.7612351 -2.047525 -1.703477  0.78110014  1.22367932</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] -2.0260159 -1.6287752 -1.872359 -2.040894  1.24070742  1.35896229</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             [,13]       [,14]      [,15]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -0.27531206 -0.15728786  0.4403611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  0.07202651 -0.04916659 -0.2748995</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  0.43777054 -0.42175823 -0.1373271</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -0.11127959  0.18720272 -0.3515258</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -0.06601219  0.20268767 -0.3164193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -1.98119607 -1.79942282 -1.9237286</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -1.59622037 -2.02946515 -2.0260159</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -1.84173523 -1.76123511 -1.6287752</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -2.24924619 -2.04752523 -1.8723595</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -1.82517818 -1.70347677 -2.0408942</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,]  0.84281588  0.78110014  1.2407074</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,]  0.83285285  1.22367932  1.3589623</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,]  6.13662851  0.91971361  0.7043720</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,]  0.91971361  5.90209604  0.7528583</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,]  0.70437198  0.75285827  6.0746840</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[5]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[6]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[7]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[8]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[9]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[10]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[11]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[12]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[13]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[14]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$clusters[[15]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$nllh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.74698</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$lambda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$message</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Initial guess for null lambda."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              [,1]       [,2]        [,3]       [,4]      [,5]      [,6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 11.62569700  0.7457596  0.40203639  0.7394198 -2.891927 -3.196674</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  0.74575960  1.2600307  0.99832528  1.1216766 -2.726927 -2.667609</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  0.40203639  0.9983253 11.22827891  1.3281153 -3.012906 -2.963637</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  0.73941985  1.1216766  1.32811532 11.3273600 -3.016338 -3.059981</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -2.89192673 -2.7269266 -3.01290630 -3.0163376 17.386299  1.824530</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -3.19667448 -2.6676091 -2.96363725 -3.0599811  1.824530  1.988305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -2.14802383 -3.2150179 -2.39972033 -2.1145902  1.334903  1.263783</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -2.27285771 -2.6083130 -3.01611967 -3.4560025  1.844892  1.872678</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -0.06893046 -0.1067248 -0.09171188 -0.1404846 -1.931374 -1.931758</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,7]      [,8]        [,9]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -2.148024 -2.272858 -0.06893046</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -3.215018 -2.608313 -0.10672483</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -2.399720 -3.016120 -0.09171188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -2.114590 -3.456002 -0.14048459</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  1.334903  1.844892 -1.93137369</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  1.263783  1.872678 -1.93175793</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 16.861587  1.426461 -1.78302008</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  1.426461 16.661355 -1.92776632</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -1.783020 -1.927766  0.99906912</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[5]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[6]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7 9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[7]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[8]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[9]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$nllh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.6258</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$lambda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$message</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]       [,3]      [,4]      [,5]       [,6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 11.6256970  0.8385883  0.7209617 -2.870505 -2.379425 -0.1184871</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.8385883  1.2068774  1.0353637 -2.778825 -2.825443 -0.1034719</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  0.7209617  1.0353637  1.0749056 -2.880245 -2.564407 -0.1325878</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -2.8705052 -2.7788255 -2.8802455  1.762949  1.445556 -1.9056921</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -2.3794245 -2.8254432 -2.5644066  1.445556 16.861587 -1.8442872</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] -0.1184871 -0.1034719 -0.1325878 -1.905692 -1.844287  0.9999403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6  7  9 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[5]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[6]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$nllh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.62144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$lambda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$message</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]      [,3]      [,4]       [,5]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 11.6256970  0.8376860 -2.846009 -2.471630 -0.1356053</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.8376860  1.0158239 -2.801814 -2.689447 -0.1224851</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -2.8460095 -2.8018145  1.706345  1.483118 -1.9023560</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -2.4716297 -2.6894469  1.483118 16.861587 -1.8596616</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -0.1356053 -0.1224851 -1.902356 -1.859662  0.9894070</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 5 3 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6  7  9 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[5]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$nllh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.61705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$lambda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$message</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]      [,2]       [,3]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.8905508 -2.739169 -0.1168082</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -2.7391691  1.553834 -1.8858920</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -0.1168082 -1.885892  0.9843714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 5 3 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6  7  9 10  8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$nllh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.62088</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$lambda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$message</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

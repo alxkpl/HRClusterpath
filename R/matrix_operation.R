@@ -208,9 +208,6 @@ psolve <- function(A, tol = 1e-12) {
   if (n != ncol(A)) {
     stop("no square matrix.")
   }
-  if (!semi_def(A)) {
-    stop("no positive semi definite matrix.")
-  }
 
   S <- crout_decomposition_rcpp(A, tol = tol)
 
