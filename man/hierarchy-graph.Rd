@@ -59,7 +59,7 @@ data <- graphicalExtremes::rmpareto(n = gr3_bal_sim_param_cluster$n,
                                     model = "HR",
                                     par = gr3_bal_sim_param_cluster$Gamma)
 
-lambda <- seq(0, 3, 1e-3)
+lambda <- seq(0, 2, 1e-3)
 
 res <- HR_Clusterpath(data = data,
                       zeta = gr3_bal_sim_param_cluster$chi,

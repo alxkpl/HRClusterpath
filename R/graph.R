@@ -40,7 +40,7 @@
 #'                                     model = "HR",
 #'                                     par = gr3_bal_sim_param_cluster$Gamma)
 #'
-#' lambda <- seq(0, 3, 1e-3)
+#' lambda <- seq(0, 2, 1e-3)
 #'
 #' res <- HR_Clusterpath(data = data,
 #'                       zeta = gr3_bal_sim_param_cluster$chi,
@@ -202,11 +202,18 @@ average_hierarchy <- function(replicates) {
 }
 
 
-#' Graphicall representation of Clusterpath results with multidimensional
-#' scaling.
+#' Multidimensional scaling for Clusterpath.
+#'
+#' Visual representation of the distance evolution between the clusters along \eqn{\lambda}.
+#' We recall that for a precision matrix \eqn{\Theta} which have a block matrix structure, 
+#' the distance between two variables is defined by:
+#' \deqn{
+#'   D(\Theta_{i\cdot}, \Theta_{j\cdot}) = \sqrt{\sum_{k\neq i,j} (\Theta_{ik} - \Theta_{jk})^2},
+#' }
+#' With this distance, two variables in the same cluster have a null distance.
 #'
 #' @param list_results A list of results optimization from \code{\link{HR_Clusterpath}()}.
-#' @param names
+#' @param names A list of name : the names of the variables, if `NULL` it will be \eqn{1,...,d}.
 #'
 #' @importFrom purrr set_names
 #' @import ggplot2
@@ -214,12 +221,64 @@ average_hierarchy <- function(replicates) {
 #' @importFrom dplyr slice_min group_by
 #' @importFrom tidyr pivot_longer
 #'
+#' @section Method used for the representation:
+#'
+#' The cluster's distance is a measure of dissimilarities between variable. With this in
+#' mind, we have a dissimilarities matrix \eqn{W} and we want to build for each \eqn{\lambda}
+#' a reconstition of a 1-dimensional scatter plot with the respect of these dissimilarities.
+#'
+#' We use the function `cmdscale()` from `stats` package to operate the optimization. It follows
+#' the analysis of \eqn{[1]}.
+#'
+#' @references \eqn{[1]} Some properties of clasical multi-dimesional scaling
+#' K.V. Mardia
 #' @export
-ggdistance <- function(list_results, names) {
+#'
+#' @examples
+#' # Construction of clusters and R matrix
+#' R <- matrix(c(1, -3, 0,
+#'               -3, 2, -2,
+#'               0, -2, 1), nc = 3)
+#' clusters <- list(1:5, 6:10, 11:15)
+#'
+#' # Construction of induced theta and corresponding variogram gamma
+#' Theta <- build_theta(R, clusters)
+#' Gamma <- graphicalExtremes::Theta2Gamma(Theta)
+#'
+#' gr3_bal_sim_param_cluster <-
+#'   list(
+#'     R = R,
+#'     clusters = clusters,
+#'     Theta = Theta,
+#'     Gamma = Gamma,
+#'     chi = 1,
+#'     n = 1e3,
+#'     d = 15
+#'   )
+#'
+#' set.seed(804)
+#' data <- graphicalExtremes::rmpareto(n = gr3_bal_sim_param_cluster$n,
+#'                                     model = "HR",
+#'                                     par = gr3_bal_sim_param_cluster$Gamma)
+#'
+#' lambda <- seq(0, 2, 1e-3)
+#'
+#' res <- HR_Clusterpath(data = data,
+#'                       zeta = gr3_bal_sim_param_cluster$chi,
+#'                       lambda = lambda,
+#'                       eps_f = 1e-1)
+#'
+#' ggdistance(res)
+#'
+ggdistance <- function(list_results, names = NULL) {
 
   data <- multi_scale_data(list_results)
 
-  column_names <- c("lambda", names)
+  if (is.null(names)) {
+    column_names <- c("lambda", seq_len(ncol(data) - 1))
+  }else {
+    column_names <- c("lambda", names)
+  }
 
   data.frame(data) |>
     as_tibble() |>
@@ -228,18 +287,19 @@ ggdistance <- function(list_results, names) {
     ggplot() +
     aes(x = lambda, y = abs(value), group = name, col = name) +
     geom_line(show.legend = FALSE) +
-    theme_ipsum() +
+    theme_ipsum(base_family = "serif") +
     xlab(expression(lambda)) +
     scale_y_continuous(labels = NULL) +
     ylab("") +
-    theme(axis.title.x = element_text(size = 15),
-          panel.grid.major.y = element_blank(),
-          panel.grid.minor.y = element_blank()) +
     geom_text(
       data = \(df) df |> group_by(name) |> slice_min(lambda, n = 1),
       aes(label = name),
       hjust = 1.2, vjust = 0, show.legend = FALSE, size = 5
-    )
+    ) +
+    theme(axis.title.x = element_text(size = 15),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor.y = element_blank(),
+          text = element_text(family = "serif"))
 }
 
 # internal ----------------------------------------------------------------------------
