@@ -157,7 +157,7 @@ gg_cluster <- function(list_results, id_names = NULL) {
 }
 
 #' @rdname hierarchy-graph
-#' 
+#'
 #' @param replicates A list of results optimization replicates from \code{\link{HR_Clusterpath}()}.
 #'
 #' @importFrom ggraph ggraph geom_edge_elbow geom_node_text geom_node_point
@@ -199,6 +199,33 @@ average_hierarchy <- function(replicates) {
           axis.title.y = element_text(angle = 0, size = 15),
           axis.ticks.y = element_line(color = "grey50", linewidth = 0.5),
           axis.ticks.length = unit(0.1, "cm"))
+}
+
+
+#' Graphicall representation of Clusterpath results with multidimensional
+#' scaling.
+#'
+#' @param list_results A list of results optimization from \code{\link{HR_Clusterpath}()}.
+#' @param names
+#'
+#' @importFrom purrr set_names
+#' @import ggplot2
+#' @importFrom tidyr pivot_longer
+#'
+#' @export
+ggdistance <- function(list_results, names) {
+
+  data <- multi_scale_data(list_results)
+
+  column_names <- c("lambda", names)
+
+  data |>
+    as_tibble() |>
+    set_names(column_names) |>
+    pivot_longer(-lambda) |>
+    ggplot() +
+    aes(x = lambda, y = abs(value), group = names, col = names) +
+    geom_line()
 }
 
 # internal ----------------------------------------------------------------------------
@@ -302,5 +329,46 @@ get_adjacency_matrix <- function(event_list, lambda_max) {
   diag(A) <- 0
 
   A
+
+}
+
+
+#' Build the dataframe for multidimensional scaling for Clusterpath.
+#'
+#' @param list_res the list of solution from `HR_Clusterpath`.
+#'
+#' @keywords internal
+#' @returns A matrix containing the projection of the variable results on the
+#' first direction and the associated value of lambda.
+#'
+#' @importFrom stats cmdscale
+#'
+multi_scale_data <- function(list_res) {
+  # extract number of variables
+  d <- sum(sapply(list_res[[1]]$clusters, length))
+
+  # Initialization
+  data <- matrix(rep(NA, (d + 1) * length(list_res)), nc = d + 1)
+  indx <- 0
+
+  for (res in list_res){
+    K <- length(res$clusters)   # number of cluster for this result
+    indx <- indx + 1            # update index
+
+    # Computation of the multidimensional scaling for the clusters
+    distance <- distance_matrix(res$R, res$clusters)
+    multi_scale <- cmdscale(distance, k = 1)
+
+    # Change into variables
+    final <- rep(0, d)
+    for (i in 1:K) {
+      final[res$clusters[[i]]] <- multi_scale[i]
+    }
+
+    # Update line
+    data[indx, ] <- c(res$lambda, final)
+  }
+
+  data
 
 }
