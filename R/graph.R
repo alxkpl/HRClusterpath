@@ -224,7 +224,7 @@ ggdistance <- function(list_results, names) {
     set_names(column_names) |>
     pivot_longer(-lambda) |>
     ggplot() +
-    aes(x = lambda, y = abs(value), group = names, col = names) +
+    aes(x = lambda, y = abs(value), group = name, col = name) +
     geom_line()
 }
 
