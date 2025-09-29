@@ -210,6 +210,8 @@ average_hierarchy <- function(replicates) {
 #'
 #' @importFrom purrr set_names
 #' @import ggplot2
+#' @importFrom hrbrthemes theme_ipsum
+#' @importFrom dplyr slice_min group_by
 #' @importFrom tidyr pivot_longer
 #'
 #' @export
@@ -219,13 +221,25 @@ ggdistance <- function(list_results, names) {
 
   column_names <- c("lambda", names)
 
-  data |>
+  data.frame(data) |>
     as_tibble() |>
     set_names(column_names) |>
     pivot_longer(-lambda) |>
     ggplot() +
     aes(x = lambda, y = abs(value), group = name, col = name) +
-    geom_line()
+    geom_line(show.legend = FALSE) +
+    theme_ipsum() +
+    xlab(expression(lambda)) +
+    scale_y_continuous(labels = NULL) +
+    ylab("") +
+    theme(axis.title.x = element_text(size = 15),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor.y = element_blank()) +
+    geom_text(
+      data = \(df) df |> group_by(name) |> slice_min(lambda, n = 1),
+      aes(label = name),
+      hjust = 1.2, vjust = 0, show.legend = FALSE, size = 5
+    )
 }
 
 # internal ----------------------------------------------------------------------------
