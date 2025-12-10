@@ -226,7 +226,6 @@ HR_Clusterpath <- function(data, zeta, lambda, p = NULL,
     Cluster_HR(R.init = R.init, lambda = lambda, it_max = it_max, eps_g = eps_g)
   }
 
-  future::plan(future::multisession, workers = parallel::detectCores() - 1)
 
   furrr::future_map(
     lambda,
