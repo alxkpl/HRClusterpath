@@ -180,6 +180,8 @@ nloglike_grad_np <- function(gamma) {
 #' @returns A function of the  clusters and compute the gradient
 #' matrix of the negative log likelihood for a fixed Precision matrix Theta.
 #'
+#' @keywords internal
+#'
 #' @examples
 #' clusters <- list(c(1,3), c(2,4))
 #' Theta <- matrix(c(3,-2,-1,0,

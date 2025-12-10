@@ -64,7 +64,8 @@ of a graphical Hüsler-Reiss model. Usefull when the precision matrix \(\Theta\)
 <span>  p <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  eps_g <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  eps_f <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>  it_max <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  it_max <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  with_gamma <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -109,6 +110,11 @@ in the function <code>data2mpareto()</code> to standardize the data (see <code>g
 
 <dt id="arg-it-max">it_max<a class="anchor" aria-label="anchor" href="#arg-it-max"></a></dt>
 <dd><p>An integer : maximal number of iteration of the gradient descent algorithm.</p></dd>
+
+
+<dt id="arg-with-gamma">with_gamma<a class="anchor" aria-label="anchor" href="#arg-with-gamma"></a></dt>
+<dd><p>For <code>HR_Clusterapth()</code>. If <code>FALSE</code> (default), compute the weights with Gamma. Otherwise,
+it computes with the initial Theta.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -172,7 +178,25 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-in"><span><span class="va">Cluster_HR</span> <span class="op">&lt;-</span> <span class="fu">get_cluster</span><span class="op">(</span><span class="va">gamma</span>, <span class="va">W</span>, <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">Cluster_HR</span><span class="op">(</span><span class="va">R</span>, <span class="fl">2.2</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in U %*% R:</span> non-conformable arguments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.7693925</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $clusters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $clusters[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $nllh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 4.616355</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lambda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $message</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">############################################################################</span></span></span>
 <span class="r-in"><span><span class="co">#                            With HR_Clusterpath</span></span></span>
@@ -321,58 +345,17 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$R</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              [,1]       [,2]        [,3]       [,4]      [,5]      [,6]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 11.62569700  0.7457596  0.40203639  0.7394198 -2.891927 -3.196674</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  0.74575960  1.2600307  0.99832528  1.1216766 -2.726927 -2.667609</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  0.40203639  0.9983253 11.22827891  1.3281153 -3.012906 -2.963637</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  0.73941985  1.1216766  1.32811532 11.3273600 -3.016338 -3.059981</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -2.89192673 -2.7269266 -3.01290630 -3.0163376 17.386299  1.824530</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -3.19667448 -2.6676091 -2.96363725 -3.0599811  1.824530  1.988305</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -2.14802383 -3.2150179 -2.39972033 -2.1145902  1.334903  1.263783</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -2.27285771 -2.6083130 -3.01611967 -3.4560025  1.844892  1.872678</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -0.06893046 -0.1067248 -0.09171188 -0.1404846 -1.931374 -1.931758</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,7]      [,8]        [,9]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -2.148024 -2.272858 -0.06893046</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -3.215018 -2.608313 -0.10672483</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -2.399720 -3.016120 -0.09171188</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -2.114590 -3.456002 -0.14048459</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  1.334903  1.844892 -1.93137369</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  1.263783  1.872678 -1.93175793</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 16.861587  1.426461 -1.78302008</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  1.426461 16.661355 -1.92776632</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -1.783020 -1.927766  0.99906912</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.7294441</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[4]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[5]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[6]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7 9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[7]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[8]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$clusters[[9]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$nllh</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.6258</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 132.7588</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$lambda</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1</span>
@@ -383,36 +366,17 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$R</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]       [,3]      [,4]      [,5]       [,6]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 11.6256970  0.8385883  0.7209617 -2.870505 -2.379425 -0.1184871</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.8385883  1.2068774  1.0353637 -2.778825 -2.825443 -0.1034719</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  0.7209617  1.0353637  1.0749056 -2.880245 -2.564407 -0.1325878</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -2.8705052 -2.7788255 -2.8802455  1.762949  1.445556 -1.9056921</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -2.3794245 -2.8254432 -2.5644066  1.445556 16.861587 -1.8442872</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] -0.1184871 -0.1034719 -0.1325878 -1.905692 -1.844287  0.9999403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.749359</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[4]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6  7  9 10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[5]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$clusters[[6]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$nllh</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.62144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 136.3833</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]$lambda</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5</span>
@@ -423,32 +387,17 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$R</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]      [,3]      [,4]       [,5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 11.6256970  0.8376860 -2.846009 -2.471630 -0.1356053</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.8376860  1.0158239 -2.801814 -2.689447 -0.1224851</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -2.8460095 -2.8018145  1.706345  1.483118 -1.9023560</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -2.4716297 -2.6894469  1.483118 16.861587 -1.8596616</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -0.1356053 -0.1224851 -1.902356 -1.859662  0.9894070</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.8110114</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 5 3 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6  7  9 10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[4]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$clusters[[5]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$nllh</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.61705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 147.6041</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]$lambda</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
@@ -459,24 +408,17 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$R</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]      [,2]       [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.8905508 -2.739169 -0.1168082</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -2.7391691  1.553834 -1.8858920</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -0.1168082 -1.885892  0.9843714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.8219726</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 5 3 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6  7  9 10  8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$clusters[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11 12 13 14 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$nllh</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -18.62088</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         [,1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 149.599</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]$lambda</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>

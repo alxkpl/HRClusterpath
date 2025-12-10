@@ -26,3 +26,4 @@ gradient <- nloglike_grad_np(Theta)
 gradient(clusters)
 
 }
+\keyword{internal}
