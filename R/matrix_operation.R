@@ -64,8 +64,14 @@ NULL
 #'
 #' @export
 build_theta <- function(R, clusters) {
-  U <- U_matrix(clusters)
-  URUt <- U %*% R %*% t(U)
+  if (length(R) == 1) {
+    K <- ifelse(length(clusters) > 1, length(clusters), length(clusters[[1]]))
+    URUt <- as.numeric(R) * rep(1, K) %*% t(rep(1, K))
+  }else {
+    U <- U_matrix(clusters)
+    URUt <- U %*% R %*% t(U)
+  }
+
   a <-  - rowSums(URUt)
 
   URUt + diag(a)

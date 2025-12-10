@@ -174,6 +174,35 @@ nloglike_grad_np <- function(gamma) {
   }
 }
 
+#' Gradient of the negative log likelihood without penalty for inverse problem.
+#'
+#' @param Theta a d x d precision matrix
+#' @returns A function of the  clusters and compute the gradient
+#' matrix of the negative log likelihood for a fixed Precision matrix Theta.
+#'
+#' @examples
+#' clusters <- list(c(1,3), c(2,4))
+#' Theta <- matrix(c(3,-2,-1,0,
+#'                   -2,7,-4,-1,
+#'                   -1,-4,12,-7,
+#'                   0,-1,-7,8), nc = 4)
+#' gradient <- nloglike_grad_np(Theta)
+#' gradient(clusters)
+#'
+nloglike_grad_np_gamma <- function(Theta) {
+  function(clusters) {
+    # Get tu U matrix of clusters indicators
+    U <- U_matrix(clusters)
+    p <- colSums(U)
+
+    # Gradient (factorisation of the formula)
+    dtr <- t(U) %*% (Theta) %*% U
+    diag <- - .5 * diag(diag(dtr * (p == 1)))
+
+    dtr + diag
+  }
+}
+
 #' Gradient matrix of distance between two columns
 #'
 #' @param R K x K symmetric matrix.

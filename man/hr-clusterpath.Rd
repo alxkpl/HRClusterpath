@@ -15,7 +15,8 @@ HR_Clusterpath(
   p = NULL,
   eps_g = 0.001,
   eps_f = 0.01,
-  it_max = 1000
+  it_max = 1000,
+  with_gamma = FALSE
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ in the function \code{data2mpareto()} to standardize the data (see \code{graphic
 \item{eps_g}{A positive number : tolerance threshold for the convergence of the gradient descent.}
 
 \item{it_max}{An integer : maximal number of iteration of the gradient descent algorithm.}
+
+\item{with_gamma}{For \code{HR_Clusterapth()}. If \code{FALSE} (default), compute the weights with Gamma. Otherwise,
+it computes with the initial Theta.}
 }
 \value{
 \code{HR_Clusterpath()} is a gradient descent from the data with default values and method for

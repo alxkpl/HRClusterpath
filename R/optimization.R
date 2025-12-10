@@ -160,7 +160,7 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
       return(
         list(
           R = R,
-          clusters = clusters,
+          clusters = list(1:d),
           nllh = -(d - 1) * (d - 2) * R,
           lambda = lambda,
           message = message
@@ -186,18 +186,26 @@ get_cluster <- function(gamma, weights, eps_f, ...) {
 #' @param p For `HR_Clusterapth()`, a numeric between 0 and 1, or `NULL`.  If `NULL` (default), it is
 #' assumed that the data are already on multivariate Pareto scale. Else, `p` is used as the probability
 #' in the function `data2mpareto()` to standardize the data (see `graphicalExtremes` documentation).
+#' @param with_gamma For `HR_Clusterapth()`. If `FALSE` (default), compute the weights with Gamma. Otherwise, 
+#' it computes with the initial Theta.
 #'
 #' @importFrom graphicalExtremes emp_vario Gamma2Theta
 #'
 #' @export
-HR_Clusterpath <- function(data, zeta, lambda, p = NULL, eps_g = 1e-3, eps_f = 1e-2, it_max = 1000) {
+HR_Clusterpath <- function(data, zeta, lambda, p = NULL,
+                           eps_g = 1e-3, eps_f = 1e-2, it_max = 1000, with_gamma = FALSE) {
   # Initialization
   Gamma_est <- emp_vario(data, p = p)
   d <- ncol(data)
   R.init <- Gamma2Theta(Gamma_est)
 
+  if (with_gamma) {
+    D <- distance_matrix(R.init, as.list(1:d))
+  }else {
+    D <- distance_matrix(Gamma_est, as.list(1:d))
+  }
+
   # Exponential weights construction
-  D <- distance_matrix(R.init, as.list(1:d))
   W <- matrix(rep(0, d * d), nc = d)
 
   for (k in 1:(d - 1)){
@@ -213,6 +221,10 @@ HR_Clusterpath <- function(data, zeta, lambda, p = NULL, eps_g = 1e-3, eps_f = 1
     weights = W,
     eps_f = eps_f
   )
+
+  if (length(lambda) == 1) {
+    Cluster_HR(R.init = R.init, lambda = lambda, it_max = it_max, eps_g = eps_g)
+  }
 
   future::plan(future::multisession, workers = parallel::detectCores() - 1)
 
