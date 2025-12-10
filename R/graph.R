@@ -217,7 +217,6 @@ average_hierarchy <- function(replicates) {
 #'
 #' @importFrom purrr set_names
 #' @import ggplot2
-#' @importFrom hrbrthemes theme_ipsum
 #' @importFrom dplyr slice_min group_by
 #' @importFrom tidyr pivot_longer
 #'
@@ -287,7 +286,7 @@ ggdistance <- function(list_results, names = NULL) {
     ggplot() +
     aes(x = lambda, y = abs(value), group = name, col = name) +
     geom_line(show.legend = FALSE) +
-    theme_ipsum(base_family = "serif") +
+    theme_minimal() +
     xlab(expression(lambda)) +
     scale_y_continuous(labels = NULL) +
     ylab("") +
