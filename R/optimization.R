@@ -281,8 +281,13 @@ step_gradient <- function(gamma, weights, size_grid = 100) {
       abs(((R %*% p) / (grad %*% p))[p > 1])
     )
 
-    s_opt <- optim(par = 1, fn = \(.) nllh(R - . * grad, clusters, lambda),
-                   method = "Brent", lower = 0, upper = min(s_max, 1, na.rm = TRUE))$par
+    s_opt <- optim(
+      par = 1,
+      fn = \(.) nllh(R - . * grad, clusters, lambda),
+      method = "Brent",
+      lower = 0,
+      upper = min(max(s_max, 0.1), 1, na.rm = TRUE)     # avoid large and zero upper
+    )$par
 
     s_opt <- s_optimal(s_opt, check_pos)
     # Returning results : size step and gradient matrix
