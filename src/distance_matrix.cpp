@@ -1,6 +1,10 @@
+#include <Rcpp.h>
+#include <RcppEigen.h>
 #include "distance_matrix.hpp"
 
-double D_tilde2_r_term(NumericMatrix R, NumericVector p, int k, int l) {
+using namespace Rcpp;     // to use List as Rcpp::List
+
+double D_tilde2_r_term(Eigen::MatrixXd R, Eigen::VectorXd p, int k, int l) {
   
   int K = p.size();
 
@@ -15,28 +19,22 @@ double D_tilde2_r_term(NumericMatrix R, NumericVector p, int k, int l) {
   return result;
 }
 
-//' Cluster distance squared matrix
-//'
-//' @param R K x K symmetric matrix.
-//' @param clusters a list of vector : each vector gives the element of
-//' a cluster.
-//'
-//' @returns A matrix of K x K : compute the square distance between
-//' two clusters for the distance defined in section 4.2 in cluster document.
-//'
-//' @keywords internal
-//' @noRd
-//[[Rcpp::export]]
-NumericMatrix distance_matrix(NumericMatrix R, List clusters) {
+// [[Rcpp::export]]
+Eigen::MatrixXd distance_matrix(Eigen::MatrixXd R, List clusters) {
+    /* Compute the squared distance matrix of the clustered precision matrix
+     *
+     * Inputs :
+     * R : a matrix, the reduced matrix
+     * clusters : a list of list, the list of clusters
+     *
+     * Ouput :
+     * A distance matrix
+     */
     int K = clusters.size();
 
-    NumericVector p(K);
-    for (int i = 0; i < K; i++) {
-        List sub = clusters[i];
-        p[i] = sub.size();
-    }
+    Eigen::VectorXd p = cluster_number(clusters);
 
-    NumericMatrix out(K, K);
+    Eigen::MatrixXd  out(K, K);
 
     for (int k = 0; k < K; k++) {
         for (int l = k; l < K; l++) {
