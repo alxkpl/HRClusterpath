@@ -12,4 +12,6 @@ Eigen::MatrixXd inverse(Eigen::MatrixXd A);
 
 Eigen::MatrixXd non_singular_P(int d);
 
+List simple_list(int d);
+
 #endif

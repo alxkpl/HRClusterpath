@@ -78,3 +78,12 @@ Eigen::MatrixXd non_singular_P(int d) {
     // Extraction of the non-sigular vectors
     return svd.matrixU().leftCols(d - 1);
 }
+
+
+List simple_list(int d){
+    List results;
+    for(int i = 1; i<=d; i++){
+        results.push_back(i);
+    }
+    return results;
+}
