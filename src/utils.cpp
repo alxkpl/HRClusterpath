@@ -2,7 +2,7 @@
 #include <RcppEigen.h>
 #include "utils.hpp"
 
-using namespace Rcpp;
+using namespace Rcpp;     // for using List as Rcpp::List
 // [[Rcpp::depends(RcppEigen)]]
 
 // [[Rcpp::export]]

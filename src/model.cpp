@@ -1,5 +1,8 @@
 #include <RcppEigen.h>
+#include <Rcpp.h>
 #include "model.hpp"
+
+using namespace Rcpp;     // for using List as Rcpp::List
 
 Eigen::MatrixXd create_U(List clusters) {
      /* Compute the cluster matrix

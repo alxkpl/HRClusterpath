@@ -2,6 +2,9 @@
 #define MODEL_HPP
 
 #include <RcppEigen.h>
+#include <Rcpp.h>
+
+using namespace Rcpp;     // for using List as Rcpp::List
 
 Eigen::MatrixXd create_U(List clusters);
 

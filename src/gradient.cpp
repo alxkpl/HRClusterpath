@@ -1,7 +1,9 @@
 #include <RcppEigen.h>
+#include <Rcpp.h>
 #include "utils.hpp"
+#include "model.hpp"
 
-using namespace Rcpp;
+using namespace Rcpp;     // for using List as Rcpp::List
 
 Eigen::MatrixXd Gradient_base(
     Eigen::MatrixXd Theta,
@@ -97,7 +99,6 @@ Eigen::VectorXd penalty_gradient(
 }
 
 
-// [[Rcpp::export]]
 Eigen::MatrixXd Gradient_penalised(
     Eigen::MatrixXd R,
     List clusters,
