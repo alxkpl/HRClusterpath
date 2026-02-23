@@ -86,3 +86,24 @@ Eigen::MatrixXd build_theta_cpp(
     }
     return Theta;
 }
+
+
+Eigen::VectorXd cluster_number(List clusters) {
+    /* Compute the vector of cluster's sizes
+     *
+     * Inputs:
+     * clusters : a list of list, the list of the clusters
+     *
+     * Output:
+     * Vector
+     */
+    const int K = clusters.size();
+    Eigen::VectorXd results(K);
+
+    for(int k = 0; k < K; k++){
+        List current_list = clusters[k];
+        results(k) = current_list.size();
+    }
+
+    return results;
+}

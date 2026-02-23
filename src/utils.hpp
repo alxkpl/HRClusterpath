@@ -12,6 +12,4 @@ Eigen::MatrixXd inverse(Eigen::MatrixXd A);
 
 Eigen::MatrixXd non_singular_P(int d);
 
-Eigen::VectorXd cluster_number(List clusters);
-
 #endif

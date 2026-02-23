@@ -10,4 +10,6 @@ Eigen::MatrixXd build_theta_cpp(
     List clusters
 );
 
+Eigen::VectorXd cluster_number(List clusters);
+
 #endif
