@@ -25,6 +25,35 @@ Eigen::MatrixXd Gradient_base(
     return dlog + dtr;
 }
 
+
+Eigen::VectorXd Gradient_block(
+    Eigen::MatrixXd R,
+    List clusters,
+    Eigen::MatrixXd Gamma,
+    Eigen::MatrixXd P,
+    int m
+) {
+    /* Compute the column gradient in a block structure
+     * 
+     * Input :
+     * R : a matrix, the reduced matrix
+     * clusters : a list of list, the list of the clusters
+     * Gamma : a matrix, the fixed variogram
+     * P : a matrix, computed with non_sigular_P in the right dimension
+     * m : an integer, the column of the gradient
+     *
+     * Output :
+     * The column gradient
+     */
+    const int K = clusters.size();
+    Eigen::MatrixXd U = create_U(clusters);
+    Eigen::MatrixXd D = Eigen::MatrixXd::Identity(K, K);
+    D(m, m) = 0.5;
+
+    return D * U.transpose() * Gradient_base(build_theta_cpp(R, clusters), Gamma, P) * U.col(m);
+}
+
+
 Eigen::VectorXd penalty_gradient(
     Eigen::MatrixXd R,
     List clusters,
@@ -65,4 +94,6 @@ Eigen::VectorXd penalty_gradient(
         }
     }
     return results;
-} 
+}
+
+
