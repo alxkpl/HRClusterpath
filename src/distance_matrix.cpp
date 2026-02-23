@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "distance_matrix.hpp"
+#include "model.hpp"
 
 using namespace Rcpp;     // to use List as Rcpp::List
 
