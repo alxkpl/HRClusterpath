@@ -6,7 +6,7 @@
 
 using namespace Rcpp;
 
-Likelihood_penalised(
+double Likelihood_penalised(
     Eigen::MatrixXd R,
     List clusters,
     const Eigen::MatrixXd Gamma,
