@@ -1,0 +1,68 @@
+#include <Rcpp.h>
+#include <RcppEigen.h>
+
+using namespace Rcpp;
+
+Eigen::MatrixXd Gradient_base(
+    Eigen::MatrixXd Theta,
+    Eigen::MatrixXd Gamma,
+    Eigen::MatrixXd P
+) {
+    /* Compute the gradient of the likelihood
+     * 
+     * Input :
+     * Theta : a matrix, the precision matrix
+     * Gamma : a matrix, the fixed variogram
+     * P : a matrix, computed with non_sigular_P in the right dimension
+     * 
+     * Output :
+     * Gradient
+     */
+    // Log-determinant part
+    Eigen::MatrixXd dlog = - P * inverse(P.transpose() * Theta * P) * P.transpose();
+    // Trace part
+    Eigen::MatrixXd dtr = - 0.5 * P * P.transpose() * Gamma * P * P.transpose();
+    return dlog + dtr;
+}
+
+Eigen::VectorXd penalty_gradient(
+    Eigen::MatrixXd R,
+    List clusters,
+    Eigen::MatrixXd tildeW,
+    int m // careful it is indexed with minus 1 in C++
+) {
+    /* Compute the block gradient of the penalty
+     * 
+     * Input :
+     * R : a matrix, the reduced matrix
+     * clusters : a list of list, the list of the clusters
+     * tildeW : a matrix, the cumulative weights per cluster
+     * m : an integer, the column of the gradient
+     * 
+     * Output :
+     * Gradient
+     */
+    int K = R.rows();
+    Eigen::VectorXd p = cluster_number(clusters);
+    Eigen::VectorXd results = Eigen::VectorXd::Zero(K);
+    for(int k = 0; k < K; k++){
+        if(k == m) continue;
+        
+        for(int i = 0; i < K; i++){
+            if(i==k || i==m) continue;
+            results(i) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * (R(m, i) - R(k, i));
+        }
+
+        results(m) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * (p(m) - 1) * (R(m, m) - R(k, m));
+        results(k) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * (p(k) - 1) * (R(k, k) - R(k, m));
+
+        if(k == K - 1) continue;
+        for(int l = k + 1; l < K; l++) {
+            if(l == m) continue;
+
+            results(k) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(k) * (R(k, m) - R(l, m));
+            results(l) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(l) * (R(l, m) - R(k, m));
+        }
+    }
+    return results;
+} 
