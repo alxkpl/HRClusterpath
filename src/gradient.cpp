@@ -97,3 +97,40 @@ Eigen::VectorXd penalty_gradient(
 }
 
 
+// [[Rcpp::export]]
+Eigen::MatrixXd Gradient_penalised(
+    Eigen::MatrixXd R,
+    List clusters,
+    const Eigen::MatrixXd Gamma,
+    const Eigen::MatrixXd P,
+    const Eigen::MatrixXd tildeW,
+    double lambda,
+    int m
+){
+    /* Compute the gradient matrix for a column/row
+     *
+     * Input :
+     * R : a matrix, the reduced matrix
+     * clusters : a list of list, the list of clusters
+     * Gamma : a matrix, the fixed variogram
+     * P : a matrix, computed with non_sigular_P in the right dimension
+     * tildeW : a matrix, the cumulative weights per cluster
+     * m : an integer, the column of the gradient
+     *
+     * Output :
+     * Gradient matrix
+     */
+    // Initialization
+    int K = clusters.size();   // Dimension of the matrix (number of cluster)
+    Eigen::MatrixXd results = Eigen::MatrixXd::Zero(K, K);   // Zeros everywhere
+
+
+    Eigen::VectorXd d_llh = Gradient_block(R, clusters, Gamma, P, m);  // Gradient of the likelihood
+    Eigen::VectorXd d_pen = penalty_gradient(R, clusters, tildeW, m);  // Gradient of the penalty
+    Eigen::VectorXd value = d_llh + lambda * d_pen;     // Gradient values in the row/column
+
+    results.col(m) = value;
+    results.row(m) = value;
+
+    return results;
+}
