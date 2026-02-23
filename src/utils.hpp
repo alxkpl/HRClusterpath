@@ -3,6 +3,8 @@
 
 #include <RcppEigen.h>
 
+using namespace Rcpp;   // to use List as Rcpp::List
+
 // Functions declaration
 int min_indx_cpp(int k, int l);
 
