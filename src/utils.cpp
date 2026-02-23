@@ -3,6 +3,7 @@
 #include <cmath>
 
 using namespace Rcpp;
+// [[Rcpp::depends(RcppEigen)]]
 
 // [[Rcpp::export]]
 int min_indx_cpp(int k, int l) {
