@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "likelihood.hpp"
+#include "utils.hpp"
 #include "model.hpp"
 #include "distance_matrix.hpp"
 
