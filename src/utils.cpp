@@ -1,6 +1,6 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include <cmath>
+#include "utils.hpp"
 
 using namespace Rcpp;
 // [[Rcpp::depends(RcppEigen)]]
@@ -38,23 +38,6 @@ int max_indx_cpp(int k, int l) {
         return l;
     }
     return k;
-}
-
-
-// [[Rcpp::export]]
-Eigen::MatrixXd inverse(Eigen::MatrixXd A) {
-    /* Compute the inverse matrix
-     * 
-     * Input :
-     * A : a matrix
-     * 
-     * Output :
-     * The inverse of A
-     */
-    const int p = A.rows();
-    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(p, p);
-    Eigen::MatrixXd x = A.colPivHouseholderQr().solve(I);
-    return x;
 }
 
 
