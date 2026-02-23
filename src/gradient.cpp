@@ -1,5 +1,5 @@
-#include <Rcpp.h>
 #include <RcppEigen.h>
+#include "utils.hpp"
 
 using namespace Rcpp;
 
