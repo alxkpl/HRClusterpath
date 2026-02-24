@@ -22,6 +22,22 @@ void Gradient_update(
     double lambda,
     int m
 ){
+    /* Gradient update for t block gradient descent. 
+     *
+     * Input :
+     * R : a matrixx, the current reduced matrix
+     * clusters : a list, the list of clusters (list of vector of indices)
+     * Gamma : a matrix, the estimated variogram
+     * P : a matrix, the Projection matrix
+     * tildeW : a matrix, the weights inside a cluster
+     * W : a matrix, the weights for each variable
+     * tol_opt : a double, the tolerance for the optimal step size
+     * lambda : a double, the regularization parameter
+     * m : an integer, the index of the block to update
+     *
+     * Output :
+     * Void, the function updates R in place
+     */
     Eigen::MatrixXd gradient = Gradient_penalised(
         R, clusters, Gamma, P, tildeW, lambda, m
     );
@@ -47,6 +63,24 @@ List HRClusterpath_unique(
     double tol_opt,
     int iter_max
 ){
+    /* Clusterpath algorithm for one value of lambda.
+     *
+     * Input :
+     * R_init : a matrix, the initial reduced matrix
+     * clusters_init : a list, the initial clusters
+     * Gamma : a matrix, the estimated variogram
+     * W : a matrix, the weights for each variable
+     * lambda : a double, the regularization parameter
+     * eps_f : a double, the threshold for merging clusters
+     * eps_conv : a double, the threshold for convergence
+     * tol_opt : a double, the tolerance for optimal step size computation
+     * iter_max : an integer, the maximum number of iterations
+     * 
+     * Output :
+     * A list containing : 
+     * - R : a matrix, the final reduced matrix
+     * - clusters : a list, the final clusters
+     */
     // Projection matrix
     int d = Gamma.rows();           // Number of variables
     Eigen::MatrixXd P = non_singular_P(d);
@@ -103,6 +137,14 @@ List HRClusterpath_unique(
     Rcpp::Rcerr << std::abs((l_old / l_new) - 1.0);
     Rcpp::Rcerr << ".\n";
     Rcpp::Rcerr << "Optimization finished.\n";
+
+
+    // Message for the user
+    if (count == iter_max) {
+        Rcpp::Rcerr << "Warning : Maximum number of iterations reached. \n";
+    } else {
+        Rcpp::Rcerr << "Convergence reached. \n";
+    }
 
     return List::create(
         _["R"] = R,
