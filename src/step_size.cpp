@@ -7,7 +7,7 @@
 
 using namespace Rcpp;       // to use List as Rcpp::List
 
-// [[Rcpp::export]]
+
 double max_step(
     Eigen::MatrixXd R,
     List clusters,
@@ -37,7 +37,7 @@ double max_step(
     return s;
 }
 
-// [[Rcpp::export]]
+
 double Gradient_step_cpp(
     Eigen::MatrixXd R_init,
     List clusters,
