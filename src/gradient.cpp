@@ -3,7 +3,7 @@
 #include "utils.hpp"
 #include "model.hpp"
 
-using namespace Rcpp;     // for using List as Rcpp::List
+using namespace Rcpp;     // to use List as Rcpp::List
 
 Eigen::MatrixXd Gradient_base(
     Eigen::MatrixXd Theta,
