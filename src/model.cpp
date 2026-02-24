@@ -111,7 +111,8 @@ Eigen::VectorXd cluster_number(List clusters) {
     return results;
 }
 
-Eigen::matrix clustered_weights(eigen::MatrixXd W, List clusters){
+
+Eigen::MatrixXd clustered_weights(Eigen::MatrixXd W, List clusters){
     Eigen::MatrixXd U = create_U(clusters);
     int d = W.rows();
 
