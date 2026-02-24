@@ -1,5 +1,5 @@
-#ifndef GRADIENT_DECENT_HPP
-#define GRADIENT_DECENT_HPP
+#ifndef MERGE_ClUSTERS_HPP
+#define MERGE_ClUSTERS_HPP
 
 #include <Rcpp.h>
 using namespace Rcpp;
