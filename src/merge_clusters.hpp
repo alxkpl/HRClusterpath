@@ -5,6 +5,7 @@
 using namespace Rcpp;
 
 // déclaration des fonctions
-List merge_clusters_rcpp(NumericMatrix R, List clusters, double eps_f = 1e-1);
+
+void cluster_fusion(Eigen::MatrixXd& R, List& clusters, int k, int l);
 
 #endif

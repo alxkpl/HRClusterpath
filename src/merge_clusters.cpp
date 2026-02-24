@@ -1,134 +1,122 @@
+#include <RcppEigen.h>
 #include "merge_clusters.hpp"
+#include "utils.hpp"
+#include "model.hpp"
 #include "distance_matrix.hpp"
 
+using namespace Rcpp;
 
-IntegerVector which_min_upper(NumericMatrix mat) {
-  int n = mat.nrow();
-  int min_i = -1;
-  int min_j = -1;
-  double min_val = R_PosInf;
 
-  for (int i = 0; i < n - 1; i++) {
-    for (int j = i + 1; j < n; j++) {  // diagonale supérieure
-      if (mat(i, j) < min_val) {
-        min_val = mat(i, j);
-        min_i = i; 
-        min_j = j;
-      }
+Eigen::VectorXd  merge_vector(Eigen::VectorXd a, Eigen::VectorXd b) {
+  /* Merge two vectors into one
+   *
+   * Inputs:
+   * a : a vector of size n
+   * b : a vector of size m
+   *
+   * Output :
+   * A vector of size n+m
+   */
+  int asize = a.size();
+  int bsize = b.size();
+  Eigen::VectorXd out(asize + bsize);
+
+  for(int i = 0; i < (asize+bsize); i++) {
+    if(i < asize){
+      out(i) = a(i);
+    } else {
+      out(i) = b(i - asize);
     }
-  }
-
-  return IntegerVector::create(min_i, min_j);
-}
-
-NumericVector merge_vector(NumericVector a, NumericVector b) {
-  
-  NumericVector out = a;
-
-  // Copier les éléments de b
-  for(int i = 0; i < b.size(); i++) {
-      out.push_back(b[i]);
+      
   }
 
   return out;
 }
 
-//' Function which merges clusters
-//'
-//' @param R K x K symmetric matrix.
-//' @param clusters a list of vector : each vector gives the element of
-//' a cluster.
-//' @param eps_f a positive number : minimal tolerance for merging clusters
-//'
-//' @returns Returns, if merging, a list of the new clusters and the
-//' corresponding R matrix, where the coefficient of the new clustered
-//' is computing by averaging the coefficient of the two previous clusters.
-//'
-//' @keywords internal
-//' @noRd
-//[[Rcpp::export]]
-List merge_clusters_rcpp(NumericMatrix R, List clusters, double eps_f)
-{
+
+void fuse_R(Eigen::MatrixXd& R, Eigen::VectorXd p, int k, int l) {
+  /* Update the column and size of R after merging step
+   *
+   * Inputs:
+   * R : a matrix, the reduced matrix
+   * p : a vector, the size of each clusters
+   * k : an integer, the first cluster to fuse
+   * l : an integer, the second cluster to fuse
+   *
+   * Output:
+   * Void
+   */
   // Initialization
-  int K = clusters.size();
+  int K = p.size();   // Size of the current R
 
-  //Computation of the distance matrix
-  NumericMatrix D = distance_matrix(R, clusters);
+  Eigen::MatrixXd R_new(K - 1, K - 1);
 
-  // Search of the two potential clusters to merge
-  IntegerVector index = which_min_upper(D);
-  int k = index[0];
-  int l = index[1];
-
-  if (D(k, l) > eps_f)
-  {
-    return List::create(_["R"] = R, _["clusters"] = clusters); 
-  }
-
-  // Vector of cluster's size
-  NumericVector p(K);
-  for (int i = 0; i < K; i++)
-  {
-    List sub = clusters[i];
-    p[i] = sub.size();
-  }
-
-  if (p.size() == 2)
-  { 
-    NumericMatrix R_new(1,1);
-    R_new(0,0) =(p[0] * R(0, 0) + p[1] * R(0, 1)) / (p[0] + p[1]);
-    return List::create(_["R"] = R_new,
-        _["clusters"] = merge_vector(clusters[0], clusters[1])); 
-  }
-
-  // New clusters
-  List new_clusters;
-
-  for (int i = 0; i < K; i++) {
-    if (i != l) { // enlever l
-      if (i == k) 
-      {
-        NumericVector merged = clusters[k];
-        NumericVector to_add = clusters[l];
-        for (int j = 0; j < to_add.size(); j++) {
-        merged.push_back(to_add[j]);
-        }
-        new_clusters.push_back(merged);
-      } else 
-      {
-        new_clusters.push_back(clusters[i]);
-      }
-    }
-  }
-
-  // New R matrix
-  NumericMatrix R_new(K - 1, K - 1);
-
+  // The coefficients of the other clusters
   int row_idx = 0;
   for (int i = 0; i < K; i++) {
-      if (i == l) continue;
+      if (i == l) continue; // To adjust the indices with no l row
       int col_idx = 0;
       for (int j = 0; j < K; j++) {
-          if (j == l) continue;
-          R_new(row_idx, col_idx) = R(i, j);
+          if (j == l) continue; // To adjust the indices with no l column
+          R_new(row_idx, col_idx) = R(i, j); // They do not change
           col_idx++;
       }
       row_idx++;
   }
 
   for (int i = 0; i < K - 1; i++) {
-    if (i == k) continue;
-    int old_i = (i >= l) ? i+1 : i;
-    double val = ((p[k] * R(k, old_i) + p[l] * R(l, old_i)) / (p[k] + p[l]));
+    if (i == k) continue; // skip the diagonal r_kk
+    int old_i = (i >= l) ? i+1 : i; // adjust the indices without l coefficient
+    // Update the coefficient by taking the average
+    double val = ((p[k] * R(k, old_i) + p[l] * R(l, old_i)) / (p[k] + p[l])); 
     R_new(k, i) = val;
     R_new(i, k) = val;
   }
-
+  // Update the value of r_kk
   R_new(k, k) = R(k, l);
+  // Update the entire matrix
+  R = R_new;
+}
 
-  return List::create(
-    _["R"] = R_new,
-    _["clusters"] = new_clusters
-  );
 
+void cluster_fusion(Eigen::MatrixXd &R, List& clusters, int k, int l)
+{
+  /* Merging step of Clusterpath algorithm, update clusters list and R coefficients
+   *
+   * Inputs:
+   * R : a matrix, the reduced matrix
+   * clusters : a list of list, the list of clusters
+   * k : an integer, the first cluster to fuse
+   * l : an integer, the second cluster to fuse
+   * 
+   * Output :
+   * Void
+   */
+  // Initialization
+  int K = clusters.size();
+
+  // Vector of cluster's size
+  Eigen::VectorXd p = cluster_number(clusters);
+
+  
+  if (p.size() == 2)
+  {
+    // Case for fusion to one cluster
+    R(0,0) = (p[0] * R(0, 0) + p[1] * R(0, 1)) / (p[0] + p[1]);
+    R.conservativeResize(K - 1, K - 1);
+    clusters = merge_vector(clusters[0], clusters[1]); 
+  }else{
+    // Other cases
+    // Cluster fusion step
+    int f_indx = min_indx_cpp(k, l);
+    int er_indx = max_indx_cpp(k, l);
+
+    // Merge cluster k and l
+    clusters[f_indx] = merge_vector(clusters[f_indx], clusters[er_indx]);
+    // Delete the old cluster
+    clusters.erase(er_indx);
+
+    // Update R matrix step
+    fuse_R(R, p, k, l);
+  }
 }
