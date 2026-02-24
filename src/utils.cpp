@@ -40,7 +40,7 @@ int max_indx_cpp(int k, int l) {
 }
 
 
-Eigen::VectorXd which_min_upper(Eigen::MatrixXd mat) {
+Eigen::VectorXi which_min_upper(Eigen::MatrixXd mat) {
   /* Extract the indices where the value is minimal
    *
    * Input :
@@ -63,7 +63,7 @@ Eigen::VectorXd which_min_upper(Eigen::MatrixXd mat) {
       }
     }
   }
-  Eigen::VectorXd indx(2);
+  Eigen::VectorXi indx(2);
   indx(0) = min_i;
   indx(1) = min_j;
   return indx;
