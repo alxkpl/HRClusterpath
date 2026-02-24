@@ -15,4 +15,6 @@ Eigen::MatrixXd build_theta_cpp(
 
 Eigen::VectorXd cluster_number(List clusters);
 
+Eigen::matrix clustered_weights(eigen::MatrixXd W, List clusters);
+
 #endif

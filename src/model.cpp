@@ -110,3 +110,13 @@ Eigen::VectorXd cluster_number(List clusters) {
 
     return results;
 }
+
+Eigen::matrix clustered_weights(eigen::MatrixXd W, List clusters){
+    Eigen::MatrixXd U = create_U(clusters);
+    int d = W.rows();
+
+    for(int i = 0; i < d; i++){
+        W(i, i) = 0;
+    }
+    return 0.5 * U.transpose() * W * U;
+}
