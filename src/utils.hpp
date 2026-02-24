@@ -10,6 +10,8 @@ int min_indx_cpp(int k, int l);
 
 int max_indx_cpp(int k, int l);
 
+Eigen::VectorXd which_min_upper(Eigen::MatrixXd mat);
+
 Eigen::MatrixXd inverse(Eigen::MatrixXd A);
 
 Eigen::MatrixXd non_singular_P(int d);

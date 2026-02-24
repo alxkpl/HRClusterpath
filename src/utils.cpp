@@ -5,7 +5,7 @@
 using namespace Rcpp;     // for using List as Rcpp::List
 // [[Rcpp::depends(RcppEigen)]]
 
-// [[Rcpp::export]]
+
 int min_indx_cpp(int k, int l) {
     /* Compute the minimum between two numbers
      *
@@ -23,7 +23,6 @@ int min_indx_cpp(int k, int l) {
 }
 
 
-// [[Rcpp::export]]
 int max_indx_cpp(int k, int l) {
     /* Compute the maximum between two numbers
      *
@@ -41,7 +40,36 @@ int max_indx_cpp(int k, int l) {
 }
 
 
-// [[Rcpp::export]]
+Eigen::VectorXd which_min_upper(Eigen::MatrixXd mat) {
+  /* Extract the indices where the value is minimal
+   *
+   * Input :
+   * mat : a matrix
+   *
+   * Output:
+   * A vector of size 2
+   */
+  int n = mat.rows();
+  int min_i = -1;
+  int min_j = -1;
+  double min_val = R_PosInf;
+
+  for (int i = 0; i < n - 1; i++) {
+    for (int j = i + 1; j < n; j++) {  // Upper diagonal matrix
+      if (mat(i, j) < min_val) {
+        min_val = mat(i, j);
+        min_i = i; 
+        min_j = j;
+      }
+    }
+  }
+  Eigen::VectorXd indx(2);
+  indx(0) = min_i;
+  indx(1) = min_j;
+  return indx;
+}
+
+
 Eigen::MatrixXd inverse(Eigen::MatrixXd A) {
     /* Compute the inverse matrix
      * 
