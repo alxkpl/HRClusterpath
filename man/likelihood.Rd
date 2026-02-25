@@ -2,21 +2,21 @@
 % Please edit documentation in R/likelihood.R
 \name{likelihood}
 \alias{likelihood}
-\alias{neg_likelihood}
+\alias{NegLikelihood_HR}
 \alias{penalty}
-\alias{neg_likelihood_pen}
+\alias{NegLikelihood_penalised}
 \title{Negative log-likelihood for Hüsler-Reiss graphical models}
 \usage{
-neg_likelihood(gamma)
+NegLikelihood_HR(R, clusters, Gamma)
 
-penalty(weights)
+penalty(R, clusters, weights)
 
-neg_likelihood_pen(gamma, weights)
+NegLikelihood_penalised(R, clusters, Gamma, weights, lambda)
 }
 \arguments{
-\item{gamma}{A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.}
-
 \item{weights}{The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal.}
+
+\item{gamma}{A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.}
 }
 \value{
 For \code{neg_likelihood()}, it produces a function with two parameters :
@@ -84,19 +84,16 @@ lambda <- 2.5
 ############################################################
 #                   NEGATIVE LOG-LIKEHOOD
 ############################################################
-nllh <- neg_likelihood(gamma)
-nllh(R, clusters)
+NegLikelihood_HR(R, clusters, gamma)
 
 ############################################################
 #                          PENALTY
 ############################################################
-pen <- penalty(W)
-pen(R, clusters)
+penalty(R, clusters, W)
 
 ############################################################
 #             PENALISED NEGATIVE LOG-LIKELIHOOD
 ############################################################
-nllh_pen <- neg_likelihood_pen(gamma, W)
-nllh_pen(R, clusters, lambda)
+NegLikelihood_penalised(R, clusters, gamma, W, lambda)
 
 }
