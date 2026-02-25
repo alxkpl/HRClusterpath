@@ -86,7 +86,7 @@ Eigen::MatrixXd inverse(Eigen::MatrixXd A) {
 }
 
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.non_singular_P)]]
 Eigen::MatrixXd non_singular_P(int d) {
     /* Compute the non sigular svd vectors of the projection in <1_n>^\perp
      * 

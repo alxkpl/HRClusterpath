@@ -26,7 +26,7 @@
   }
 
   # Non singular matrix projection P for the likelihood computation
-  P <- non_singular_P(d)
+  P <- .non_singular_P(d)
 
   # Results of the Clusterpath procedure
   results <- .HRClusterpath(
@@ -42,7 +42,7 @@
   )
 
   # Likelihood value
-  results$likelihood <- Likelihood_penalised(results$R, results$clusters, Gamma_est, P, W, lambda)
+  results$likelihood <- .Likelihood_penalised(results$R, results$clusters, Gamma_est, P, W, lambda)
 
   # Input parameters
   results$lambda <- lambda

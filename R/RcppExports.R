@@ -9,11 +9,15 @@ distance_matrix <- function(R, clusters) {
     .Call(`_HRClusterpath_HRClusterpath_unique`, R_init, clusters_init, Gamma, W, lambda, eps_f, eps_conv, tol_opt, iter_max)
 }
 
-Likelihood_HR <- function(R, clusters, Gamma, P) {
+.Likelihood_HR <- function(R, clusters, Gamma, P) {
     .Call(`_HRClusterpath_Likelihood_raw`, R, clusters, Gamma, P)
 }
 
-Likelihood_penalised <- function(R, clusters, Gamma, P, W, lambda) {
+.Penalty <- function(R, clusters, W) {
+    .Call(`_HRClusterpath_Penalty`, R, clusters, W)
+}
+
+.Likelihood_penalised <- function(R, clusters, Gamma, P, W, lambda) {
     .Call(`_HRClusterpath_Likelihood_penalised`, R, clusters, Gamma, P, W, lambda)
 }
 
@@ -21,7 +25,7 @@ build_theta <- function(R, clusters) {
     .Call(`_HRClusterpath_build_theta_cpp`, R, clusters)
 }
 
-non_singular_P <- function(d) {
+.non_singular_P <- function(d) {
     .Call(`_HRClusterpath_non_singular_P`, d)
 }
 

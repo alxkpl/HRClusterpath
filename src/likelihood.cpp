@@ -8,7 +8,7 @@
 using namespace Rcpp;     // for using List as Rcpp::List
 
 
-// [[Rcpp::export(Likelihood_HR)]]
+// [[Rcpp::export(.Likelihood_HR)]]
 double Likelihood_raw(
     Eigen::MatrixXd R,
     List clusters,
@@ -37,7 +37,7 @@ double Likelihood_raw(
     return  - std::log(det_value) - 0.5 * tr_value;
 }
 
-
+//[[Rcpp::export(.Penalty)]]
 double Penalty(
     Eigen::MatrixXd R,
     List clusters,
@@ -63,7 +63,7 @@ double Penalty(
 }
 
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.Likelihood_penalised)]]
 double Likelihood_penalised(
     Eigen::MatrixXd R,
     List clusters,

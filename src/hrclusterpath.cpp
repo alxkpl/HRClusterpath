@@ -100,13 +100,9 @@ List HRClusterpath_unique(
     int count = 0;
     int K_max = R.cols();
 
-    Rcpp::Rcerr << "Optimization Initialization : \n";
+    // Rcpp::Rcerr << "Optimization Initialization : \n";
     while(std::abs((l_old / l_new) - 1.0) > eps_conv & count < iter_max) {
-        Rcpp::Rcerr << "Step : ";
-        Rcpp::Rcerr << count;
-        Rcpp::Rcerr << " | Variation : ";
-        Rcpp::Rcerr << std::abs((l_old / l_new) - 1.0); 
-        Rcpp::Rcerr << "\n";
+        // Rcpp::Rcerr << "Step : " << count << " | Variation : " << std::abs((l_old / l_new) - 1.0) << "\n";
 
         int k = 0;
         l_old = l_new;
@@ -133,21 +129,18 @@ List HRClusterpath_unique(
         count++;
     }
 
-    Rcpp::Rcerr << "Final variation : ";
-    Rcpp::Rcerr << std::abs((l_old / l_new) - 1.0);
-    Rcpp::Rcerr << ".\n";
-    Rcpp::Rcerr << "Optimization finished.\n";
+    // Rcpp::Rcerr << "Final variation : " << std::abs((l_old / l_new) - 1.0)  << ".\n" << "Optimization finished.\n";
 
 
     // Message for the user
-    if (count == iter_max) {
-        Rcpp::Rcerr << "Warning : Maximum number of iterations reached. \n";
-    } else {
-        Rcpp::Rcerr << "Convergence reached. \n";
-    }
+    // if (count == iter_max) {
+    //     Rcpp::Rcerr << "Warning : Maximum number of iterations reached. \n";
+    // } else {
+    //     Rcpp::Rcerr << "Convergence reached. \n";
+    // }
 
     return List::create(
-        _["R"] = R,
-        _["clusters"] = clusters
+        _["R"] = wrap(R),
+        _["clusters"] = wrap(clusters)
     );
 }

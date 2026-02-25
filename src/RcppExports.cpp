@@ -56,6 +56,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Penalty
+double Penalty(Eigen::MatrixXd R, List clusters, const Eigen::MatrixXd W);
+RcppExport SEXP _HRClusterpath_Penalty(SEXP RSEXP, SEXP clustersSEXP, SEXP WSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W(WSEXP);
+    rcpp_result_gen = Rcpp::wrap(Penalty(R, clusters, W));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Likelihood_penalised
 double Likelihood_penalised(Eigen::MatrixXd R, List clusters, const Eigen::MatrixXd Gamma, const Eigen::MatrixXd P, const Eigen::MatrixXd W, double lambda);
 RcppExport SEXP _HRClusterpath_Likelihood_penalised(SEXP RSEXP, SEXP clustersSEXP, SEXP GammaSEXP, SEXP PSEXP, SEXP WSEXP, SEXP lambdaSEXP) {
@@ -100,6 +113,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HRClusterpath_distance_matrix", (DL_FUNC) &_HRClusterpath_distance_matrix, 2},
     {"_HRClusterpath_HRClusterpath_unique", (DL_FUNC) &_HRClusterpath_HRClusterpath_unique, 9},
     {"_HRClusterpath_Likelihood_raw", (DL_FUNC) &_HRClusterpath_Likelihood_raw, 4},
+    {"_HRClusterpath_Penalty", (DL_FUNC) &_HRClusterpath_Penalty, 3},
     {"_HRClusterpath_Likelihood_penalised", (DL_FUNC) &_HRClusterpath_Likelihood_penalised, 6},
     {"_HRClusterpath_build_theta_cpp", (DL_FUNC) &_HRClusterpath_build_theta_cpp, 2},
     {"_HRClusterpath_non_singular_P", (DL_FUNC) &_HRClusterpath_non_singular_P, 1},
