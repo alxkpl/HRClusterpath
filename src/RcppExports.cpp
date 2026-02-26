@@ -85,6 +85,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// create_U
+Eigen::MatrixXd create_U(List clusters);
+RcppExport SEXP _HRClusterpath_create_U(SEXP clustersSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_U(clusters));
+    return rcpp_result_gen;
+END_RCPP
+}
 // build_theta_cpp
 Eigen::MatrixXd build_theta_cpp(Eigen::MatrixXd R, List clusters);
 RcppExport SEXP _HRClusterpath_build_theta_cpp(SEXP RSEXP, SEXP clustersSEXP) {
@@ -115,6 +126,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HRClusterpath_Likelihood_raw", (DL_FUNC) &_HRClusterpath_Likelihood_raw, 4},
     {"_HRClusterpath_Penalty", (DL_FUNC) &_HRClusterpath_Penalty, 3},
     {"_HRClusterpath_Likelihood_penalised", (DL_FUNC) &_HRClusterpath_Likelihood_penalised, 6},
+    {"_HRClusterpath_create_U", (DL_FUNC) &_HRClusterpath_create_U, 1},
     {"_HRClusterpath_build_theta_cpp", (DL_FUNC) &_HRClusterpath_build_theta_cpp, 2},
     {"_HRClusterpath_non_singular_P", (DL_FUNC) &_HRClusterpath_non_singular_P, 1},
     {NULL, NULL, 0}

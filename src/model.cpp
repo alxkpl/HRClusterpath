@@ -4,6 +4,7 @@
 
 using namespace Rcpp;     // for using List as Rcpp::List
 
+//[[Rcpp::export(.create_U)]]
 Eigen::MatrixXd create_U(List clusters) {
      /* Compute the cluster matrix
      * 
