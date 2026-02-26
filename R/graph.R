@@ -21,7 +21,7 @@
 #' clusters <- list(1:5, 6:10, 11:15)
 #'
 #' # Construction of induced theta and corresponding variogram gamma
-#' Theta <- build_theta(R, clusters)
+#' Theta <- build_Theta(R, clusters)
 #' Gamma <- graphicalExtremes::Theta2Gamma(Theta)
 #'
 #' gr3_bal_sim_param_cluster <-
@@ -40,14 +40,6 @@
 #'                                     model = "HR",
 #'                                     par = gr3_bal_sim_param_cluster$Gamma)
 #'
-#' lambda <- seq(0, 2, 1e-3)
-#'
-#' res <- HR_Clusterpath(data = data,
-#'                       zeta = gr3_bal_sim_param_cluster$chi,
-#'                       lambda = lambda,
-#'                       eps_f = 1e-1)
-#'
-#' gg_cluster(res)
 #'
 #' @references \eqn{[1]} Hocking, T. D., Joulin, A., Bach, F., and Vert, J.-P. (2011). Clusterpath: An
 #' Algorithm for Clustering using Convex Fusion Penalties. In Proceedings of the 28th International
@@ -241,7 +233,7 @@ average_hierarchy <- function(replicates) {
 #' clusters <- list(1:5, 6:10, 11:15)
 #'
 #' # Construction of induced theta and corresponding variogram gamma
-#' Theta <- build_theta(R, clusters)
+#' Theta <- build_Theta(R, clusters)
 #' Gamma <- graphicalExtremes::Theta2Gamma(Theta)
 #'
 #' gr3_bal_sim_param_cluster <-
@@ -262,12 +254,6 @@ average_hierarchy <- function(replicates) {
 #'
 #' lambda <- seq(0, 2, 1e-3)
 #'
-#' res <- HR_Clusterpath(data = data,
-#'                       zeta = gr3_bal_sim_param_cluster$chi,
-#'                       lambda = lambda,
-#'                       eps_f = 1e-1)
-#'
-#' ggdistance(res)
 #'
 ggdistance <- function(list_results, names = NULL) {
 

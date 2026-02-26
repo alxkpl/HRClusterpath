@@ -65,7 +65,7 @@ NULL
 #' @export
 build_Theta <- function(R, clusters) {
   return(
-    build_theta(R, clusters)
+    .build_theta(R, clusters)
   )
 }
 

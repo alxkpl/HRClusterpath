@@ -73,23 +73,23 @@ where \(|\cdot|_+\) is the generalised determinant, \(n\) is the sample size,
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">neg_likelihood</span><span class="op">(</span><span class="va">gamma</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">NegLikelihood_HR</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span>, <span class="va">Gamma</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">penalty</span><span class="op">(</span><span class="va">weights</span><span class="op">)</span></span>
+<span><span class="fu">penalty</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span>, <span class="va">weights</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">neg_likelihood_pen</span><span class="op">(</span><span class="va">gamma</span>, <span class="va">weights</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">NegLikelihood_penalised</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span>, <span class="va">Gamma</span>, <span class="va">weights</span>, <span class="va">lambda</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
-<dd><p>A \(d \times d\) matrix: the variogram matrix \(\Gamma\).</p></dd>
-
-
-<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
+<dl><dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
 <dd><p>The \(d \times d\) symmetric matrix \(W\) with a zero diagonal.</p></dd>
+
+
+<dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
+<dd><p>A \(d \times d\) matrix: the variogram matrix \(\Gamma\).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -107,7 +107,7 @@ and compute the value of the penalised negative log-likelihood \(L_{\mathcal P}^
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>We use the block matrix structure to compute the likelihood here (see <code><a href="theta-r.html">build_theta</a>()</code> and
+    <p>We use the block matrix structure to compute the likelihood here (see <code>build_theta()</code> and
 <code><a href="theta-r.html">extract_R_matrix</a>()</code>), that is why we use two parameters for the computation
 instead of only one matrix \(\Theta\).</p>
     </div>
@@ -140,23 +140,20 @@ instead of only one matrix \(\Theta\).</p>
 <span class="r-in"><span><span class="co">############################################################</span></span></span>
 <span class="r-in"><span><span class="co">#                   NEGATIVE LOG-LIKEHOOD</span></span></span>
 <span class="r-in"><span><span class="co">############################################################</span></span></span>
-<span class="r-in"><span><span class="va">nllh</span> <span class="op">&lt;-</span> <span class="fu">neg_likelihood</span><span class="op">(</span><span class="va">gamma</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">nllh</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">NegLikelihood_HR</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span>, <span class="va">gamma</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10.72741</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">############################################################</span></span></span>
 <span class="r-in"><span><span class="co">#                          PENALTY</span></span></span>
 <span class="r-in"><span><span class="co">############################################################</span></span></span>
-<span class="r-in"><span><span class="va">pen</span> <span class="op">&lt;-</span> <span class="fu">penalty</span><span class="op">(</span><span class="va">W</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">pen</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 18</span>
+<span class="r-in"><span><span class="fu">penalty</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span>, <span class="va">W</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 9</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">############################################################</span></span></span>
 <span class="r-in"><span><span class="co">#             PENALISED NEGATIVE LOG-LIKELIHOOD</span></span></span>
 <span class="r-in"><span><span class="co">############################################################</span></span></span>
-<span class="r-in"><span><span class="va">nllh_pen</span> <span class="op">&lt;-</span> <span class="fu">neg_likelihood_pen</span><span class="op">(</span><span class="va">gamma</span>, <span class="va">W</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">nllh_pen</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span>, <span class="va">lambda</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 55.72741</span>
+<span class="r-in"><span><span class="fu">NegLikelihood_penalised</span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span>, <span class="va">gamma</span>, <span class="va">W</span>, <span class="va">lambda</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 33.22741</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -21,7 +21,7 @@ distance_matrix <- function(R, clusters) {
     .Call(`_HRClusterpath_Likelihood_penalised`, R, clusters, Gamma, P, W, lambda)
 }
 
-build_theta <- function(R, clusters) {
+.build_theta <- function(R, clusters) {
     .Call(`_HRClusterpath_build_theta_cpp`, R, clusters)
 }
 

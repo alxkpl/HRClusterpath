@@ -117,7 +117,7 @@ R <- matrix(c(1, -3, 0,
 clusters <- list(1:5, 6:10, 11:15)
 
 # Construction of induced theta and corresponding variogram gamma
-Theta <- build_theta(R, clusters)
+Theta <- build_Theta(R, clusters)
 Gamma <- graphicalExtremes::Theta2Gamma(Theta)
 
 gr3_bal_sim_param_cluster <-

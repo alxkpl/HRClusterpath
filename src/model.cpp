@@ -40,7 +40,7 @@ Eigen::MatrixXd create_U(List clusters) {
 
 
 
-// [[Rcpp::export(build_theta)]]
+// [[Rcpp::export(.build_theta)]]
 Eigen::MatrixXd build_theta_cpp(
     Eigen::MatrixXd R,
     List clusters

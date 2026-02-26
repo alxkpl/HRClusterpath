@@ -21,16 +21,15 @@ reference:
       a matrix with a given clustering, and other tools...
     contents: 
       - extract_R_matrix
-      - ChiToGamma
-      - build_theta
+      - build_Theta
 
   - title: Likelihood functions
     desc: |
       Computation of the likelihood function for a Hüsler-Reiss graphical model, 
       as well ass the penalised version of the latter.
     contents:
-      - neg_likelihood
-      - neg_likelihood_pen
+      - NegLikelihood_HR
+      - NegLikelihood_penalised
       - penalty 
 
   - title: Optimization
@@ -39,7 +38,6 @@ reference:
       weights ans a softer one with customizable weights.
     contents: 
       - HR_Clusterpath
-      - get_cluster
 
   - title: Graphical functions
     desc: Tools for making graphs and analyze results.
