@@ -121,15 +121,18 @@ HR_Clusterpath <- function(
   data, lambda, zeta, W = NULL, p = NULL, eps_f = NULL, kappa = 1e-2,
   eps_conv = 1e-7, tol_opt = 1e-3, iter_max = 1000
 ) {
+  # Estimation of the variogram matrix from the data
+  Gamma <- graphicalExtremes::emp_vario(data, p = p)
+
+  output <- list()
   # Parallelization of the procedure for each value of lambda
-  results <- parallel::mclapply(
+  output$results <- parallel::mclapply(
     lambda,
     function(l) {
       .HRC_wrapper(
-        data = data,
+        Gamma = Gamma,
         zeta = zeta,
         lambda = l,
-        p = p,
         W = W,
         kappa = kappa,
         eps_conv = eps_conv,
@@ -140,12 +143,20 @@ HR_Clusterpath <- function(
     },
     mc.cores = min(length(lambda), parallel::detectCores() - 1)
   )
+  output$Gamma <- Gamma
+
+  # Input parameters
+  output$inputs <- list()
+  output$inputs$eps_conv <- eps_conv
+  output$inputs$eps_f <- eps_f
+  output$inputs$tol_opt <- tol_opt
+  output$inputs$iter_max <- iter_max
 
   # Naming the results with the corresponding lambda values
-  names(results) <- paste0("l", seq_along(lambda))
+  names(output$results) <- paste0("l", seq_along(lambda))
 
   # Class of the results
-  class(results) <- "HR_Clusterpath"
+  class(output) <- "HR_Clusterpath"
 
-  return(results)
+  return(output)
 }

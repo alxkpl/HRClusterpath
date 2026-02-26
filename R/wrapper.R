@@ -2,22 +2,21 @@
 #'
 #' @keywords internal
 .HRC_wrapper <- function(
-  data, zeta, lambda, p, W, kappa,
+  Gamma, zeta, lambda, W, kappa,
   eps_conv, eps_f, tol_opt, iter_max
 ) {
   # Number of variables
-  d <- ncol(data)
+  d <- ncol(Gamma)
 
-  # Computation of the variogram and initial Theta
-  Gamma_est <- emp_vario(data, p = p)
-  R.init <- Gamma2Theta(Gamma_est)
+  # Computation of the initial Theta
+  R.init <- Gamma2Theta(Gamma)
 
   # Initial clusters
   clusters.init <- as.list(1:d)
 
   # If no custom weights are given, we use the exponential weights
   if (is.null(W)) {
-    W <- exp(-zeta * sqrt(distance_matrix(Gamma_est, as.list(1:d))))    # Choosen weights
+    W <- exp(-zeta * sqrt(distance_matrix(Gamma, as.list(1:d))))    # Choosen weights
   }
 
   # Adaptative threshold for the fusion step if no custom one is given
@@ -32,7 +31,7 @@
   results <- .HRClusterpath(
     R.init,
     clusters.init,
-    Gamma_est,
+    Gamma,
     W,
     lambda,
     eps_f,
@@ -42,15 +41,8 @@
   )
 
   # Likelihood value
-  results$likelihood <- .Likelihood_penalised(results$R, results$clusters, Gamma_est, P, W, lambda)
-
-  # Input parameters
+  results$likelihood <- .Likelihood_penalised(results$R, results$clusters, Gamma, P, W, lambda)
   results$lambda <- lambda
-  results$inputs$eps_conv <- eps_conv
-  results$inputs$eps_f <- eps_f
-  results$inputs$tol_opt <- tol_opt
-  results$inputs$iter_max <- iter_max
-
 
   names(results$clusters) <- paste0("C", seq_along(results$clusters))
 
