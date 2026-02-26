@@ -43,14 +43,15 @@
 #'
 #' @returns `HR_Clusterpath()` is a block gradient descent from the data with default values and method for
 #' the optimization : the variogram matrix \eqn{\Gamma} is the empirical variogram and the weights are
-#' set as the exponential weights, which depends of only one tuning parameter \eqn{\zeta} and where 
+#' set as the exponential weights, which depends of only one tuning parameter \eqn{\zeta} and where
 #' we have some theoretical results.
 #'
-#' The produce a list of results :
-#'  - $R : the \eqn{R} matrix of the clusters.
-#'  - $clusters : a list of the variable indices, clustered.
-#'  - $likelihood : the value of the negative penalised negative loglikelihood.
-#'  - $lambda : the value of lambda.
+#' The produce a list of several datas :
+#'  - $results : a list of results for each value of lambda, where each result is a
+#'               list with the following elements : $R the \eqn{R} matrix of the clusters, $clusters
+#'               a list of the variable indices separated per cluster, $likelihood the value of the
+#'               penalised negative loglikelihood and $lambda the corresponding regularized parameter.
+#'  - $Gamma : the variogram matrix used for the procedure.
 #'  - $inputs : a list of the input parameters used in the procedure.
 #'
 #' @section Some results for `HR_Clusterpath()`:
@@ -60,31 +61,11 @@
 #' minimum of the penalised negative loglikelihood conveges almost surely to the
 #' true precision matrix of the model \eqn{\Theta^*}, for all \eqn{\lambda}, provided that
 #' we choose a sequence \eqn{(\zeta_n)_{n\in \mathbb N^*}} which grows slower than the
-#' \eqn{log(n)} sequence. In general, the \eqn{\zeta \in [1,2]} is a good choice.
+#' \eqn{log(n)^s} sequence with \eqn{s < 8}.
 #'
 #' @examples
 #' ############################################################################
-#' #                            With get_clusters
-#' ############################################################################
-#' # Customizable weights
-#' W <- matrix(c(0, 1, 1, 1,
-#'               1, 0, 1, 1,
-#'               1, 1, 0, 1,
-#'               1, 1, 1, 0), nc = 4)
-#'
-#' # Free choice of variogram
-#' gamma <- graphicalExtremes::generate_random_Gamma(d = 4)
-#'
-#' # Choice of initial condition for the optimization
-#' R <- matrix(c(1, 0, 0, -1,
-#'               0, 1, 1, -2,
-#'               0, 1, 1, -1,
-#'               -1, -2, -1, 1), nc = 4)
-#' lambda <- 2.2
-#'
-#'
-#' ############################################################################
-#' #                            With HR_Clusterpath
+#' #                 EXAMPLE OF USE OF THE HR_CLUSTERPATH FUNCTION
 #' ############################################################################
 #' # Construction of clusters and R matrix for simulation
 #' R <- matrix(c(1, -3, 0,
@@ -102,11 +83,28 @@
 #'     clusters = clusters,
 #'     Theta = Theta,
 #'     Gamma = Gamma,
-#'     chi = 1,
-#'     n = 1e3,
+#'     n = 1e4,
 #'     d = 15
 #'   )
 #'
+#' # Simulation of data
+#' set.seed(123)
+#' data <- graphicalExtremes::rmstable(
+#'            n = gr3_bal_sim_param_cluster$n,
+#'            model = "HR",
+#'            d = gr3_bal_sim_param_cluster$d,
+#'            par = gr3_bal_sim_param_cluster$Gamma)
+#' norm_inf <- apply(abs(data), 1, max)
+#' quantile <- sort(norm_inf, decreasing = TRUE) |> as.numeric()
+#'
+#' k <- floor(0.1 * nrow(data))
+#' u <- quantile[k]
+#'
+#' data_par <- data[norm_inf > u, ] / u # Transformation to multivariate Pareto scale
+#'
+#' # Computation of the solution produced by the clusterpath procedure for one value of lambda
+#' zeta <- log(gr3_bal_sim_param_cluster$n) ** 2              # Zeta parameter for the exponential weights
+#' HR_Clusterpath(data_par, lambda = 10, zeta = zeta)
 #'
 NULL
 

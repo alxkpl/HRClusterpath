@@ -34,8 +34,8 @@ reference:
 
   - title: Optimization
     desc: |
-      We give two way for the optimization : the one studied with exponential
-      weights ans a softer one with customizable weights.
+      We give several method for the optimization : the classic Hüsler-Reis Clusterpath procedure with some
+      default parameters etc...
     contents: 
       - HR_Clusterpath
       - HR_Clusterpath_refit
