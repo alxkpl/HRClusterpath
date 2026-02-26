@@ -38,6 +38,7 @@ reference:
       weights ans a softer one with customizable weights.
     contents: 
       - HR_Clusterpath
+      - HR_Clusterpath_refit
 
   - title: Graphical functions
     desc: Tools for making graphs and analyze results.

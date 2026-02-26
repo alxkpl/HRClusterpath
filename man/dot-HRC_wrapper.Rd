@@ -4,18 +4,7 @@
 \alias{.HRC_wrapper}
 \title{Wrapper function for the HRClusterpath procedure implemented in .HRClusterpath (in C++).}
 \usage{
-.HRC_wrapper(
-  data,
-  zeta,
-  lambda,
-  p,
-  W,
-  kappa,
-  eps_conv,
-  eps_f,
-  tol_opt,
-  iter_max
-)
+.HRC_wrapper(Gamma, zeta, lambda, W, kappa, eps_conv, eps_f, tol_opt, iter_max)
 }
 \description{
 Wrapper function for the HRClusterpath procedure implemented in .HRClusterpath (in C++).
