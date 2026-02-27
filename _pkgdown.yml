@@ -15,18 +15,17 @@ navbar:
       href: reference/index.html
 
 reference:
-  - title: Matrices computation
+  - title: Model structure transformation
     desc: |
-      Functions which can be used to extract/give the block model structure to 
-      a matrix with a given clustering, and other tools...
+      Functions used to adapt object to the model assumptions, such as the transformation 
+      in block model.
     contents: 
       - extract_R_matrix
       - build_Theta
 
   - title: Likelihood functions
     desc: |
-      Computation of the likelihood function for a Hüsler-Reiss graphical model, 
-      as well ass the penalised version of the latter.
+      Computation of the model's likelihood and its penalised version, and also the penalty function.
     contents:
       - NegLikelihood_HR
       - NegLikelihood_penalised
@@ -34,14 +33,14 @@ reference:
 
   - title: Optimization
     desc: |
-      We give several method for the optimization : the classic Hüsler-Reis Clusterpath procedure with some
+      We provide several method for the optimization : the classic Hüsler-Reis Clusterpath procedure with some
       default parameters etc...
     contents: 
       - HR_Clusterpath
       - HR_Clusterpath_refit
 
   - title: Graphical functions
-    desc: Tools for making graphs and analyze results.
+    desc: Tools for making graphs and analyze results. NOT FINISHED YET
     contents:
       - gg_cluster
       - average_hierarchy
