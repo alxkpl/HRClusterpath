@@ -14,13 +14,12 @@ remotes::install_github("alxkpl/HRClusterpath")
 
 This section gives an overview of the package's tools.
 
-### Clusterpath algorithm for hierarchical clustering
+### Clusterpath algorithm
 
-The first method you can use with the package is a hierarchical clustering (for variables) using a Clusterpath algorithm applied to the likelihood of the precision matrix of the Husler Reiss graphical model with a fused-Lasso penalty. 
+The method provided by the package is a clustering method (for variables) using a Clusterpath algorithm applied to the likelihood of the precision matrix of the Husler Reiss graphical model with a fused-Lasso penalty. 
 
-You can use : 
+One can use : 
 
-- `get_cluster` to get optimal cluster with fixed parameter $\lambda$ and estimated variogram $\hat \Gamma$ with customizable weights.
 - `HR_Clusterpath` that build a list of optimal results with a grid of $\lambda$ and the standards exponnential weights. 
-- `gg_cluster` which provides the dendrogram induced by the results of the `HR_Clusterpath` function.
+- `HR_Clusterpath_refit` that re-optimize the results of the previous functions with bloc model constaint based on the estimated cluster .
 - and others functions to analyze the results.

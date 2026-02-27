@@ -74,17 +74,15 @@
 </h2>
 <p>This section gives an overview of the package’s tools.</p>
 <div class="section level3">
-<h3 id="clusterpath-algorithm-for-hierarchical-clustering">Clusterpath algorithm for hierarchical clustering<a class="anchor" aria-label="anchor" href="#clusterpath-algorithm-for-hierarchical-clustering"></a>
+<h3 id="clusterpath-algorithm">Clusterpath algorithm<a class="anchor" aria-label="anchor" href="#clusterpath-algorithm"></a>
 </h3>
-<p>The first method you can use with the package is a hierarchical clustering (for variables) using a Clusterpath algorithm applied to the likelihood of the precision matrix of the Husler Reiss graphical model with a fused-Lasso penalty.</p>
-<p>You can use :</p>
+<p>The method provided by the package is a clustering method (for variables) using a Clusterpath algorithm applied to the likelihood of the precision matrix of the Husler Reiss graphical model with a fused-Lasso penalty.</p>
+<p>One can use :</p>
 <ul>
-<li>
-<code>get_cluster</code> to get optimal cluster with fixed parameter <span class="math inline">\(\lambda\)</span> and estimated variogram <span class="math inline">\(\hat \Gamma\)</span> with customizable weights.</li>
 <li>
 <code>HR_Clusterpath</code> that build a list of optimal results with a grid of <span class="math inline">\(\lambda\)</span> and the standards exponnential weights.</li>
 <li>
-<code>gg_cluster</code> which provides the dendrogram induced by the results of the <code>HR_Clusterpath</code> function.</li>
+<code>HR_Clusterpath_refit</code> that re-optimize the results of the previous functions with bloc model constaint based on the estimated cluster .</li>
 <li>and others functions to analyze the results.</li>
 </ul>
 </div>
