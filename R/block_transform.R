@@ -1,9 +1,10 @@
 #' Functions to navigate between \eqn{R} and \eqn{\Theta} for given clusters
 #'
-#' The block matrix models is defined from two elements : the cluster's partition
-#' \eqn{\{C_1, \dots, C_K\}}, included in \eqn{V} and the \eqn{R} matrix which belongs
-#' to \eqn{\mathcal S_K(\mathbb R)}, the set of symmetric \eqn{K \times K} matrix.
-#'The expression of the precision \eqn{\Theta} which statisfies the block matrix model is 
+#' The block matrix models are characterized by two objects : a clustering partition
+#' \eqn{\{C_1, \dots, C_K\}} of \eqn{V = \{1, \dots, d\}} and a matrix \eqn{R}
+#' which belongs to \eqn{\mathcal S_K(\mathbb R)}, the set of symmetric \eqn{K \times K}
+#' matrix. The expression of the precision matrix \eqn{\Theta} statisfying the block matrix
+#' assumption is
 #' \deqn{
 #'    \Theta = U R U^t + A
 #' }
