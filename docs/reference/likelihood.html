@@ -5,20 +5,20 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Negative log-likelihood for Hüsler-Reiss graphical models — likelihood"><meta name="description" content="The penalised negative loglikelihood of the Hüsler-Reiss graphical models can be
-written as follow :
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Negative log-likelihood for Hüsler-Reiss graphical models — likelihood"><meta name="description" content="The penalised negative log-likelihood of the Hüsler-Reiss graphical models can be
+written as follow:
 $$
  L_{\mathcal P}^{(n)}(\Theta, \lambda) = \underbrace{-\log(|\Theta|_+) -
  \frac 12 \text{tr}(\hat \Gamma^{(n)}\Theta)}_{L^{(n)}(\Theta)} + \lambda
- \underbrace{\sum_{i&amp;lt;j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)}
+ \underbrace{\sum_{i&amp;lt;j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)},
 $$
 where \(|\cdot|_+\) is the generalised determinant, \(n\) is the sample size,
-\(\hat \Gamma^{(n)}\) an estimation of the variogram matrix \(\Gamma\) and \(w_{ij}&amp;gt;0\) the weights."><meta property="og:description" content="The penalised negative loglikelihood of the Hüsler-Reiss graphical models can be
-written as follow :
+\(\hat \Gamma^{(n)}\) an estimation of the variogram matrix \(\Gamma\) and \(w_{ij}&amp;gt;0\) the weights."><meta property="og:description" content="The penalised negative log-likelihood of the Hüsler-Reiss graphical models can be
+written as follow:
 $$
  L_{\mathcal P}^{(n)}(\Theta, \lambda) = \underbrace{-\log(|\Theta|_+) -
  \frac 12 \text{tr}(\hat \Gamma^{(n)}\Theta)}_{L^{(n)}(\Theta)} + \lambda
- \underbrace{\sum_{i&amp;lt;j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)}
+ \underbrace{\sum_{i&amp;lt;j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)},
 $$
 where \(|\cdot|_+\) is the generalised determinant, \(n\) is the sample size,
 \(\hat \Gamma^{(n)}\) an estimation of the variogram matrix \(\Gamma\) and \(w_{ij}&amp;gt;0\) the weights."></head><body>
@@ -60,12 +60,12 @@ where \(|\cdot|_+\) is the generalised determinant, \(n\) is the sample size,
     </div>
 
     <div class="ref-description section level2">
-    <p>The penalised negative loglikelihood of the Hüsler-Reiss graphical models can be
-written as follow :
+    <p>The penalised negative log-likelihood of the Hüsler-Reiss graphical models can be
+written as follow:
 $$
  L_{\mathcal P}^{(n)}(\Theta, \lambda) = \underbrace{-\log(|\Theta|_+) -
  \frac 12 \text{tr}(\hat \Gamma^{(n)}\Theta)}_{L^{(n)}(\Theta)} + \lambda
- \underbrace{\sum_{i&lt;j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)}
+ \underbrace{\sum_{i&lt;j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)},
 $$
 where \(|\cdot|_+\) is the generalised determinant, \(n\) is the sample size,
 \(\hat \Gamma^{(n)}\) an estimation of the variogram matrix \(\Gamma\) and \(w_{ij}&gt;0\) the weights.</p>
@@ -84,32 +84,50 @@ where \(|\cdot|_+\) is the generalised determinant, \(n\) is the sample size,
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
+<dl><dt id="arg-r">R<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
+<dd><p>A \(K \times K\) matrix : the matrix of the clusters.</p></dd>
+
+
+<dt id="arg-clusters">clusters<a class="anchor" aria-label="anchor" href="#arg-clusters"></a></dt>
+<dd><p>A list of indices associated to a partition of \(V\).</p></dd>
+
+
+<dt id="arg-gamma">Gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
+<dd><p>A \(d \times d\) matrix: the variogram matrix \(\Gamma\).</p></dd>
+
+
+<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
 <dd><p>The \(d \times d\) symmetric matrix \(W\) with a zero diagonal.</p></dd>
 
 
-<dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
-<dd><p>A \(d \times d\) matrix: the variogram matrix \(\Gamma\).</p></dd>
+<dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
+<dd><p>A positive number, the regularized parameter.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>For <code>neg_likelihood()</code>, it produces a function with two parameters :</p><ul><li><p><strong>R</strong> the \(K \times K\) clusters matrix</p></li>
+    <p>For <code>NegLikelihood_HR()</code>, it computes the value of the negative log-likelihood from two parameters:</p><ul><li><p><strong>R</strong> the \(K \times K\) clusters matrix</p></li>
 <li><p><strong>clusters</strong> a list of indices associated to a partition of \(V\)
 and compute the value of the non penalised negative log-likelihood \(L^{(n)}(\Theta)\).</p></li>
-</ul><p>For <code>penalty()</code>, it produces a function with two parameters :</p><ul><li><p><strong>R</strong> the \(K \times K\) clusters matrix</p></li>
+</ul><p>For <code>penalty()</code>, it computes the value of the penalty with:</p><ul><li><p><strong>R</strong> the \(K \times K\) clusters matrix</p></li>
 <li><p><strong>clusters</strong> a list of indices associated to a partition of \(V\)
 and compute the value of the penalty \(\mathcal P(\Theta)\).</p></li>
-</ul><p>For <code>neg_likelihood_pen()</code>, it produces a function with three parameters :</p><ul><li><p><strong>R</strong> : the \(K \times K\) clusters matrix</p></li>
+</ul><p>For <code>NegLikelihood_penalised()</code>, it computes the value of the penalised negative log-likelihood with:</p><ul><li><p><strong>R</strong> : the \(K \times K\) clusters matrix</p></li>
 <li><p><strong>clusters</strong> : a list of indices associated to a partition of \(V\)</p></li>
-<li><p><strong>lambda</strong> : a positive number, the weight of the penalty.
+<li><p><strong>lambda</strong> : a positive number, the regularized parameter.
 and compute the value of the penalised negative log-likelihood \(L_{\mathcal P}^{(n)}(\Theta, \lambda)\).</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>We use the block matrix structure to compute the likelihood here (see <code>build_theta()</code> and
-<code><a href="theta-r.html">extract_R_matrix</a>()</code>), that is why we use two parameters for the computation
-instead of only one matrix \(\Theta\).</p>
+    <p>An equivalent version of the negative likelihood is used by the function which is more convenient
+for the optimization procedure. It is defined by the following:</p>
+<p>$$
+ L^{(n)}(\Theta, \lambda) = -\log(|P^t \Theta P|) - \frac 12 \text{tr}(\Gamma \Theta),
+$$
+where \(P\) is a matrix \(d\times (d-1)\) matrix such that \(P P^t = \Pi\), with \(\Pi\)
+the projection matrix on the orthogonal space of \(&lt;\pmb{1}_d&gt;\).</p>
+<p>The block matrix structure is used to compute the negative log-likelihood (see <code>build_theta()</code> and
+<code><a href="theta-r.html">extract_R_matrix</a>()</code>) not directly the value of the precision matrix \(\Theta\).</p>
     </div>
 
     <div class="section level2">

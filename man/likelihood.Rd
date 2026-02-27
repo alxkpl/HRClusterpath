@@ -14,48 +14,62 @@ penalty(R, clusters, weights)
 NegLikelihood_penalised(R, clusters, Gamma, weights, lambda)
 }
 \arguments{
+\item{R}{A \eqn{K \times K} matrix : the matrix of the clusters.}
+
+\item{clusters}{A list of indices associated to a partition of \eqn{V}.}
+
+\item{Gamma}{A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.}
+
 \item{weights}{The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal.}
 
-\item{gamma}{A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.}
+\item{lambda}{A positive number, the regularized parameter.}
 }
 \value{
-For \code{neg_likelihood()}, it produces a function with two parameters :
+For \code{NegLikelihood_HR()}, it computes the value of the negative log-likelihood from two parameters:
 \itemize{
 \item \strong{R} the \eqn{K \times K} clusters matrix
 \item \strong{clusters} a list of indices associated to a partition of \eqn{V}
 and compute the value of the non penalised negative log-likelihood \eqn{L^{(n)}(\Theta)}.
 }
 
-For \code{penalty()}, it produces a function with two parameters :
+For \code{penalty()}, it computes the value of the penalty with:
 \itemize{
 \item \strong{R} the \eqn{K \times K} clusters matrix
 \item \strong{clusters} a list of indices associated to a partition of \eqn{V}
 and compute the value of the penalty \eqn{\mathcal P(\Theta)}.
 }
 
-For \code{neg_likelihood_pen()}, it produces a function with three parameters :
+For \code{NegLikelihood_penalised()}, it computes the value of the penalised negative log-likelihood with:
 \itemize{
 \item \strong{R} : the \eqn{K \times K} clusters matrix
 \item \strong{clusters} : a list of indices associated to a partition of \eqn{V}
-\item \strong{lambda} : a positive number, the weight of the penalty.
+\item \strong{lambda} : a positive number, the regularized parameter.
 and compute the value of the penalised negative log-likelihood \eqn{L_{\mathcal P}^{(n)}(\Theta, \lambda)}.
 }
 }
 \description{
-The penalised negative loglikelihood of the Hüsler-Reiss graphical models can be
-written as follow :
+The penalised negative log-likelihood of the Hüsler-Reiss graphical models can be
+written as follow:
 \deqn{
  L_{\mathcal P}^{(n)}(\Theta, \lambda) = \underbrace{-\log(|\Theta|_+) -
  \frac 12 \text{tr}(\hat \Gamma^{(n)}\Theta)}_{L^{(n)}(\Theta)} + \lambda
- \underbrace{\sum_{i<j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)}
+ \underbrace{\sum_{i<j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)},
 }
 where \eqn{|\cdot|_+} is the generalised determinant, \eqn{n} is the sample size,
 \eqn{\hat \Gamma^{(n)}} an estimation of the variogram matrix \eqn{\Gamma} and \eqn{w_{ij}>0} the weights.
 }
 \details{
-We use the block matrix structure to compute the likelihood here (see \code{\link{build_theta}()} and
-\code{\link{extract_R_matrix}()}), that is why we use two parameters for the computation
-instead of only one matrix \eqn{\Theta}.
+An equivalent version of the negative likelihood is used by the function which is more convenient
+for the optimization procedure. It is defined by the following:
+
+\deqn{
+ L^{(n)}(\Theta, \lambda) = -\log(|P^t \Theta P|) - \frac 12 \text{tr}(\Gamma \Theta),
+}
+where \eqn{P} is a matrix \eqn{d\times (d-1)} matrix such that \eqn{P P^t = \Pi}, with \eqn{\Pi}
+the projection matrix on the orthogonal space of \eqn{<\pmb{1}_d>}.
+
+The block matrix structure is used to compute the negative log-likelihood (see \code{\link{build_theta}()} and
+\code{\link{extract_R_matrix}()}) not directly the value of the precision matrix \eqn{\Theta}.
 }
 \examples{
 ############################################################
