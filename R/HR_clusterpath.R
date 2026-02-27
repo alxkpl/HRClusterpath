@@ -1,15 +1,15 @@
 #' Clusterpath algorithm for Hüsler-Reiss models
 #'
-#' Gradient descent based on the Clusterpath algorithm adapted to the likelihood
-#' of a graphical Hüsler-Reiss model. Usefull when the precision matrix \eqn{\Theta}
+#' Block gradient descent based on the Clusterpath algorithm for Hüsler-Reiss
+#' graphical model. Usefull when the precision matrix \eqn{\Theta}
 #' (or the variogram \eqn{\Gamma}) has a block matrix structure.
 #'
-#' The block matrix models is defined from two elements : the cluster's partition
-#' \eqn{\{C_1, \dots, C_K\}}, included in \eqn{V} and the \eqn{R} matrix which belongs
-#' to \eqn{\mathcal S_K(\mathbb R)}, the set of symmetric \eqn{K \times K} matrix (See also
-#' \code{\link{build_theta}()} and \code{\link{extract_R_matrix}()}).
+#' The block matrix models are characterized by two objects : a clustering partition
+#' \eqn{\{C_1, \dots, C_K\}} of \eqn{V = \{1, \dots, d\}} and a matrix \eqn{R}
+#' which belongs to \eqn{\mathcal S_K(\mathbb R)}, the set of symmetric \eqn{K \times K}
+#' matrix (See also \code{\link{build_theta}()} and \code{\link{extract_R_matrix}()}).
 #'
-#' The Clusterpath aims to find optimum of some penalised negative loglikelihood defined in
+#' The Clusterpath aims to find the optimum of some penalised negative loglikelihood defined in
 #' \code{\link{neg_likelihood_pen}()}.
 #'
 #' @name hr-clusterpath
@@ -39,14 +39,16 @@
 #'
 #' @param eps_conv A positive number : tolerance threshold for the convergence of the algorithm.
 #'
-#' @param iter_max An integer : maximal number of iteration of the procedure.
+#' @param tol_opt A positive number : tolerance for the optimal step in the gradient descent.
+#'
+#' @param iter_max An integer : maximal number of iterations of the procedure.
 #'
 #' @returns `HR_Clusterpath()` is a block gradient descent from the data with default values and method for
 #' the optimization : the variogram matrix \eqn{\Gamma} is the empirical variogram and the weights are
 #' set as the exponential weights, which depends of only one tuning parameter \eqn{\zeta} and where
-#' we have some theoretical results.
+#' some theoretical guarantees are provided.
 #'
-#' The produce a list of several datas :
+#' The output is an object of class `HR_Clusterpath` which contains a list of several datas :
 #'  - $results : a list of results for each value of lambda, where each result is a
 #'               list with the following elements : $R the \eqn{R} matrix of the clusters, $clusters
 #'               a list of the variable indices separated per cluster, $likelihood the value of the
@@ -64,53 +66,42 @@
 #' \eqn{log(n)^s} sequence with \eqn{s < 8}.
 #'
 #' @examples
-#' ############################################################################
-#' #                 EXAMPLE OF USE OF THE HR_CLUSTERPATH FUNCTION
-#' ############################################################################
-#' # Construction of clusters and R matrix for simulation
+#' # Initialization of the parameters for the simulation
 #' R <- matrix(c(1, -3, 0,
 #'               -3, 2, -2,
 #'               0, -2, 1), nc = 3)
 #' clusters <- list(1:5, 6:10, 11:15)
 #'
-#' # Construction of induced theta and corresponding variogram gamma
+#' # Building of the variogram matrix for the simulation
 #' Theta <- build_Theta(R, clusters)
 #' Gamma <- graphicalExtremes::Theta2Gamma(Theta)
 #'
-#' gr3_bal_sim_param_cluster <-
-#'   list(
-#'     R = R,
-#'     clusters = clusters,
-#'     Theta = Theta,
-#'     Gamma = Gamma,
-#'     n = 1e4,
-#'     d = 15
-#'   )
-#'
 #' # Simulation of data
 #' set.seed(123)
+#' n <- 1e4                               # Sample size
+#' d <- ncol(Gamma)                       # Number of variables
 #' data <- graphicalExtremes::rmstable(
-#'            n = gr3_bal_sim_param_cluster$n,
+#'            n = n,
 #'            model = "HR",
-#'            d = gr3_bal_sim_param_cluster$d,
-#'            par = gr3_bal_sim_param_cluster$Gamma)
+#'            d = d,
+#'            par = Gamma)
+#'
+#' # Computation of the multivariate Pareto data
 #' norm_inf <- apply(abs(data), 1, max)
 #' quantile <- sort(norm_inf, decreasing = TRUE) |> as.numeric()
-#'
 #' k <- floor(0.1 * nrow(data))
 #' u <- quantile[k]
 #'
-#' data_par <- data[norm_inf > u, ] / u # Transformation to multivariate Pareto scale
+#' data_par <- data[norm_inf > u, ] / u         # Multivariate Pareto data
 #'
-#' # Computation of the solution produced by the clusterpath procedure for one value of lambda
-#' zeta <- log(gr3_bal_sim_param_cluster$n) ** 2              # Zeta parameter for the exponential weights
-#' HR_Clusterpath(data_par, lambda = 10, zeta = zeta)
-#'
+#' # Computation of the Hüsler-Reiss Clusterpath
+#' zeta <- log(n) ** 2              # Zeta parameter for the exponential weights
+#' HRC <- HR_Clusterpath(data_par, lambda = 10, zeta = zeta)
+#' HRC
 NULL
 
 
 #' @rdname hr-clusterpath
-#'
 #'
 #' @importFrom graphicalExtremes emp_vario Gamma2Theta
 #'

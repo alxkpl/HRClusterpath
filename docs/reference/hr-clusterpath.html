@@ -5,10 +5,10 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Clusterpath algorithm for Hüsler-Reiss models — hr-clusterpath"><meta name="description" content="Gradient descent based on the Clusterpath algorithm adapted to the likelihood
-of a graphical Hüsler-Reiss model. Usefull when the precision matrix \(\Theta\)
-(or the variogram \(\Gamma\)) has a block matrix structure."><meta property="og:description" content="Gradient descent based on the Clusterpath algorithm adapted to the likelihood
-of a graphical Hüsler-Reiss model. Usefull when the precision matrix \(\Theta\)
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Clusterpath algorithm for Hüsler-Reiss models — hr-clusterpath"><meta name="description" content="Block gradient descent based on the Clusterpath algorithm for Hüsler-Reiss
+graphical model. Usefull when the precision matrix \(\Theta\)
+(or the variogram \(\Gamma\)) has a block matrix structure."><meta property="og:description" content="Block gradient descent based on the Clusterpath algorithm for Hüsler-Reiss
+graphical model. Usefull when the precision matrix \(\Theta\)
 (or the variogram \(\Gamma\)) has a block matrix structure."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -48,8 +48,8 @@ of a graphical Hüsler-Reiss model. Usefull when the precision matrix \(\Theta\)
     </div>
 
     <div class="ref-description section level2">
-    <p>Gradient descent based on the Clusterpath algorithm adapted to the likelihood
-of a graphical Hüsler-Reiss model. Usefull when the precision matrix \(\Theta\)
+    <p>Block gradient descent based on the Clusterpath algorithm for Hüsler-Reiss
+graphical model. Usefull when the precision matrix \(\Theta\)
 (or the variogram \(\Gamma\)) has a block matrix structure.</p>
     </div>
 
@@ -114,8 +114,12 @@ this parameter is not used.</p></dd>
 <dd><p>A positive number : tolerance threshold for the convergence of the algorithm.</p></dd>
 
 
+<dt id="arg-tol-opt">tol_opt<a class="anchor" aria-label="anchor" href="#arg-tol-opt"></a></dt>
+<dd><p>A positive number : tolerance for the optimal step in the gradient descent.</p></dd>
+
+
 <dt id="arg-iter-max">iter_max<a class="anchor" aria-label="anchor" href="#arg-iter-max"></a></dt>
-<dd><p>An integer : maximal number of iteration of the procedure.</p></dd>
+<dd><p>An integer : maximal number of iterations of the procedure.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -123,8 +127,8 @@ this parameter is not used.</p></dd>
     <p><code>HR_Clusterpath()</code> is a block gradient descent from the data with default values and method for
 the optimization : the variogram matrix \(\Gamma\) is the empirical variogram and the weights are
 set as the exponential weights, which depends of only one tuning parameter \(\zeta\) and where
-we have some theoretical results.</p>
-<p>The produce a list of several datas :</p><ul><li><p>$results : a list of results for each value of lambda, where each result is a
+some theoretical guarantees are provided.</p>
+<p>The output is an object of class <code>HR_Clusterpath</code> which contains a list of several datas :</p><ul><li><p>$results : a list of results for each value of lambda, where each result is a
 list with the following elements : $R the \(R\) matrix of the clusters, $clusters
 a list of the variable indices separated per cluster, $likelihood the value of the
 penalised negative loglikelihood and $lambda the corresponding regularized parameter.</p></li>
@@ -133,11 +137,11 @@ penalised negative loglikelihood and $lambda the corresponding regularized param
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The block matrix models is defined from two elements : the cluster's partition
-\(\{C_1, \dots, C_K\}\), included in \(V\) and the \(R\) matrix which belongs
-to \(\mathcal S_K(\mathbb R)\), the set of symmetric \(K \times K\) matrix (See also
-<code>build_theta()</code> and <code><a href="theta-r.html">extract_R_matrix</a>()</code>).</p>
-<p>The Clusterpath aims to find optimum of some penalised negative loglikelihood defined in
+    <p>The block matrix models are characterized by two objects : a clustering partition
+\(\{C_1, \dots, C_K\}\) of \(V = \{1, \dots, d\}\) and a matrix \(R\)
+which belongs to \(\mathcal S_K(\mathbb R)\), the set of symmetric \(K \times K\)
+matrix (See also <code>build_theta()</code> and <code><a href="theta-r.html">extract_R_matrix</a>()</code>).</p>
+<p>The Clusterpath aims to find the optimum of some penalised negative loglikelihood defined in
 <code>neg_likelihood_pen()</code>.</p>
     </div>
     <div class="section level2">
@@ -155,47 +159,38 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">############################################################################</span></span></span>
-<span class="r-in"><span><span class="co">#                 EXAMPLE OF USE OF THE HR_CLUSTERPATH FUNCTION</span></span></span>
-<span class="r-in"><span><span class="co">############################################################################</span></span></span>
-<span class="r-in"><span><span class="co"># Construction of clusters and R matrix for simulation</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Initialization of the parameters for the simulation</span></span></span>
 <span class="r-in"><span><span class="va">R</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">3</span>, <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>              <span class="op">-</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>,</span></span>
 <span class="r-in"><span>              <span class="fl">0</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>, nc <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Construction of induced theta and corresponding variogram gamma</span></span></span>
+<span class="r-in"><span><span class="co"># Building of the variogram matrix for the simulation</span></span></span>
 <span class="r-in"><span><span class="va">Theta</span> <span class="op">&lt;-</span> <span class="fu"><a href="theta-r.html">build_Theta</a></span><span class="op">(</span><span class="va">R</span>, <span class="va">clusters</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">Gamma</span> <span class="op">&lt;-</span> <span class="fu">graphicalExtremes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/graphicalExtremes/man/parameterMatrixConversion.html" class="external-link">Theta2Gamma</a></span><span class="op">(</span><span class="va">Theta</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">gr3_bal_sim_param_cluster</span> <span class="op">&lt;-</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    R <span class="op">=</span> <span class="va">R</span>,</span></span>
-<span class="r-in"><span>    clusters <span class="op">=</span> <span class="va">clusters</span>,</span></span>
-<span class="r-in"><span>    Theta <span class="op">=</span> <span class="va">Theta</span>,</span></span>
-<span class="r-in"><span>    Gamma <span class="op">=</span> <span class="va">Gamma</span>,</span></span>
-<span class="r-in"><span>    n <span class="op">=</span> <span class="fl">1e4</span>,</span></span>
-<span class="r-in"><span>    d <span class="op">=</span> <span class="fl">15</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulation of data</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">1e4</span>                               <span class="co"># Sample size</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">Gamma</span><span class="op">)</span>                       <span class="co"># Number of variables</span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">graphicalExtremes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/graphicalExtremes/man/rmstable.html" class="external-link">rmstable</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>           n <span class="op">=</span> <span class="va">gr3_bal_sim_param_cluster</span><span class="op">$</span><span class="va">n</span>,</span></span>
+<span class="r-in"><span>           n <span class="op">=</span> <span class="va">n</span>,</span></span>
 <span class="r-in"><span>           model <span class="op">=</span> <span class="st">"HR"</span>,</span></span>
-<span class="r-in"><span>           d <span class="op">=</span> <span class="va">gr3_bal_sim_param_cluster</span><span class="op">$</span><span class="va">d</span>,</span></span>
-<span class="r-in"><span>           par <span class="op">=</span> <span class="va">gr3_bal_sim_param_cluster</span><span class="op">$</span><span class="va">Gamma</span><span class="op">)</span></span></span>
+<span class="r-in"><span>           d <span class="op">=</span> <span class="va">d</span>,</span></span>
+<span class="r-in"><span>           par <span class="op">=</span> <span class="va">Gamma</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Computation of the multivariate Pareto data</span></span></span>
 <span class="r-in"><span><span class="va">norm_inf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span>, <span class="fl">1</span>, <span class="va">max</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">quantile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">norm_inf</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fl">0.1</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">u</span> <span class="op">&lt;-</span> <span class="va">quantile</span><span class="op">[</span><span class="va">k</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data_par</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">[</span><span class="va">norm_inf</span> <span class="op">&gt;</span> <span class="va">u</span>, <span class="op">]</span> <span class="op">/</span> <span class="va">u</span> <span class="co"># Transformation to multivariate Pareto scale</span></span></span>
+<span class="r-in"><span><span class="va">data_par</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">[</span><span class="va">norm_inf</span> <span class="op">&gt;</span> <span class="va">u</span>, <span class="op">]</span> <span class="op">/</span> <span class="va">u</span>         <span class="co"># Multivariate Pareto data</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Computation of the solution produced by the clusterpath procedure for one value of lambda</span></span></span>
-<span class="r-in"><span><span class="va">zeta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">gr3_bal_sim_param_cluster</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op">**</span> <span class="fl">2</span>              <span class="co"># Zeta parameter for the exponential weights</span></span></span>
-<span class="r-in"><span><span class="fu">HR_Clusterpath</span><span class="op">(</span><span class="va">data_par</span>, lambda <span class="op">=</span> <span class="fl">10</span>, zeta <span class="op">=</span> <span class="va">zeta</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Computation of the Hüsler-Reiss Clusterpath</span></span></span>
+<span class="r-in"><span><span class="va">zeta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">**</span> <span class="fl">2</span>              <span class="co"># Zeta parameter for the exponential weights</span></span></span>
+<span class="r-in"><span><span class="va">HRC</span> <span class="op">&lt;-</span> <span class="fu">HR_Clusterpath</span><span class="op">(</span><span class="va">data_par</span>, lambda <span class="op">=</span> <span class="fl">10</span>, zeta <span class="op">=</span> <span class="va">zeta</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">HRC</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $results</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $results$l1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $results$l1$R</span>
@@ -286,7 +281,6 @@ we choose a sequence \((\zeta_n)_{n\in \mathbb N^*}\) which grows slower than t
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "HR_Clusterpath"</span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
