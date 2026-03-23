@@ -10,8 +10,8 @@
   K <- ncol(U) # Number of clusters
 
   # Problem formulation
-  Theta <- CVXR::Variable(d, d, PSD = TRUE)   # The precision matrix to estimate
-  R <- CVXR::Variable(K, K, symmetric = TRUE)       # The reduced matrix for Theta
+  Theta <- CVXR::Variable(shape = c(d, d), PSD = TRUE)   # The precision matrix to estimate
+  R <- CVXR::Variable(shape = c(K, K), symmetric = TRUE)       # The reduced matrix for Theta
   A <- CVXR::Variable(d)                      # The diagonal matrix for null sum constraint
   llh <- -CVXR::log_det(t(P) %*% Theta %*% P) - 1 / 2 * sum(CVXR::diag(Gamma %*% Theta)) # Likelihood on Theta
 
