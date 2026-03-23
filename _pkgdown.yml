@@ -38,6 +38,7 @@ reference:
     contents: 
       - HR_Clusterpath
       - HR_Clusterpath_refit
+      - HR_Clusterpath_hierarchy
 
   - title: Graphical functions
     desc: Tools for making graphs and analyze results. NOT FINISHED YET
