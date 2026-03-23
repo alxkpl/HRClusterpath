@@ -13,23 +13,23 @@
   Theta <- CVXR::Variable(shape = c(d, d), PSD = TRUE)   # The precision matrix to estimate
   R <- CVXR::Variable(shape = c(K, K), symmetric = TRUE)       # The reduced matrix for Theta
   A <- CVXR::Variable(d)                      # The diagonal matrix for null sum constraint
-  llh <- -CVXR::log_det(t(P) %*% Theta %*% P) - 1 / 2 * sum(CVXR::diag(Gamma %*% Theta)) # Likelihood on Theta
+  llh <- -CVXR::log_det(t(P) %*% Theta %*% P) - 1 / 2 * sum(CVXR::DiagMat(Gamma %*% Theta)) # Likelihood on Theta
 
   # Objective and constraints
   objective <- CVXR::Minimize(llh)                    # Objective on the likelihood
   constraints <- list(                                # Constraints :
     P %*% t(P) %*% Theta %*% P %*% t(P) == Theta,     # Theta in SP_d^1
-    Theta == CVXR::diag(A) + U %*% R %*% t(U)         # Theta with fixed block matrix structure
+    Theta == CVXR::DiagVec(A) + U %*% R %*% t(U)         # Theta with fixed block matrix structure
   )
 
   prob <- CVXR::Problem(objective, constraints)   # Problem definition
-  solution <- CVXR::solve(prob)
+  solution <- CVXR::psolve(prob, solver = "SCS")
 
   # Results
   results <- list()
-  results$R <- solution$getValue(R)
+  results$R <- CVXR::value(R)
   results$clusters <- clusters
-  results$likelihood <- solution$value
+  results$likelihood <- solution
 
   names(results$clusters) <- paste0("C", seq_along(results$clusters))
 
@@ -85,7 +85,7 @@
 #' k <- floor(0.1 * nrow(data))
 #' u <- quantile[k]
 #'
-#' data_par <- data[norm_inf > u, ] / u         # Multivariate Pareto data
+#' data_par <- data[norm_inf > u, ] / u          # Multivariate Pareto data
 #'
 #' # Computation of the Hüsler-Reiss Clusterpath
 #' zeta <- log(n) ** 2              # Zeta parameter for the exponential weights

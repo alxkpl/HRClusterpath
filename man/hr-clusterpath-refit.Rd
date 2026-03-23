@@ -56,7 +56,7 @@ quantile <- sort(norm_inf, decreasing = TRUE) |> as.numeric()
 k <- floor(0.1 * nrow(data))
 u <- quantile[k]
 
-data_par <- data[norm_inf > u, ] / u         # Multivariate Pareto data
+data_par <- data[norm_inf > u, ] / u          # Multivariate Pareto data
 
 # Computation of the Hüsler-Reiss Clusterpath
 zeta <- log(n) ** 2              # Zeta parameter for the exponential weights

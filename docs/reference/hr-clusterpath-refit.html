@@ -115,7 +115,7 @@ estimated clusters.</p>
 <span class="r-in"><span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fl">0.1</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">u</span> <span class="op">&lt;-</span> <span class="va">quantile</span><span class="op">[</span><span class="va">k</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data_par</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">[</span><span class="va">norm_inf</span> <span class="op">&gt;</span> <span class="va">u</span>, <span class="op">]</span> <span class="op">/</span> <span class="va">u</span>         <span class="co"># Multivariate Pareto data</span></span></span>
+<span class="r-in"><span><span class="va">data_par</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">[</span><span class="va">norm_inf</span> <span class="op">&gt;</span> <span class="va">u</span>, <span class="op">]</span> <span class="op">/</span> <span class="va">u</span>          <span class="co"># Multivariate Pareto data</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Computation of the Hüsler-Reiss Clusterpath</span></span></span>
 <span class="r-in"><span><span class="va">zeta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">**</span> <span class="fl">2</span>              <span class="co"># Zeta parameter for the exponential weights</span></span></span>
@@ -133,10 +133,10 @@ estimated clusters.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># New estimation of R</span></span></span>
 <span class="r-in"><span><span class="va">HRC_refit</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">l1</span><span class="op">$</span><span class="va">R</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]      [,2]       [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  1.0695803 -3.002448 -0.1067049</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -3.0024481  1.562946 -1.8063244</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -0.1067049 -1.806324  0.8696769</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             [,1]      [,2]        [,3]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  1.16677175 -3.137760 -0.06471347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -3.13776030  1.769561 -1.86317096</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -0.06471347 -1.863171  0.88505537</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
