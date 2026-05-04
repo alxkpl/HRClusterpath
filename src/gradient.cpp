@@ -78,21 +78,22 @@ Eigen::VectorXd penalty_gradient(
     Eigen::VectorXd results = Eigen::VectorXd::Zero(K);
     for(int k = 0; k < K; k++){
         if(k == m) continue;
-        
+        // Gradient for dd_km / dr_mi
         for(int i = 0; i < K; i++){
             if(i==k || i==m) continue;
-            results(i) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * (R(m, i) - R(k, i));
+            results(i) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * p(i) * (R(m, i) - R(k, i));
         }
 
         results(m) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * (p(m) - 1) * (R(m, m) - R(k, m));
-        results(k) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * (p(k) - 1) * (R(k, k) - R(k, m));
+        results(k) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * ((p(k) - 1) * (R(k, m) - R(k, k)) + (p(m) - 1) * (R(k, m) - R(m, m)));
 
         if(k == K - 1) continue;
+        // Gradient for dd_kl / dr_m.
         for(int l = k + 1; l < K; l++) {
             if(l == m) continue;
 
-            results(k) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(k) * (R(k, m) - R(l, m));
-            results(l) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(l) * (R(l, m) - R(k, m));
+            results(k) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(m) * (R(k, m) - R(l, m));
+            results(l) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(m) * (R(l, m) - R(k, m));
         }
     }
     return results;
