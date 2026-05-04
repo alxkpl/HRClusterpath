@@ -107,9 +107,6 @@ List HRClusterpath_unique(
         int k = 0;
         l_old = l_new;
         while (k < K_max){
-            // Gradient update
-            Gradient_update(R, clusters, Gamma, P, tildeW, W, tol_opt, lambda, k);
-
             // Merging step
             Eigen::MatrixXd d_mat = distance_matrix(R, clusters);
             Eigen::VectorXi indx = which_min_upper(d_mat);
@@ -122,6 +119,9 @@ List HRClusterpath_unique(
                 // Change dimension size
                 K_max = R.cols();
                 tildeW = clustered_weights(W, clusters);
+            } else {
+                // Gradient update
+                Gradient_update(R, clusters, Gamma, P, tildeW, W, tol_opt, lambda, k);
             }
             k++;
         }
