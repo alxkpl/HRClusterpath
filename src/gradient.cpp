@@ -35,7 +35,7 @@ Eigen::VectorXd Gradient_block(
     Eigen::MatrixXd P,
     int m
 ) {
-    /* Compute the column gradient in a block structure
+    /* Compute the column gradient in a block structure with only URU^t part
      * 
      * Input :
      * R : a matrix, the reduced matrix
@@ -52,10 +52,43 @@ Eigen::VectorXd Gradient_block(
     Eigen::MatrixXd D = Eigen::MatrixXd::Identity(K, K);
     D(m, m) = 0.5;
 
-    return D * U.transpose() * Gradient_base(build_theta_cpp(R, clusters), Gamma, P) * U.col(m);
+    return 2 * D * U.transpose() * Gradient_base(build_theta_cpp(R, clusters), Gamma, P) * U.col(m);
 }
 
+Eigen::VectorXd correction_gradient(Eigen::MatrixXd R, List clusters, Eigen::MatrixXd Gamma, Eigen::MatrixXd P, int m) {
 
+    /* Compute the column gradient in a block structure with only the A part
+     * 
+     * Input :
+     * R : a matrix, the reduced matrix
+     * clusters : a list of list, the list of the clusters
+     * Gamma : a matrix, the fixed variogram
+     * P : a matrix, computed with non_sigular_P in the right dimension
+     * m : an integer, the column of the gradient
+     *
+     * Output :
+     * The correction gradient for the block gradient descent
+     */
+    int K = clusters.size();
+    Eigen::MatrixXd U = create_U(clusters);
+    Eigen::MatrixXd p = cluster_number(clusters);
+    Eigen::MatrixXd M = P * inverse(P.transpose() * build_theta_cpp(R, clusters) * P) * P.transpose();
+    Eigen::MatrixXd Gamma_P = P * P.transpose() * Gamma * P * P.transpose();
+    Eigen::VectorXd correction = Eigen::VectorXd::Zero(K);
+
+    // Correction = -(1 - pm) * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii)
+    correction(m) = - (1 - p(m)) * ((U.col(m).asDiagonal() * M).trace() + 0.5 * (U.col(m).asDiagonal() * Gamma_P).trace());
+
+    for(int k = 0; k < K; k++) {
+        if (k == m) continue; // already done for m
+
+        // Correction = pk * sum_(i \in C_m) (M_ii + 0.5 * Gamma_P_ii) + pm * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii)
+        correction(k) = p(k) * ((U.col(m).asDiagonal() * M).trace() + 0.5 * (U.col(m).asDiagonal() * Gamma_P).trace()) + p(m) * ((U.col(k).asDiagonal() * M).trace() + 0.5 * (U.col(k).asDiagonal() * Gamma_P).trace());
+    }
+
+    return correction;
+}
+ 
 Eigen::VectorXd penalty_gradient(
     Eigen::MatrixXd R,
     List clusters,
@@ -99,7 +132,7 @@ Eigen::VectorXd penalty_gradient(
     return results;
 }
 
-
+//[[Rcpp::export(.Gradient_step)]]
 Eigen::MatrixXd Gradient_penalised(
     Eigen::MatrixXd R,
     List clusters,
@@ -129,7 +162,8 @@ Eigen::MatrixXd Gradient_penalised(
 
     Eigen::VectorXd d_llh = Gradient_block(R, clusters, Gamma, P, m);  // Gradient of the likelihood
     Eigen::VectorXd d_pen = penalty_gradient(R, clusters, tildeW, m);  // Gradient of the penalty
-    Eigen::VectorXd value = d_llh + lambda * d_pen;     // Gradient values in the row/column
+    Eigen::MatrixXd correction = correction_gradient(R, clusters, Gamma, P, m);  // Correction for the block gradient descent with A matrix
+    Eigen::VectorXd value = correction + d_llh + lambda * d_pen;     // Gradient values in the row/column
 
     results.col(m) = value;
     results.row(m) = value;
