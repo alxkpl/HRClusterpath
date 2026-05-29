@@ -112,7 +112,7 @@ Eigen::VectorXd cluster_number(List clusters) {
     return results;
 }
 
-
+//[[Rcpp::export(.cw)]]
 Eigen::MatrixXd clustered_weights(Eigen::MatrixXd W, List clusters){
     Eigen::MatrixXd U = create_U(clusters);
     int d = W.rows();
@@ -120,5 +120,5 @@ Eigen::MatrixXd clustered_weights(Eigen::MatrixXd W, List clusters){
     for(int i = 0; i < d; i++){
         W(i, i) = 0;
     }
-    return 0.5 * U.transpose() * W * U;
+    return U.transpose() * W * U;
 }
