@@ -2,6 +2,7 @@
 #include <Rcpp.h>
 #include "utils.hpp"
 #include "model.hpp"
+#include "hessian.hpp"
 
 using namespace Rcpp;     // to use List as Rcpp::List
 
@@ -76,8 +77,8 @@ Eigen::VectorXd correction_gradient(Eigen::MatrixXd R, List clusters, Eigen::Mat
     Eigen::MatrixXd Gamma_P = P * P.transpose() * Gamma * P * P.transpose();
     Eigen::VectorXd correction = Eigen::VectorXd::Zero(K);
 
-    // Correction = -(1 - pm) * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii)
-    correction(m) = - (1 - p(m)) * ((U.col(m).asDiagonal() * M).trace() + 0.5 * (U.col(m).asDiagonal() * Gamma_P).trace());
+    // Correction =  pm * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii)
+    correction(m) = p(m) * ((U.col(m).asDiagonal() * M).trace() + 0.5 * (U.col(m).asDiagonal() * Gamma_P).trace());
 
     for(int k = 0; k < K; k++) {
         if (k == m) continue; // already done for m
@@ -88,7 +89,7 @@ Eigen::VectorXd correction_gradient(Eigen::MatrixXd R, List clusters, Eigen::Mat
 
     return correction;
 }
- 
+
 Eigen::VectorXd penalty_gradient(
     Eigen::MatrixXd R,
     List clusters,
@@ -132,7 +133,6 @@ Eigen::VectorXd penalty_gradient(
     return results;
 }
 
-//[[Rcpp::export(.Gradient_step)]]
 Eigen::MatrixXd Gradient_penalised(
     Eigen::MatrixXd R,
     List clusters,
@@ -163,7 +163,10 @@ Eigen::MatrixXd Gradient_penalised(
     Eigen::VectorXd d_llh = Gradient_block(R, clusters, Gamma, P, m);  // Gradient of the likelihood
     Eigen::VectorXd d_pen = penalty_gradient(R, clusters, tildeW, m);  // Gradient of the penalty
     Eigen::MatrixXd correction = correction_gradient(R, clusters, Gamma, P, m);  // Correction for the block gradient descent with A matrix
-    Eigen::VectorXd value = correction + d_llh + lambda * d_pen;     // Gradient values in the row/column
+    Eigen::VectorXd gradient = correction + d_llh + lambda * d_pen;     // Gradient in the row/column
+    Eigen::MatrixXd hessian = Hessian(R, clusters, P, tildeW, lambda, m); // Hessian int the m-th column
+
+    Eigen::VectorXd value = inverse(hessian) * gradient;
 
     results.col(m) = value;
     results.row(m) = value;

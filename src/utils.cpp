@@ -115,3 +115,20 @@ List simple_list(int d){
     }
     return results;
 }
+
+Eigen::MatrixXd E_matrix(int d, int k, int l){
+    /* Compute the symmetric matrix of indicators for the indices k and l
+     * 
+     * Input :
+     * d : an integer, the dimension
+     * k : an integer, the first index
+     * l : an integer, the second index
+     * 
+     * Output :
+     * The matrix E_kl
+     */
+    Eigen::MatrixXd results = Eigen::MatrixXd::Zero(d, d);
+    results(k, l) = 1;
+    results(l, k) = 1;
+    return results;
+}

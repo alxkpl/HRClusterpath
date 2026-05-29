@@ -18,4 +18,6 @@ Eigen::MatrixXd non_singular_P(int d);
 
 List simple_list(int d);
 
+Eigen::MatrixXd E_matrix(int d, int k, int l);
+
 #endif
