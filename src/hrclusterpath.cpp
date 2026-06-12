@@ -128,7 +128,7 @@ List HRClusterpath_unique(
             double min_dist = d_mat(indx(0), indx(1));
 
             // Check if the smaller distance is under the thresold eps_f
-            if(min_dist < eps_f) {
+            if(min_dist < eps_f && K_max > 1) {
                 // Merge clusters and update R coefficients
                 cluster_fusion(R, clusters, indx(0), indx(1));
                 // Change dimension size

@@ -104,7 +104,8 @@ void cluster_fusion(Eigen::MatrixXd &R, List& clusters, int k, int l)
     // Case for fusion to one cluster
     R(0,0) = (p[0] * R(0, 0) + p[1] * R(0, 1)) / (p[0] + p[1]);
     R.conservativeResize(K - 1, K - 1);
-    clusters = merge_vector(clusters[0], clusters[1]); 
+    clusters[0] = merge_vector(clusters[0], clusters[1]);
+    clusters.erase(1);
   }else{
     // Other cases
     // Cluster fusion step
