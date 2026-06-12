@@ -113,15 +113,26 @@ penalty <- function(R, clusters, weights) {
 #' @rdname likelihood
 #'
 #' @param Gamma A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.
-#' @param weights The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal.
-#' @param lambda A positive number, the regularized parameter.
+#' @param weights The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal. The weights for
+#' the clusterpath penalty.
+#' @param weights_lasso The \eqn{d \times d} symmetric matrix \eqn{W_{lasso}} with a zero diagonal. The
+#' weights for the lasso penalty.
+#' @param lambda A positive number, the regularized parameter for clusterpath penalty.
+#' @param mu A positive number, the regularized parameter for lasso penalty.
+#' @param eps_lasso A small positive number, the parameter for the smoothed Lasso penalty.
 #'
 #' @export
-NegLikelihood_penalised <- function(R, clusters, Gamma, weights, lambda) {
+NegLikelihood_penalised <- function(
+  R, clusters, Gamma, weights, weights_lasso = NULL, lambda, mu = 0, eps_lasso = 5e-3
+) {
   d <- ncol(Gamma)
   P <- .non_singular_P(d)
 
+  if (is.null(weights_lasso)) {
+    weights_lasso <- matrix(1, nc = d, nr = d) - diag(rep(1, d))
+  }
+
   return(
-    .Likelihood_penalised(R, clusters, Gamma, P, weights, lambda)
+    .Likelihood_penalised(R, clusters, Gamma, P, weights, weights_lasso, lambda, mu, eps_lasso)
   )
 }

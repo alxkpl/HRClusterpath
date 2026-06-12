@@ -5,8 +5,8 @@ distance_matrix <- function(R, clusters) {
     .Call(`_HRClusterpath_distance_matrix`, R, clusters)
 }
 
-.HRClusterpath <- function(R_init, clusters_init, Gamma, W, lambda, eps_f, eps_conv, tol_opt, iter_max) {
-    .Call(`_HRClusterpath_HRClusterpath_unique`, R_init, clusters_init, Gamma, W, lambda, eps_f, eps_conv, tol_opt, iter_max)
+.HRClusterpath <- function(R_init, clusters_init, Gamma, W, Z, lambda, mu, eps_lasso, eps_f, eps_conv, tol_opt, iter_max) {
+    .Call(`_HRClusterpath_HRClusterpath_unique`, R_init, clusters_init, Gamma, W, Z, lambda, mu, eps_lasso, eps_f, eps_conv, tol_opt, iter_max)
 }
 
 .Likelihood_HR <- function(R, clusters, Gamma, P) {
@@ -17,8 +17,8 @@ distance_matrix <- function(R, clusters) {
     .Call(`_HRClusterpath_Penalty`, R, clusters, W)
 }
 
-.Likelihood_penalised <- function(R, clusters, Gamma, P, W, lambda) {
-    .Call(`_HRClusterpath_Likelihood_penalised`, R, clusters, Gamma, P, W, lambda)
+.Likelihood_penalised <- function(R, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso) {
+    .Call(`_HRClusterpath_Likelihood_penalised`, R, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso)
 }
 
 .create_U <- function(clusters) {
@@ -27,6 +27,10 @@ distance_matrix <- function(R, clusters) {
 
 .build_theta <- function(R, clusters) {
     .Call(`_HRClusterpath_build_theta_cpp`, R, clusters)
+}
+
+.cw <- function(W, clusters) {
+    .Call(`_HRClusterpath_clustered_weights`, W, clusters)
 }
 
 .non_singular_P <- function(d) {

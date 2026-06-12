@@ -18,34 +18,42 @@ void Gradient_update(
     const Eigen::MatrixXd P,
     const Eigen::MatrixXd tildeW,
     const Eigen::MatrixXd W,
+    const Eigen::MatrixXd tildeZ,
+    const Eigen::MatrixXd Z,
     double tol_opt,
     double lambda,
+    double mu,
+    double eps_lasso,
     int m
 ){
     /* Gradient update for t block gradient descent. 
      *
      * Input :
-     * R : a matrixx, the current reduced matrix
+     * R : a matrix, the current reduced matrix
      * clusters : a list, the list of clusters (list of vector of indices)
      * Gamma : a matrix, the estimated variogram
      * P : a matrix, the Projection matrix
      * tildeW : a matrix, the weights inside a cluster
      * W : a matrix, the weights for each variable
+     * tildeZ : a matrix, lasso weights inside a cluster
+     * Z : a matrix, lasso weights for each variable
      * tol_opt : a double, the tolerance for the optimal step size
      * lambda : a double, the regularization parameter
+     * mu : a double, the lasso parameter
+     * eps_lasso : a double, the smooth parameter for the absolute value
      * m : an integer, the index of the block to update
      *
      * Output :
      * Void, the function updates R in place
      */
     Eigen::MatrixXd gradient = Gradient_penalised(
-        R, clusters, Gamma, P, tildeW, lambda, m
+        R, clusters, Gamma, P, tildeW, tildeZ, lambda, mu, eps_lasso, m
     );
 
     // Computation of the optimal step for the block gradient descent
     double m_step = max_step(R, clusters, gradient, m);     // Max step using inequalities
     if (m_step > 10) m_step = 10.0; // To improve code velocity
-    double s = Gradient_step_cpp(R, clusters, Gamma, P, W, lambda, gradient, tol_opt, 0, m_step);
+    double s = Gradient_step_cpp(R, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso, gradient, tol_opt, 0, m_step);
 
     R -= s * gradient;
 }
@@ -57,7 +65,10 @@ List HRClusterpath_unique(
     List clusters_init,
     const Eigen::MatrixXd Gamma,
     const Eigen::MatrixXd W,
+    const Eigen::MatrixXd Z,
     double lambda,
+    double mu,
+    double eps_lasso,
     double eps_f,
     double eps_conv,
     double tol_opt,
@@ -69,8 +80,11 @@ List HRClusterpath_unique(
      * R_init : a matrix, the initial reduced matrix
      * clusters_init : a list, the initial clusters
      * Gamma : a matrix, the estimated variogram
-     * W : a matrix, the weights for each variable
+     * W : a matrix, the clusterpath weights for each variable
+     * Z : a matrix, the lasso weights for each variable
      * lambda : a double, the regularization parameter
+     * mu : a double, the lasso parameter
+     * eps_lasso : a double, the smooth parameter for the absolute value
      * eps_f : a double, the threshold for merging clusters
      * eps_conv : a double, the threshold for convergence
      * tol_opt : a double, the tolerance for optimal step size computation
@@ -91,10 +105,11 @@ List HRClusterpath_unique(
     List clusters = clusters_init;
 
     // Likelihood values for the convergence criteria
-    double l_new = Likelihood_penalised(R, clusters, Gamma, P, W, lambda);
+    double l_new = Likelihood_penalised(R, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
     double l_old = 2 * l_new;
 
     Eigen::MatrixXd tildeW = clustered_weights(W, clusters);  // Weights inside a cluster
+    Eigen::MatrixXd tildeZ = clustered_weights(Z, clusters);  // Lasso weights inside a cluster
 
     // Initial value for the while loop
     int count = 0;
@@ -119,14 +134,25 @@ List HRClusterpath_unique(
                 // Change dimension size
                 K_max = R.cols();
                 tildeW = clustered_weights(W, clusters);
+                tildeZ = clustered_weights(Z, clusters);
             } else {
                 // Gradient update
-                Gradient_update(R, clusters, Gamma, P, tildeW, W, tol_opt, lambda, k);
+                Gradient_update(R, clusters, Gamma, P, tildeW, W, tildeZ, Z, tol_opt, lambda, mu, eps_lasso, k);
             }
             k++;
         }
-        l_new = Likelihood_penalised(R, clusters, Gamma, P, W, lambda);
+        l_new = Likelihood_penalised(R, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
         count++;
+    }
+
+    // Check if some coefficients are under the smooth threshold
+    for(int k = 0; k < K_max; k++){
+        for(int l = k; l < K_max; l++){
+            if (R(k, l) > - eps_lasso && R(k, l) < eps_lasso) {
+                R(k, l) = 0;
+                R(l, k) = 0;
+            }
+        }
     }
 
     // Rcpp::Rcerr << "Final variation : " << std::abs((l_old / l_new) - 1.0)  << ".\n" << "Optimization finished.\n";

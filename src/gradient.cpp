@@ -133,13 +133,46 @@ Eigen::VectorXd penalty_gradient(
     return results;
 }
 
+Eigen::VectorXd lasso_gradient(
+    Eigen::MatrixXd R,
+    Eigen::MatrixXd tildeZ,
+    double epsilon,
+    int m
+) {
+    /* Compute the block gradient of the lasso penalty
+     * 
+     * Input :
+     * R : a matrix, the reduced matrix
+     * tildeZ : a matrix, the cumulative lasso weights per cluster
+     * epsilon : a double, the regularization parameter
+     * m : an integer, the column of the gradient
+     * 
+     * Output :
+     * Gradient
+     */
+    int K = R.rows();
+
+    Eigen::VectorXd results = tildeZ.col(m);
+    for(int k = 0; k < K; k++){
+        if(R(m, k) >= -epsilon && R(m, k) <= epsilon){
+            results(k) = tildeZ(m,k) * R(m, k) / epsilon;
+        } else {
+            results(k) = (2 - (k==m)) * tildeZ(m,k) * ((R(m, k) > 0) - (R(m, k) < 0));
+        }
+    }
+    return results;
+}
+
 Eigen::MatrixXd Gradient_penalised(
     Eigen::MatrixXd R,
     List clusters,
     const Eigen::MatrixXd Gamma,
     const Eigen::MatrixXd P,
     const Eigen::MatrixXd tildeW,
+    const Eigen::MatrixXd tildeZ,
     double lambda,
+    double mu,
+    double eps_lasso,
     int m
 ){
     /* Compute the gradient matrix for a column/row
@@ -150,6 +183,10 @@ Eigen::MatrixXd Gradient_penalised(
      * Gamma : a matrix, the fixed variogram
      * P : a matrix, computed with non_sigular_P in the right dimension
      * tildeW : a matrix, the cumulative weights per cluster
+     * tildeZ : a matrix, the lasso weights per cluster
+     * lambda : a double, the regularisation parameter
+     * mu : a double, the lasso parameter
+     * eps_lasso : a double, the smooth parameter for the absolute value
      * m : an integer, the column of the gradient
      *
      * Output :
@@ -159,12 +196,16 @@ Eigen::MatrixXd Gradient_penalised(
     int K = clusters.size();   // Dimension of the matrix (number of cluster)
     Eigen::MatrixXd results = Eigen::MatrixXd::Zero(K, K);   // Zeros everywhere
 
-
     Eigen::VectorXd d_llh = Gradient_block(R, clusters, Gamma, P, m);  // Gradient of the likelihood
-    Eigen::VectorXd d_pen = penalty_gradient(R, clusters, tildeW, m);  // Gradient of the penalty
+    Eigen::VectorXd d_pen = penalty_gradient(R, clusters, tildeW, m);  // Gradient of the penalty 
     Eigen::MatrixXd correction = correction_gradient(R, clusters, Gamma, P, m);  // Correction for the block gradient descent with A matrix
     Eigen::VectorXd gradient = correction + d_llh + lambda * d_pen;     // Gradient in the row/column
-    Eigen::MatrixXd hessian = Hessian(R, clusters, P, tildeW, lambda, m); // Hessian int the m-th column
+
+    if (mu > 0) {
+        gradient += mu * lasso_gradient(R, tildeZ, eps_lasso, m); // Gradient of the lasso penalty
+    }
+
+    Eigen::MatrixXd hessian = Hessian(R, clusters, P, tildeW, tildeZ, lambda, mu, eps_lasso, m); // Hessian int the m-th column
 
     Eigen::VectorXd value = inverse(hessian) * gradient;
 

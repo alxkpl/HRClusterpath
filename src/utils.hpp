@@ -20,4 +20,6 @@ List simple_list(int d);
 
 Eigen::MatrixXd E_matrix(int d, int k, int l);
 
+double abs_penalty(double x, double epsilon);
+
 #endif

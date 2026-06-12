@@ -12,7 +12,10 @@ Eigen::MatrixXd Gradient_penalised(
     const Eigen::MatrixXd Gamma,
     const Eigen::MatrixXd P,
     const Eigen::MatrixXd tildeW,
+    const Eigen::MatrixXd tildeZ,
     double lambda,
+    double mu,
+    double eps_lasso,
     int m
 );
 

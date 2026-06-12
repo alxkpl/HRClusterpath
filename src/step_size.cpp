@@ -44,7 +44,10 @@ double Gradient_step_cpp(
     Eigen::MatrixXd Gamma,
     Eigen::MatrixXd P,
     Eigen::MatrixXd W,
+    Eigen::MatrixXd Z,
     double lambda,
+    double mu,
+    double eps_lasso,
     Eigen::MatrixXd gradient,
     double tol,
     double lo,
@@ -58,7 +61,10 @@ double Gradient_step_cpp(
      * Gamma : a matrix, the fixed variogram
      * P : a matrix, computed with non_sigular_P in the right dimension
      * W : a matrix, the matrix of weights
+     * Z : a matrix, the matrix of latent variables
      * lambda : double, the regularization parameter
+     * mu : double, the Lasso regularization parameter
+     * eps_lasso : double, the epsilon for the Lasso penalty
      * gradient : a matrix, a direction of the gradient
      * tol : positive number, the tolerance for convergence of the method
      * lo : a positive number, the value of the lower bound of the interval
@@ -79,11 +85,11 @@ double Gradient_step_cpp(
     n_steps = std::max(n_steps, 2);
 
     // Value of the likelihood without gradient step
-    double val_0 = Likelihood_penalised(R_init, clusters, Gamma, P, W, lambda);
+    double val_0 = Likelihood_penalised(R_init, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
 
     // Values of the likelihood with the two gradient steps
-    double val_c = Likelihood_penalised(R_init - c * gradient, clusters, Gamma, P, W, lambda);
-    double val_d = Likelihood_penalised(R_init - d * gradient, clusters, Gamma, P, W, lambda);
+    double val_c = Likelihood_penalised(R_init - c * gradient, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
+    double val_d = Likelihood_penalised(R_init - d * gradient, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
 
     for(int i = 0; i < n_steps; i++){
         if(std::abs(a-b) < tol) break;      // Break the loop if the tolerance is reached
@@ -107,15 +113,15 @@ double Gradient_step_cpp(
         d = a + (b - a) / phi;
 
         // Update of the associated likelihood values
-        val_c = Likelihood_penalised(R_init - c * gradient, clusters, Gamma, P, W, lambda);
-        val_d = Likelihood_penalised(R_init - d * gradient, clusters, Gamma, P, W, lambda);
+        val_c = Likelihood_penalised(R_init - c * gradient, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
+        val_d = Likelihood_penalised(R_init - d * gradient, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
 
     }
 
     // Candidate for the optimal step
     double s = (a + b) / 2.0;
 
-    double val_s = Likelihood_penalised(R_init - s * gradient, clusters, Gamma, P, W, lambda);
+    double val_s = Likelihood_penalised(R_init - s * gradient, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso);
 
     // Checking if it does better than initial matrix, return 0.0 if it does not
     if (val_s > val_0) return 0.0;

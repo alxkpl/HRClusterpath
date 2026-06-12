@@ -97,7 +97,7 @@ NULL
 #'
 #' @export
 HR_Clusterpath_hierarchy <- function(
-  Gamma, lambda, W = NULL, zeta, eps_f = NULL, kappa = 1e-2,
+  Gamma, lambda, mu = 0, W = NULL, Z = NULL, zeta, eps_lasso = 5e-3, eps_f = NULL, kappa = 1e-2,
   eps_conv = 1e-7, tol_opt = 1e-3, iter_max = 1000
 ) {
   # Number of variables
@@ -120,6 +120,12 @@ HR_Clusterpath_hierarchy <- function(
     eps_f <-  kappa * median(sqrt(distance_matrix(res$R, as.list(1:d))) + diag(rep(NA, d)), na.rm = TRUE)
   }
 
+  if (is.null(Z)) {
+    Z <- abs(1 / res$R)
+    diag(Z) <- 0
+    Z <- Z / sum(Z) * d * (d - 1)
+  }
+
   # Non singular matrix projection P for the likelihood computation
   P <- .non_singular_P(d)
   hierarchy <- list()
@@ -130,7 +136,10 @@ HR_Clusterpath_hierarchy <- function(
       res$clusters,
       Gamma,
       W,
+      Z,
       lambda[i],
+      mu,
+      eps_lasso,
       eps_f,
       eps_conv,
       tol_opt,
@@ -142,8 +151,9 @@ HR_Clusterpath_hierarchy <- function(
     names(hierarchy$results[[i]]$clusters) <- paste0("C", seq_along(hierarchy$results[[i]]$clusters))
 
     # Likelihood value
-    hierarchy$results[[i]]$likelihood <- .Likelihood_penalised(res$R, res$clusters, Gamma, P, W, lambda[i])
+    hierarchy$results[[i]]$likelihood <- .Likelihood_penalised(res$R, res$clusters, Gamma, P, W, Z, lambda[i], mu, eps_lasso)
     hierarchy$results[[i]]$lambda <- lambda[i]
+    hierarchy$results[[i]]$mu <- mu
   }
 
   hierarchy$Gamma <- Gamma

@@ -107,7 +107,7 @@ NULL
 #'
 #' @export
 HR_Clusterpath <- function(
-  data, lambda, zeta, W = NULL, p = NULL, eps_f = NULL, kappa = 1e-2,
+  data, lambda, mu = 0, zeta, W = NULL, Z = NULL, p = NULL, eps_lasso = 5e-3, eps_f = NULL, kappa = 1e-2,
   eps_conv = 1e-7, tol_opt = 1e-3, iter_max = 1000
 ) {
   # Estimation of the variogram matrix from the data
@@ -122,8 +122,11 @@ HR_Clusterpath <- function(
         Gamma = Gamma,
         zeta = zeta,
         lambda = l,
+        mu = mu,
         W = W,
+        Z = Z,
         kappa = kappa,
+        eps_lasso = eps_lasso,
         eps_conv = eps_conv,
         eps_f = eps_f,
         tol_opt = tol_opt,

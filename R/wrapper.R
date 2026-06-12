@@ -2,7 +2,7 @@
 #'
 #' @keywords internal
 .HRC_wrapper <- function(
-  Gamma, zeta, lambda, W, kappa,
+  Gamma, zeta, lambda, mu, W, Z, kappa, eps_lasso,
   eps_conv, eps_f, tol_opt, iter_max
 ) {
   # Number of variables
@@ -24,6 +24,12 @@
     eps_f <-  kappa * median(sqrt(distance_matrix(R.init, as.list(1:d))) + diag(rep(NA, d)), na.rm = TRUE)
   }
 
+  # If no custom weights are given, we use inverse of the initial guess as weights
+  if (is.null(Z)) {
+    Z <- 1 / abs(R.init) - diag(1 / abs(R.init))
+    Z <- Z / sum(Z) * d * (d - 1)
+  }
+
   # Non singular matrix projection P for the likelihood computation
   P <- .non_singular_P(d)
 
@@ -33,7 +39,10 @@
     clusters.init,
     Gamma,
     W,
+    Z,
     lambda,
+    mu,
+    eps_lasso,
     eps_f,
     eps_conv,
     tol_opt,
@@ -41,7 +50,7 @@
   )
 
   # Likelihood value
-  results$likelihood <- .Likelihood_penalised(results$R, results$clusters, Gamma, P, W, lambda)
+  results$likelihood <- .Likelihood_penalised(results$R, results$clusters, Gamma, P, W, Z, lambda, mu, eps_lasso)
   results$lambda <- lambda
 
   names(results$clusters) <- paste0("C", seq_along(results$clusters))

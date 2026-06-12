@@ -108,13 +108,49 @@ Eigen::MatrixXd Hessian_penalty(
     
 }
 
+Eigen::MatrixXd Hessian_lasso(
+    Eigen::MatrixXd R,
+    Eigen::MatrixXd tildeZ,
+    double epsilon,
+    int m
+) {
+    /* Compute the Hessian of the lasso penalty
+     * 
+     * Input :
+     * R : a matrix, the reduced matrix
+     * tildeZ : a matrix, the cumulative lasso weights per cluster
+     * epsilon : a double, the smooth parameter for the absolute value
+     * m : an integer, the column of the gradient
+     * 
+     * Output :
+     * Hessian
+     */
+    const int K = R.rows();
+    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(K, K);
+    for (int k = 0; k < K; k++){
+        if(R(m, k) >= -epsilon && R(m, k) <= epsilon) H(k, k) = tildeZ(m, k) / epsilon;
+    }
+
+    return H;
+}
+
 Eigen::MatrixXd Hessian(
     Eigen::MatrixXd R,
     List clusters,
     Eigen::MatrixXd P,
     Eigen::MatrixXd tildeW,
+    Eigen::MatrixXd tildeZ,
     double lambda,
+    double mu,
+    double eps_lasso,
     int m
 ) {
-    return Hessian_base(R = R, clusters = clusters, P = P, m = m) + lambda * Hessian_penalty(R = R, clusters = clusters, tildeW = tildeW, m = m);
+    Eigen::MatrixXd H_base = Hessian_base(R, clusters, P, m);
+    Eigen::MatrixXd H_pen = Hessian_penalty(R, clusters, tildeW, m);
+    if (mu > 0) {
+        Eigen::MatrixXd H_lasso = Hessian_lasso(R, tildeZ, eps_lasso, m);
+        return H_base + lambda * H_pen + mu * H_lasso;
+    } else {
+        return H_base + lambda * H_pen;
+    }
 }

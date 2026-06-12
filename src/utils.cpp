@@ -132,3 +132,20 @@ Eigen::MatrixXd E_matrix(int d, int k, int l){
     results(l, k) = 1;
     return results;
 }
+
+double abs_penalty(double x, double epsilon) {
+    /* Compute the value of the lasso penalty for a single value
+     * 
+     * Input :
+     * x : a double, the value
+     * epsilon : a double, the smooth parameter for the absolute value
+     * 
+     * Output :
+     * The value of the lasso penalty for x
+     */
+    if (x >= -epsilon && x <= epsilon) {
+        return x * x / (2 * epsilon) + epsilon / 2;
+    } else {
+        return std::fabs(x);
+    }
+}

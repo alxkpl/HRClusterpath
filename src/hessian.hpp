@@ -11,7 +11,10 @@ Eigen::MatrixXd Hessian(
     List clusters,
     Eigen::MatrixXd P,
     Eigen::MatrixXd tildeW,
+    Eigen::MatrixXd tildeZ,
     double lambda,
+    double mu,
+    double eps_lasso,
     int m
 );
 

@@ -12,7 +12,10 @@ double Likelihood_penalised(
     const Eigen::MatrixXd Gamma,
     const Eigen::MatrixXd P,
     const Eigen::MatrixXd W,
-    double lambda
+    const Eigen::MatrixXd Z,
+    double lambda,
+    double mu,
+    double eps_lasso
 );
 
 #endif
