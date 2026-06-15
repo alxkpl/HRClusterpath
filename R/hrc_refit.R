@@ -2,7 +2,7 @@
 #'
 #' @keywords internal
 #'
-.HRC_refit_wrapper <- function(clusters, Gamma) {
+.HRC_refit_wrapper <- function(clusters, R_0, Gamma) {
   # Initialization
   d <- ncol(Gamma)    # Number of variables
   P <- .non_singular_P(d) # Projection matrix
@@ -19,7 +19,8 @@
   objective <- CVXR::Minimize(llh)                    # Objective on the likelihood
   constraints <- list(                                # Constraints :
     P %*% t(P) %*% Theta %*% P %*% t(P) == Theta,     # Theta in SP_d^1
-    Theta == CVXR::DiagVec(A) + U %*% R %*% t(U)         # Theta with fixed block matrix structure
+    Theta == CVXR::DiagVec(A) + U %*% R %*% t(U),     # Theta with fixed block matrix structure
+    R[R_0 == 0] == 0
   )
 
   prob <- CVXR::Problem(objective, constraints)   # Problem definition
@@ -28,6 +29,7 @@
   # Results
   results <- list()
   results$R <- CVXR::value(R)
+  results$R[R_0 == 0] <- 0
   results$clusters <- clusters
   results$likelihood <- solution
 
@@ -115,7 +117,7 @@ HR_Clusterpath_refit <- function(hrc_output) {
   results <- hrc_output$results
 
   for (i in seq_along(results)) {
-    results[[i]] <- .HRC_refit_wrapper(results[[i]]$clusters, Gamma)
+    results[[i]] <- .HRC_refit_wrapper(results[[i]]$clusters, results[[i]]$R, Gamma)
   }
 
   # Results of the refit procedure
