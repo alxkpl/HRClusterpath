@@ -6,6 +6,44 @@
 
 using namespace Rcpp;
 
+void drop_column(Eigen::MatrixXd& R, int m) {
+  /* Drop a column and a row from a matrix
+   *
+   * Inputs:
+   * R : a matrix, the reduced matrix
+   * m : an integer, the index of the column to drop
+   *
+   * Output :
+   * Void
+   */
+  int K = R.rows();
+
+  // To exit the function if the matrix is already of size 1 and avoid
+  // memory issues
+  if(K == 1){
+    R.resize(0, 0);
+    return;
+  }
+
+  // Shift each with index larger than m one position upwards
+  for (int k = 0; k < K; k++) {
+      for (int l = m; l < K - 1; l++) {
+          R(l, k) = R(l + 1, k);
+      }
+  }
+
+  // Transpose and do the same for symmetry
+  R.transposeInPlace();
+
+  for (int k = 0; k < K; k++) {
+      for (int l = m; l < K - 1; l++) {
+          R(l, k) = R(l + 1, k);
+      }
+  }
+
+  // Drop the last row and column to resize the matrix
+  R.conservativeResize(K - 1, K - 1);
+}
 
 Eigen::VectorXd  merge_vector(Eigen::VectorXd a, Eigen::VectorXd b) {
   /* Merge two vectors into one
@@ -49,33 +87,45 @@ void fuse_R(Eigen::MatrixXd& R, Eigen::VectorXd p, int k, int l) {
   // Initialization
   int K = p.size();   // Size of the current R
 
-  Eigen::MatrixXd R_new(K - 1, K - 1);
 
-  // The coefficients of the other clusters
-  int row_idx = 0;
-  for (int i = 0; i < K; i++) {
-      if (i == l) continue; // To adjust the indices with no l row
-      int col_idx = 0;
-      for (int j = 0; j < K; j++) {
-          if (j == l) continue; // To adjust the indices with no l column
-          R_new(row_idx, col_idx) = R(i, j); // They do not change
-          col_idx++;
-      }
-      row_idx++;
-  }
-
-  for (int i = 0; i < K - 1; i++) {
-    if (i == k) continue; // skip the diagonal r_kk
-    int old_i = (i >= l) ? i+1 : i; // adjust the indices without l coefficient
+  for(int i = 0; i < K; i++) {
+    if(i == k || i == l) continue;
     // Update the coefficient by taking the average
-    double val = ((p[k] * R(k, old_i) + p[l] * R(l, old_i)) / (p[k] + p[l])); 
-    R_new(k, i) = val;
-    R_new(i, k) = val;
+    double val = ((p[k] * R(k, i) + p[l] * R(l, i)) / (p[k] + p[l])); 
+    R(k, i) = val;
+    R(i, k) = val;
   }
-  // Update the value of r_kk
-  R_new(k, k) = R(k, l);
+
+  R(k, k) = R(k, l);
+
+  drop_column(R, l);
+
+  // Eigen::MatrixXd R_new(K - 1, K - 1);
+
+  // // The coefficients of the other clusters
+  // int row_idx = 0;
+  // for (int i = 0; i < K; i++) {
+  //     if (i == l) continue; // To adjust the indices with no l row
+  //     int col_idx = 0;
+  //     for (int j = 0; j < K; j++) {
+  //         if (j == l) continue; // To adjust the indices with no l column
+  //         R_new(row_idx, col_idx) = R(i, j); // They do not change
+  //         col_idx++;
+  //     }
+  //     row_idx++;
+  // }
+
+  // for (int i = 0; i < K - 1; i++) {
+  //   if (i == k) continue; // skip the diagonal r_kk
+  //   int old_i = (i >= l) ? i+1 : i; // adjust the indices without l coefficient
+  //   // Update the coefficient by taking the average
+  //   double val = ((p[k] * R(k, old_i) + p[l] * R(l, old_i)) / (p[k] + p[l])); 
+  //   R_new(k, i) = val;
+  //   R_new(i, k) = val;
+  // }
+  // // Update the value of r_kk
+  // R_new(k, k) = R(k, l);
   // Update the entire matrix
-  R = R_new;
 }
 
 
