@@ -20,9 +20,15 @@
 #'
 #' @param lambda A numeric vector of positive number : the grid line for \eqn{\lambda}.
 #'
-#' @param W A \eqn{d \times d} matrix of positive number : the weights for the penalty.
+#' @param mu A positive number, the regularized parameter for the lasso penalty.
+#'
+#' @param W_cluster A \eqn{d \times d} matrix of positive number : the weights for the penalty.
 #' If `NULL` (default), it is set as the exponential weights, which depends of only one
 #' tuning parameter \eqn{\zeta} and where we have some theoretical results.
+#'
+#' @param W_lasso A \eqn{d \times d} matrix of positive number : the sparsity weights for the
+#' lasso penalty. If `NULL` (default), it is set as the inverse of the absolute coefficients 
+#' of the initial guess for the precision matrix.
 #'
 #' @param zeta A positive number : tuned parameter for the exponential weights.
 #' If `W` is not `NULL`, this parameter is not used.
@@ -34,11 +40,11 @@
 #' @param kappa A positive number : tuned parameter for the fusion threshold. If `eps_f` is not `NULL`,
 #' this parameter is not used.
 #'
-#' @param eps_conv A positive number : tolerance threshold for the convergence of the algorithm.
+#' @param EPS_CONV A positive number : tolerance threshold for the convergence of the algorithm.
 #'
-#' @param tol_opt A positive number : tolerance for the optimal step in the gradient descent.
+#' @param TOL_OPT A positive number : tolerance for the optimal step in the gradient descent.
 #'
-#' @param iter_max An integer : maximal number of iterations of the procedure.
+#' @param MAX_ITER An integer : maximal number of iterations of the procedure.
 #'
 #' @returns `HR_Clusterpath()` is a block gradient descent from the data with default values and method for
 #' the optimization : the variogram matrix \eqn{\Gamma} is the empirical variogram and the weights are
@@ -97,79 +103,102 @@ NULL
 #'
 #' @export
 HR_Clusterpath_hierarchy <- function(
-  Gamma, lambda, mu = 0, W = NULL, Z = NULL, zeta, eps_lasso = 5e-3, eps_f = NULL, kappa = 1e-2,
-  eps_conv = 1e-7, tol_opt = 1e-3, iter_max = 1000
+  Gamma, lambda, mu = 0, W_cluster = NULL, W_lasso = NULL,
+  zeta, eps_lasso = 5e-3, eps_f = NULL, kappa = 1e-2,
+  EPS_CONV = 1e-7, TOL_OPT = 1e-3, MAX_ITER = 1000
 ) {
-  # Number of variables
-  d <- ncol(Gamma)
+  # ---- INITIALIZATION ----
+  D_VARIABLE <- ncol(Gamma)     # Number of variables
 
-  # Computation of the initial Theta
-  res <- list()
-  res$R <- Gamma2Theta(Gamma)
+  # Intermediate result
+  inter_result <- list()                          # Initialisation
+  inter_result$R <- Gamma2Theta(Gamma)            # First guess for the R matrix
+  inter_result$clusters <- as.list(1:D_VARIABLE)  # Initial clusters
 
-  # Initial clusters
-  res$clusters <- as.list(1:d)
-
-  # If no custom weights are given, we use the exponential weights
-  if (is.null(W)) {
-    W <- exp(-zeta * sqrt(distance_matrix(Gamma, as.list(1:d))))    # Choosen weights
+  # Default clusterpath weights : exponential weights with parameter zeta
+  if (is.null(W_cluster)) {
+    W_cluster <- exp(
+      -zeta * sqrt(distance_matrix(Gamma, as.list(1:D_VARIABLE)))
+    )
   }
 
-  # Adaptative threshold for the fusion step if no custom one is given
+  # Default merge threshold : data-driven threshold
   if (is.null(eps_f)) {
-    eps_f <-  kappa * median(sqrt(distance_matrix(res$R, as.list(1:d))) + diag(rep(NA, d)), na.rm = TRUE)
+    # Base on data : median computed from the first guess for the precision matrix
+    distance_median <- median(
+      x     = sqrt(distance_matrix(inter_result$R, as.list(1:D_VARIABLE))) + diag(rep(NA, D_VARIABLE)),
+      na.rm = TRUE
+    )
+    eps_f <-  kappa * distance_median
   }
 
-  if (is.null(Z)) {
-    Z <- abs(1 / res$R)
-    diag(Z) <- 0
-    Z <- Z / sum(Z) * d * (d - 1)
+  # Default sparsity weights : inverse absolute coefficient of the initial guess
+  if (is.null(W_lasso)) {
+    W_lasso <- abs(1 / inter_result$R)
+    diag(W_lasso) <- 0      # Weight matrix = null diagonal
+    W_lasso <- W_lasso / sum(W_lasso) * D_VARIABLE * (D_VARIABLE - 1)   # Standardized weights
   }
 
-  # Non singular matrix projection P for the likelihood computation
-  P <- .non_singular_P(d)
+  # Matrix projection P for the likelihood computation
+  P <- .non_singular_P(D_VARIABLE)
   hierarchy <- list()
   hierarchy$results <- list()
+
+  # ---- COMPUTATION ----
   for (i in seq_along(lambda)) {
-    res <- .HRClusterpath(
-      res$R,
-      res$clusters,
-      Gamma,
-      W,
-      Z,
-      lambda[i],
-      mu,
-      eps_lasso,
-      eps_f,
-      eps_conv,
-      tol_opt,
-      iter_max
+    # Use the previous results as initialisation for the next lambda
+    inter_result <- .HRClusterpath(
+      R_init        = inter_result$R,
+      clusters_init = inter_result$clusters,
+      Gamma         = Gamma,
+      W             = W_cluster,
+      Z             = W_lasso,
+      lambda        = lambda[i],
+      mu            = mu,
+      eps_lasso     = eps_lasso,
+      eps_f         = eps_f,
+      eps_conv      = EPS_CONV,
+      tol_opt       = TOL_OPT,
+      iter_max      = MAX_ITER
     )
 
-    hierarchy$results[[i]] <- res
-
+    # Keep the results in the global variable
+    hierarchy$results[[i]] <- inter_result
     names(hierarchy$results[[i]]$clusters) <- paste0("C", seq_along(hierarchy$results[[i]]$clusters))
 
-    # Likelihood value
-    hierarchy$results[[i]]$likelihood <- .Likelihood_penalised(res$R, res$clusters, Gamma, P, W, Z, lambda[i], mu, eps_lasso)
-    hierarchy$results[[i]]$lambda <- lambda[i]
-    hierarchy$results[[i]]$mu <- mu
+    # Take usefull values
+    hierarchy$results[[i]]$likelihood <- .Likelihood_penalised(
+      R         = inter_result$R,
+      clusters  = inter_result$clusters,
+      Gamma     = Gamma,
+      P         = P,
+      W         = W_cluster,
+      Z         = W_lasso,
+      lambda    = lambda[i],
+      mu        = mu,
+      eps_lasso = eps_lasso
+    )
+    hierarchy$results[[i]]$lambda <- lambda[i]    # Regularised parameter
+    hierarchy$results[[i]]$mu <- mu               # Lasso parameter
   }
 
+  # ---- OUTPUT ----
+  # Keep interesting computation and parameters
+  # First variogram estimation in the output
   hierarchy$Gamma <- Gamma
 
-  # Input parameters
-  hierarchy$inputs <- list()
-  hierarchy$inputs$eps_conv <- eps_conv
-  hierarchy$inputs$eps_f <- eps_f
-  hierarchy$inputs$tol_opt <- tol_opt
-  hierarchy$inputs$iter_max <- iter_max
+  # Input parameters in the output
+  hierarchy$inputs <- list()                 # Initialisation
+  hierarchy$inputs$eps_conv <- EPS_CONV      # Convergence tolerance of the gradient descent
+  hierarchy$inputs$eps_f <- eps_f            # Fusing threshold parameter
+  hierarchy$inputs$tol_opt <- TOL_OPT        # Tolerance for the optimal step
+  hierarchy$inputs$max_iter <- MAX_ITER      # Limit of iteration for the gradient descent
 
   # Naming the results with the corresponding lambda values
   names(hierarchy$results) <- paste0("l", seq_along(lambda))
 
+  # Class of the results
   class(hierarchy) <- "HRC_hierarchy"
 
   return(hierarchy)
-
 }

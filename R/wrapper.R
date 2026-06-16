@@ -2,59 +2,74 @@
 #'
 #' @keywords internal
 .HRC_wrapper <- function(
-  Gamma, zeta, lambda, mu, W, Z, kappa, eps_lasso,
-  eps_conv, eps_f, tol_opt, iter_max
+  Gamma, zeta, lambda, mu, W_cluster, W_lasso, kappa,
+  eps_lasso, eps_f, EPS_CONV, TOL_OPT, MAX_ITER
 ) {
-  # Number of variables
-  d <- ncol(Gamma)
+  # ---- INITIALIZATION ----
+  D_VARIABLE <- ncol(Gamma)               # Number of variables
+  R.init <- Gamma2Theta(Gamma)            # First guess for the R matrix
+  clusters.init <- as.list(1:D_VARIABLE)  # Initial clusters
 
-  # Computation of the initial Theta
-  R.init <- Gamma2Theta(Gamma)
-
-  # Initial clusters
-  clusters.init <- as.list(1:d)
-
-  # If no custom weights are given, we use the exponential weights
+  # Default clusterpath weights : exponential weights with parameter zeta
   if (is.null(W)) {
-    W <- exp(-zeta * sqrt(distance_matrix(Gamma, as.list(1:d))))    # Choosen weights
+    W <- exp(
+      - zeta * sqrt(distance_matrix(Gamma, as.list(1:D_VARIABLE)))
+    )
   }
 
-  # Adaptative threshold for the fusion step if no custom one is given
+  # Default merge threshold : data-driven threshold
   if (is.null(eps_f)) {
-    eps_f <-  kappa * median(sqrt(distance_matrix(R.init, as.list(1:d))) + diag(rep(NA, d)), na.rm = TRUE)
+    # Base on data : median computed from the first guess for the precision matrix
+    distance_median <- median(
+      x     = sqrt(distance_matrix(R.init, as.list(1:D_VARIABLE))) + diag(rep(NA, D_VARIABLE)),
+      na.rm = TRUE
+    )
+    eps_f <-  kappa * distance_median
   }
 
-  # If no custom weights are given, we use inverse of the initial guess as weights
+  # Default sparsity weights : inverse absolute coefficient of the initial guess
   if (is.null(Z)) {
-    Z <- 1 / abs(R.init) - diag(1 / abs(R.init))
-    Z <- Z / sum(Z) * d * (d - 1)
+    Z <- 1 / abs(R.init) - diag(1 / abs(R.init))      # Null diagonal on weights matrix
+    Z <- Z / sum(Z) * D_VARIABLE * (D_VARIABLE - 1)   # Standardized weights
   }
 
-  # Non singular matrix projection P for the likelihood computation
-  P <- .non_singular_P(d)
+  # Matrix projection P for the likelihood computation
+  P <- .non_singular_P(D_VARIABLE)
 
-  # Results of the Clusterpath procedure
-  results <- .HRClusterpath(
-    R.init,
-    clusters.init,
-    Gamma,
-    W,
-    Z,
-    lambda,
-    mu,
-    eps_lasso,
-    eps_f,
-    eps_conv,
-    tol_opt,
-    iter_max
+  # ---- COMPUTATION ----
+  HRC_results <- .HRClusterpath(
+    R_init        = R.init,
+    clusters_init = clusters.init,
+    Gamma         = Gamma,
+    W             = W_cluster,
+    Z             = W_lasso,
+    lambda        = lambda,
+    mu            = mu,
+    eps_lasso     = eps_lasso,
+    eps_f         = eps_f,
+    eps_conv      = EPS_CONV,
+    tol_opt       = TOL_OPT,
+    iter_max      = MAX_ITER
   )
 
-  # Likelihood value
-  results$likelihood <- .Likelihood_penalised(results$R, results$clusters, Gamma, P, W, Z, lambda, mu, eps_lasso)
-  results$lambda <- lambda
+  # ---- OUTPUT ----
+  # Keep the results in the output results
+  HRC_results$likelihood <- .Likelihood_penalised(
+    R         = HRC_results$R,
+    clusters  = HRC_results$clusters,
+    Gamma     = Gamma,
+    P         = P,
+    W         = W_cluster,
+    Z         = W_lasso,
+    lambda    = lambda,
+    mu        = mu,
+    eps_lasso = eps_lasso
+  )
+  HRC_results$lambda <- lambda    # Regularised parameter
+  HRC_results$mu <- mu            # Lasso parameter
 
-  names(results$clusters) <- paste0("C", seq_along(results$clusters))
+  names(HRC_results$clusters) <- paste0("C", seq_along(HRC_results$clusters))
 
-  return(results)
+  return(HRC_results)
 
 }

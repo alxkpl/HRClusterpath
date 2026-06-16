@@ -4,11 +4,13 @@
 #' written as follow:
 #' \deqn{
 #'  L_{\mathcal P}^{(n)}(\Theta, \lambda) = \underbrace{-\log(|\Theta|_+) -
-#'  \frac 12 \text{tr}(\hat \Gamma^{(n)}\Theta)}_{L^{(n)}(\Theta)} + \lambda
-#'  \underbrace{\sum_{i<j} w_{ij} d^2_{ij}(\Theta)}_{\mathcal P(\Theta)},
+#'  \frac 12 \text{tr}(\hat \Gamma^{(n)}\Theta)}_{L^{(n)}(\Theta)} +
+#'  \underbrace{\lambda\sum_{i<j} w_{ij} d^2_{ij}(\Theta) +
+#'  \mu \sum_{i \neq j} z_{ij} |\theta_{ij}|}_{\mathcal P(\Theta)},
 #' }
 #' where \eqn{|\cdot|_+} is the generalised determinant, \eqn{n} is the sample size,
-#' \eqn{\hat \Gamma^{(n)}} an estimation of the variogram matrix \eqn{\Gamma} and \eqn{w_{ij}>0} the weights.
+#' \eqn{\hat \Gamma^{(n)}} an estimation of the variogram matrix \eqn{\Gamma}, \eqn{w_{ij}>0} the clusterpath
+#' weights and \eqn{z_{ij}>0} the lasso weights.
 #'
 #' An equivalent version of the negative likelihood is used by the function which is more convenient
 #' for the optimization procedure. It is defined by the following:
@@ -24,7 +26,7 @@
 #'
 #' @name likelihood
 #'
-#' @param R A \eqn{K \times K} matrix : the matrix of the clusters.
+#' @param r_matrix A \eqn{K \times K} matrix : the matrix of the clusters.
 #'
 #' @param clusters A list of indices associated to a partition of \eqn{V}.
 #'
@@ -53,11 +55,16 @@
 #'               -1, -1), nr = 2)
 #' clusters <- list(c(1,3), c(2,4))
 #'
-#' # Weight matrix
-#' W <- matrix(c(0, 1, 1, 1,
-#'               1, 0, 1, 1,
-#'               1, 1, 0, 1,
-#'               1, 1, 1, 0), nc = 4)
+#' # Weights matrices
+#' W_cluster <- matrix(c(0, 1, 1, 1,
+#'                       1, 0, 1, 1,
+#'                       1, 1, 0, 1,
+#'                       1, 1, 1, 0), nc = 4)
+#'
+#' W_lasso <- matrix(c(0, 1, 1, 1,
+#'                     1, 0, 1, 1,
+#'                     1, 1, 0, 1,
+#'                     1, 1, 1, 0), nc = 4)
 #'
 #' # Random variogram
 #' gamma <- matrix(c(0, 2, 1, 0,
@@ -67,6 +74,7 @@
 #'
 #' # Regularization parameter
 #' lambda <- 2.5
+#' mu <- 0.1
 #'
 #' ############################################################
 #' #                   NEGATIVE LOG-LIKEHOOD
@@ -76,12 +84,12 @@
 #' ############################################################
 #' #                          PENALTY
 #' ############################################################
-#' penalty(R, clusters, W)
+#' penalty(R, clusters, W_cluster)
 #'
 #' ############################################################
 #' #             PENALISED NEGATIVE LOG-LIKELIHOOD
 #' ############################################################
-#' NegLikelihood_penalised(R, clusters, gamma, W, lambda)
+#' NegLikelihood_penalised(R, clusters, gamma, W_cluster, W_lasso, lambda, mu)
 #'
 NULL
 
@@ -90,49 +98,83 @@ NULL
 #' @param Gamma A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.
 #'
 #' @export
-NegLikelihood_HR <- function(R, clusters, Gamma) {
-  d <- ncol(Gamma)
-  P <- .non_singular_P(d)
+NegLikelihood_HR <- function(r_matrix, clusters, Gamma) {
+  # ---- INITIALIZATION ----
+  D_VARIABLE <- ncol(Gamma)           # Number of variable
+  P_matrix <- .non_singular_P(D_VARIABLE)    # Matrix projection P
 
+  # --- OUTPUT ---
+  # Computed with Rcpp function (see src/likelihood.cpp)
   return(
-    .Likelihood_HR(R, clusters, Gamma, P)
+    .Likelihood_HR(
+      R        = r_matrix,
+      clusters = clusters,
+      Gamma    = Gamma,
+      P        = P_matrix
+    )
   )
 }
 
 #' @rdname likelihood
 #'
-#' @param weights The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal.
+#' @param W_cluster The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal.
 #'
 #' @export
-penalty <- function(R, clusters, weights) {
+penalty <- function(r_matrix, clusters, W_cluster) {
+  # ---- OUTPUT ----
+  # Computed with Rcpp function (see src/likelihood.cpp)
   return(
-    .Penalty(R, clusters, weights)
+    .Penalty(
+      R        = r_matrix,
+      clusters = clusters,
+      W        = W_cluster
+    )
   )
 }
 
 #' @rdname likelihood
 #'
 #' @param Gamma A \eqn{d \times d} matrix: the variogram matrix \eqn{\Gamma}.
-#' @param weights The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal. The weights for
+#'
+#' @param W_cluster The \eqn{d \times d} symmetric matrix \eqn{W} with a zero diagonal. The weights for
 #' the clusterpath penalty.
-#' @param weights_lasso The \eqn{d \times d} symmetric matrix \eqn{W_{lasso}} with a zero diagonal. The
+#'
+#' @param W_lasso The \eqn{d \times d} symmetric matrix \eqn{W_{lasso}} with a zero diagonal. The
 #' weights for the lasso penalty.
+#'
 #' @param lambda A positive number, the regularized parameter for clusterpath penalty.
+#'
 #' @param mu A positive number, the regularized parameter for lasso penalty.
+#'
 #' @param eps_lasso A small positive number, the parameter for the smoothed Lasso penalty.
 #'
 #' @export
 NegLikelihood_penalised <- function(
-  R, clusters, Gamma, weights, weights_lasso = NULL, lambda, mu = 0, eps_lasso = 5e-3
+  r_matrix, clusters, Gamma, W_cluster, W_lasso = NULL,
+  lambda, mu = 0, eps_lasso = 5e-3
 ) {
-  d <- ncol(Gamma)
-  P <- .non_singular_P(d)
+  # ---- INITIALIZATION ----
+  D_VARIABLE <- ncol(Gamma)                   # Number of variable
+  P_matrix <- .non_singular_P(D_VARIABLE)     # Matrix projection P
 
-  if (is.null(weights_lasso)) {
-    weights_lasso <- matrix(1, nc = d, nr = d) - diag(rep(1, d))
+  # Default weights : uniform weights for all coefficient
+  if (is.null(W_lasso)) {
+    W_lasso <- matrix(1, nc = D_VARIABLE, nr = D_VARIABLE) - diag(rep(1, D_VARIABLE))
   }
 
+  # ---- OUTPUT ----
+  # Computed with Rcpp function (see src/likelihood.cpp)
   return(
-    .Likelihood_penalised(R, clusters, Gamma, P, weights, weights_lasso, lambda, mu, eps_lasso)
+    .Likelihood_penalised(
+      R         = r_matrix,
+      clusters  = clusters,
+      Gamma     = Gamma,
+      P         = P_matrix,
+      W         = W_cluster,
+      Z         = W_lasso,
+      lambda    = lambda,
+      mu        = mu,
+      eps_lasso = eps_lasso
+    )
   )
 }

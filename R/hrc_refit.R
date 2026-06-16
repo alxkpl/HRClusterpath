@@ -2,36 +2,50 @@
 #'
 #' @keywords internal
 #'
-.HRC_refit_wrapper <- function(clusters, R_0, Gamma) {
-  # Initialization
-  d <- ncol(Gamma)    # Number of variables
-  P <- .non_singular_P(d) # Projection matrix
-  U <- .create_U(clusters) # Cluster matrix
-  K <- ncol(U) # Number of clusters
+.HRC_refit_wrapper <- function(clusters, init_r_matrix, Gamma) {
+  # ---- INITIALIZATION ----
+  D_VARIABLE <- ncol(Gamma)         # Number of variables
+  P_matrix <- .non_singular_P(D_VARIABLE)  # Projection matrix
+  cluster_matrix <- .create_U(clusters)          # Cluster matrix
+  CLUSTER_NUMBER <- ncol(cluster_matrix)                      # Number of clusters
 
-  # Problem formulation
-  Theta <- CVXR::Variable(shape = c(d, d), PSD = TRUE)   # The precision matrix to estimate
-  R <- CVXR::Variable(shape = c(K, K), symmetric = TRUE)       # The reduced matrix for Theta
-  A <- CVXR::Variable(d)                      # The diagonal matrix for null sum constraint
-  llh <- -CVXR::log_det(t(P) %*% Theta %*% P) - 1 / 2 * sum(CVXR::DiagMat(Gamma %*% Theta)) # Likelihood on Theta
 
-  # Objective and constraints
-  objective <- CVXR::Minimize(llh)                    # Objective on the likelihood
-  constraints <- list(                                # Constraints :
-    P %*% t(P) %*% Theta %*% P %*% t(P) == Theta,     # Theta in SP_d^1
-    Theta == CVXR::DiagVec(A) + U %*% R %*% t(U),     # Theta with fixed block matrix structure
-    R[R_0 == 0] == 0
+  # ---- COMPUTATION ----
+  # Problem formulation in CVXR
+  # Variables
+  Theta <- CVXR::Variable(
+    shape = c(D_VARIABLE, D_VARIABLE),             # The precision matrix to estimate
+    PSD   = TRUE
+  )
+  R <- CVXR::Variable(
+    shape     = c(CLUSTER_NUMBER, CLUSTER_NUMBER), # The reduced matrix for Theta
+    symmetric = TRUE
+  )
+  A <- CVXR::Variable(
+    shape = D_VARIABLE                             # Diagonal entries for null sum column
   )
 
-  prob <- CVXR::Problem(objective, constraints)   # Problem definition
-  solution <- CVXR::psolve(prob, solver = "SCS")
+  # Likelihood expression
+  llh <- -CVXR::log_det(t(P_matrix) %*% Theta %*% P_matrix) - 0.5 * sum(CVXR::DiagMat(Gamma %*% Theta))
 
-  # Results
+  # Objective and constraints
+  objective <- CVXR::Minimize(llh)                    # Minimization of the likelihood
+  constraints <- list(                                                       # Constraints :
+    P_matrix %*% t(P_matrix) %*% Theta %*% P_matrix %*% t(P_matrix) == Theta,  # Theta in SP_d^1
+    Theta == CVXR::DiagVec(A) + cluster_matrix %*% R %*% t(cluster_matrix),    # Theta with fixed block matrix structure
+    R[init_r_matrix == 0] == 0
+  )
+
+  # Problem definition and computation of the solution
+  problem <- CVXR::Problem(objective, constraints)   # Problem definition
+  solution <- CVXR::psolve(problem, solver = "SCS")  # Solution
+
+  # ---- OUTPUT ----
   results <- list()
-  results$R <- CVXR::value(R)
-  results$R[R_0 == 0] <- 0
-  results$clusters <- clusters
-  results$likelihood <- solution
+  results$R <- CVXR::value(R)             # Entries of the reduced matrix R
+  results$R[init_r_matrix == 0] <- 0      # Null coefficient for the initial sparse coefficient
+  results$clusters <- clusters            # Cluster of the initialisation
+  results$likelihood <- solution          # Value of the likelihood
 
   names(results$clusters) <- paste0("C", seq_along(results$clusters))
 
@@ -108,18 +122,23 @@ NULL
 #' @export
 HR_Clusterpath_refit <- function(hrc_output) {
 
+  # ---- INITIALIZATION ----
   if (inherits(hrc_output, "HR_Clusterpath_refit")) {
+    # Check if the output is already refitted
     warning("Already refitted results")
     return(hrc_output)
   }
 
-  Gamma <- hrc_output$Gamma
-  results <- hrc_output$results
+  # Extraction of the informations
+  Gamma <- hrc_output$Gamma       # Empirical variogram
+  results <- hrc_output$results   # Results on the grid of value for lambda
 
+  # ---- COMPUTATION ----
   for (i in seq_along(results)) {
     results[[i]] <- .HRC_refit_wrapper(results[[i]]$clusters, results[[i]]$R, Gamma)
   }
 
+  # ---- OUTPUT ----
   # Results of the refit procedure
   refit <- list()
   refit$results <- results
@@ -128,7 +147,7 @@ HR_Clusterpath_refit <- function(hrc_output) {
   # Input parameters of the raw procedure
   refit$initial_inputs <- hrc_output$inputs
 
-
+  # Class of the results
   class(refit) <- "HR_Clusterpath_refit"
 
   return(refit)

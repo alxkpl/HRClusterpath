@@ -16,19 +16,27 @@
 #'
 #' @param data A \eqn{n \times d} matrix : the matrix of data.
 #'
-#' @param lambda If a positive number, the regularized parameter for the penalty. If a numerix
-#' vector of positive number : the grid line for \eqn{\lambda}.
+#' @param lambda If a positive number, the regularized parameter for the clsuterpath penalty. 
+#' If a numerix vector of positive number : the grid line for \eqn{\lambda}.
 #'
-#' @param W A \eqn{d \times d} matrix of positive number : the weights for the penalty.
+#' @param mu A positive number, the regularized parameter for the lasso penalty.
+#'
+#' @param W_cluster A \eqn{d \times d} matrix of positive number : the weights for the penalty.
 #' If `NULL` (default), it is set as the exponential weights, which depends of only one
 #' tuning parameter \eqn{\zeta} and where we have some theoretical results.
 #'
+#' @param W_lasso A \eqn{d \times d} matrix of positive number : the sparsity weights for the
+#' lasso penalty. If `NULL` (default), it is set as the inverse of the absolute coefficients 
+#' of the initial guess for the precision matrix.
+#'
 #' @param zeta A positive number : tuned parameter for the exponential weights.
-#' If `W` is not `NULL`, this parameter is not used.
+#' If `W_c` is not `NULL`, this parameter is not used.
 #'
 #' @param p A numeric between 0 and 1, or `NULL`.  If `NULL` (default), it is
 #' assumed that the data are already on multivariate Pareto scale. Else, `p` is used as the probability
 #' in the function `data2mpareto()` to standardize the data (see `graphicalExtremes` documentation).
+#'
+#' @param eps_lasso A positive number : smoothness threshold for the absolute value.
 #'
 #' @param eps_f A positive number : tolerance threshold for merging clusters. If `NULL` (default),
 #' it is set as \eqn{\kappa} times the median of the non-diagonal elements of the distance matrix
@@ -37,11 +45,11 @@
 #' @param kappa A positive number : tuned parameter for the fusion threshold. If `eps_f` is not `NULL`,
 #' this parameter is not used.
 #'
-#' @param eps_conv A positive number : tolerance threshold for the convergence of the algorithm.
+#' @param EPS_CONV A positive number : tolerance threshold for the convergence of the algorithm.
 #'
 #' @param tol_opt A positive number : tolerance for the optimal step in the gradient descent.
 #'
-#' @param iter_max An integer : maximal number of iterations of the procedure.
+#' @param MAX_ITER An integer : maximal number of iterations of the procedure.
 #'
 #' @returns `HR_Clusterpath()` is a block gradient descent from the data with default values and method for
 #' the optimization : the variogram matrix \eqn{\Gamma} is the empirical variogram and the weights are
@@ -107,48 +115,59 @@ NULL
 #'
 #' @export
 HR_Clusterpath <- function(
-  data, lambda, mu = 0, zeta, W = NULL, Z = NULL, p = NULL, eps_lasso = 5e-3, eps_f = NULL, kappa = 1e-2,
-  eps_conv = 1e-7, tol_opt = 1e-3, iter_max = 1000
+  data, lambda, mu = 0, zeta, W_cluster = NULL,
+  W_lasso = NULL, p = NULL, eps_lasso = 5e-3,
+  eps_f = NULL, kappa = 1e-2, EPS_CONV = 1e-7,
+  TOL_OPT = 1e-3, MAX_ITER = 1000
 ) {
-  # Estimation of the variogram matrix from the data
-  Gamma <- graphicalExtremes::emp_vario(data, p = p)
+  # ---- INITIALIZATION ----
+  Gamma <- graphicalExtremes::emp_vario(
+    data = data,
+    p    = p
+  )  # Computation of the empirical variogram
 
-  output <- list()
+  HRC_output <- list()  # Initialisation fot the list of results
+
+  # ---- COMPUTATION ----
   # Parallelization of the procedure for each value of lambda
-  output$results <- parallel::mclapply(
+  HRC_output$results <- parallel::mclapply(
     lambda,
-    function(l) {
+    function(lambda_par) {
       .HRC_wrapper(
-        Gamma = Gamma,
-        zeta = zeta,
-        lambda = l,
-        mu = mu,
-        W = W,
-        Z = Z,
-        kappa = kappa,
+        Gamma     = Gamma,
+        zeta      = zeta,
+        lambda    = lambda_par,
+        mu        = mu,
+        W         = W_cluster,
+        Z         = W_lasso,
+        kappa     = kappa,
         eps_lasso = eps_lasso,
-        eps_conv = eps_conv,
-        eps_f = eps_f,
-        tol_opt = tol_opt,
-        iter_max = iter_max
+        eps_f     = eps_f,
+        EPS_CONV  = EPS_CONV,
+        TOL_OPT   = TOL_OPT,
+        MAX_ITER  = MAX_ITER
       )
     },
     mc.cores = min(length(lambda), parallel::detectCores() - 1)
   )
-  output$Gamma <- Gamma
 
-  # Input parameters
-  output$inputs <- list()
-  output$inputs$eps_conv <- eps_conv
-  output$inputs$eps_f <- eps_f
-  output$inputs$tol_opt <- tol_opt
-  output$inputs$iter_max <- iter_max
+  # ---- OUTPUT ----
+  # Keep interesting computation and parameters
+  # First variogram estimation in the output
+  HRC_output$Gamma <- Gamma
+
+  # Input parameters in the output
+  HRC_output$inputs <- list()                 # Initialisation
+  HRC_output$inputs$eps_conv <- EPS_CONV      # Convergence tolerance of the gradient descent
+  HRC_output$inputs$eps_f <- eps_f            # Fusing threshold parameter
+  HRC_output$inputs$tol_opt <- TOL_OPT        # Tolerance for the optimal step
+  HRC_output$inputs$max_iter <- MAX_ITER      # Limit of iteration for the gradient descent
 
   # Naming the results with the corresponding lambda values
-  names(output$results) <- paste0("l", seq_along(lambda))
+  names(HRC_output$results) <- paste0("l", seq_along(lambda))
 
   # Class of the results
-  class(output) <- "HR_Clusterpath"
+  class(HRC_output) <- "HR_Clusterpath"
 
-  return(output)
+  return(HRC_output)
 }

@@ -25,7 +25,7 @@
 #' corresponding to the reduced matrix \eqn{R} of the original matrix \eqn{\Theta}.
 #'
 #' For `build_theta()`, a matrix on size the number of variables (i.e. \eqn{d})
-#' corresponding to the precision matrix \eqn{\Theta} induced by \eqn{R}.
+#' corresponding to the precision matrix \eqn{\Theta} induced by \eqn{R} and a list of clusters.
 #'
 #' @examples
 #' ##############################################################
@@ -64,32 +64,46 @@ NULL
 #' @rdname theta-r
 #'
 #' @export
-build_Theta <- function(R, clusters) {
+build_Theta <- function(r_matrix, clusters) {
+  # Theta matrix built with the Rcpp function (see src/model.cpp)
   return(
-    .build_theta(R, clusters)
+    .build_theta(r_matrix, clusters)
   )
 }
 
 #' @rdname theta-r
 #'
 #' @export
-extract_R_matrix <- function(Theta, clusters) {
+extract_R_matrix <- function(theta, clusters) {
+  # ---- INITIALIZATION ----
+  NB_CLUSTERS <- length(clusters)      # Number of clusters
+  r_matrix <- matrix(
+    data = rep(NA, NB_CLUSTERS ** 2),  # Reduced matrix R
+    nc   = NB_CLUSTERS
+  )
 
-  K <- length(clusters)
-  indx <- 1:K
-  R <- matrix(rep(NA, K * K), nc = K)
+  indx <- 1:NB_CLUSTERS     # Vector of indices for the loop
 
+  # ---- COMPUTATION ----
   for (i in indx) {
+    # Select a cluster
     k <- clusters[[i]][1]
+
+    # Take the value for the diagonal by taking another variable
+    # in the selected cluster.
     if (length(clusters[[i]]) > 1) {
       l <- clusters[[i]][2]
-      R[i, i] <- Theta[k, l]
+      r_matrix[i, i] <- theta[k, l]
     }
+
+    # Take the value for the other coefficients by selecting the
+    # first variable of the other clusters.
     for (j in indx[-i]){
       l <- clusters[[j]][1]
-      R[i, j] <- Theta[k, l]
+      r_matrix[i, j] <- theta[k, l]
     }
   }
 
-  R
+  # ---- OUTPUT ----
+  r_matrix
 }
