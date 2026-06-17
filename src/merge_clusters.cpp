@@ -6,135 +6,118 @@
 
 using namespace Rcpp;
 
-void drop_column(Eigen::MatrixXd& R, int m) {
+void drop_column(Eigen::MatrixXd& R_matrix, int m) {
   /* Drop a column and a row from a matrix
    *
    * Inputs:
-   * R : a matrix, the reduced matrix
+   * R_matrix : a matrix, the reduced matrix
    * m : an integer, the index of the column to drop
    *
    * Output :
-   * Void
+   * Void, drop the column of the matrix inplace
    */
-  int K = R.rows();
+  // ---- INITIALIZATION ---- //
+  const int K_CLUSTER = R_matrix.rows();
 
+  // ---- COMPUTATION ---- //
   // To exit the function if the matrix is already of size 1 and avoid
   // memory issues
-  if(K == 1){
-    R.resize(0, 0);
+  if(K_CLUSTER == 1){
+    R_matrix.resize(0, 0);
     return;
   }
 
   // Shift each with index larger than m one position upwards
-  for (int k = 0; k < K; k++) {
-      for (int l = m; l < K - 1; l++) {
-          R(l, k) = R(l + 1, k);
+  for (int k = 0; k < K_CLUSTER; k++) {
+      for (int l = m; l < K_CLUSTER - 1; l++) {
+          R_matrix(l, k) = R_matrix(l + 1, k);
       }
   }
 
   // Transpose and do the same for symmetry
-  R.transposeInPlace();
+  R_matrix.transposeInPlace();
 
-  for (int k = 0; k < K; k++) {
-      for (int l = m; l < K - 1; l++) {
-          R(l, k) = R(l + 1, k);
+  for (int k = 0; k < K_CLUSTER; k++) {
+      for (int l = m; l < K_CLUSTER - 1; l++) {
+          R_matrix(l, k) = R_matrix(l + 1, k);
       }
   }
 
   // Drop the last row and column to resize the matrix
-  R.conservativeResize(K - 1, K - 1);
+  R_matrix.conservativeResize(K_CLUSTER - 1, K_CLUSTER - 1);
 }
 
-Eigen::VectorXd  merge_vector(Eigen::VectorXd a, Eigen::VectorXd b) {
+Eigen::VectorXd  merge_vector(Eigen::VectorXd vector_1, Eigen::VectorXd vector_2) {
   /* Merge two vectors into one
    *
    * Inputs:
-   * a : a vector of size n
-   * b : a vector of size m
+   * vector_1 : a vector of size n
+   * vector_2 : a vector of size m
    *
    * Output :
    * A vector of size n+m
    */
-  int asize = a.size();
-  int bsize = b.size();
-  Eigen::VectorXd out(asize + bsize);
+  // ---- INITIALIZATION ---- //
+  int size_1 = vector_1.size();                // Size of the first vector
+  int size_2 = vector_2.size();                // Size of the second vector
+  Eigen::VectorXd merged(size_1 + size_2);     // Initialization of the output
 
-  for(int i = 0; i < (asize+bsize); i++) {
-    if(i < asize){
-      out(i) = a(i);
+  // ---- COMPUTATION ---- //
+  for(int i = 0; i < (size_1 + size_2); i++) {
+    if(i < size_1){
+      // Fill with the first vector
+      merged(i) = vector_1(i);
     } else {
-      out(i) = b(i - asize);
+      // Fill then with the oter
+      merged(i) = vector_2(i - size_1);
     }
       
   }
 
-  return out;
+  // ---- OUTPUT ---- //
+  return merged;
 }
 
 
-void fuse_R(Eigen::MatrixXd& R, Eigen::VectorXd p, int k, int l) {
+void fuse_R(Eigen::MatrixXd& R_matrix, Eigen::VectorXd p_vector, int k, int l) {
   /* Update the column and size of R after merging step
    *
    * Inputs:
-   * R : a matrix, the reduced matrix
-   * p : a vector, the size of each clusters
+   * R_matrix : a matrix, the reduced matrix
+   * p_vector : a vector, the size of each clusters
    * k : an integer, the first cluster to fuse
    * l : an integer, the second cluster to fuse
    *
    * Output:
    * Void
    */
-  // Initialization
-  int K = p.size();   // Size of the current R
+  // ---- INITIALIZATION ---- //
+  const int K_CLUSTER = p_vector.size();           // Size of the current R
+  double size_total = p_vector[k] + p_vector[l];   // Size of the new cluster 
+  double weight_k = p_vector[k] / size_total;      // Weight of cluster k
+  double weight_l = p_vector[l] / size_total;      // Weight of cluster l
 
-
-  for(int i = 0; i < K; i++) {
+  // ---- COMPUTATION ---- //
+  for(int i = 0; i < K_CLUSTER; i++) {
     if(i == k || i == l) continue;
     // Update the coefficient by taking the average
-    double val = ((p[k] * R(k, i) + p[l] * R(l, i)) / (p[k] + p[l])); 
-    R(k, i) = val;
-    R(i, k) = val;
+    double val = weight_k * R_matrix(k, i) + weight_l * R_matrix(l, i); 
+    R_matrix(k, i) = val;
+    R_matrix(i, k) = val;
   }
 
-  R(k, k) = R(k, l);
+  R_matrix(k, k) = R_matrix(k, l);
 
-  drop_column(R, l);
-
-  // Eigen::MatrixXd R_new(K - 1, K - 1);
-
-  // // The coefficients of the other clusters
-  // int row_idx = 0;
-  // for (int i = 0; i < K; i++) {
-  //     if (i == l) continue; // To adjust the indices with no l row
-  //     int col_idx = 0;
-  //     for (int j = 0; j < K; j++) {
-  //         if (j == l) continue; // To adjust the indices with no l column
-  //         R_new(row_idx, col_idx) = R(i, j); // They do not change
-  //         col_idx++;
-  //     }
-  //     row_idx++;
-  // }
-
-  // for (int i = 0; i < K - 1; i++) {
-  //   if (i == k) continue; // skip the diagonal r_kk
-  //   int old_i = (i >= l) ? i+1 : i; // adjust the indices without l coefficient
-  //   // Update the coefficient by taking the average
-  //   double val = ((p[k] * R(k, old_i) + p[l] * R(l, old_i)) / (p[k] + p[l])); 
-  //   R_new(k, i) = val;
-  //   R_new(i, k) = val;
-  // }
-  // // Update the value of r_kk
-  // R_new(k, k) = R(k, l);
-  // Update the entire matrix
+  drop_column(R_matrix, l);   // Drop the l column
 }
 
 
-void cluster_fusion(Eigen::MatrixXd &R, List& clusters, int k, int l)
+void cluster_fusion(Eigen::MatrixXd &R_matrix, List& clusters, int k, int l)
 {
   /* Merging step of Clusterpath algorithm, update clusters list and R coefficients
    *
    * Inputs:
-   * R : a matrix, the reduced matrix
+   * R_matrix : a matrix, the reduced matrix
    * clusters : a list of list, the list of clusters
    * k : an integer, the first cluster to fuse
    * l : an integer, the second cluster to fuse
@@ -142,20 +125,21 @@ void cluster_fusion(Eigen::MatrixXd &R, List& clusters, int k, int l)
    * Output :
    * Void
    */
-  // Initialization
-  int K = clusters.size();
+  // ---- INITIALIZATION ---- //
+  const int K_CLUSTER = clusters.size();
+  Eigen::VectorXd p_vector = cluster_number(clusters);  // Vector of cluster's size
 
-  // Vector of cluster's size
-  Eigen::VectorXd p = cluster_number(clusters);
-
-  
-  if (p.size() == 2)
+  // ---- COMPUTATION ---- //
+  if (p_vector.size() == 2)
   {
     // Case for fusion to one cluster
-    R(0,0) = (p[0] * R(0, 0) + p[1] * R(0, 1)) / (p[0] + p[1]);
-    R.conservativeResize(K - 1, K - 1);
+    // Merge two last clusters
     clusters[0] = merge_vector(clusters[0], clusters[1]);
     clusters.erase(1);
+
+    // Update R matrix
+    R_matrix(0, 0) = (p_vector[0] * R_matrix(0, 0) + p_vector[1] * R_matrix(0, 1)) / (p_vector[0] + p_vector[1]);
+    R_matrix.conservativeResize(K_CLUSTER - 1, K_CLUSTER - 1);
   }else{
     // Other cases
     // Cluster fusion step
@@ -168,6 +152,6 @@ void cluster_fusion(Eigen::MatrixXd &R, List& clusters, int k, int l)
     clusters.erase(er_indx);
 
     // Update R matrix step
-    fuse_R(R, p, k, l);
+    fuse_R(R_matrix, p_vector, k, l);
   }
 }

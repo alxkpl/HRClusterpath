@@ -3,46 +3,60 @@
 #include "distance_matrix.hpp"
 #include "model.hpp"
 
-using namespace Rcpp;     // to use List as Rcpp::List
+using namespace Rcpp;
 
-double D_tilde2_r_term(Eigen::MatrixXd R, Eigen::VectorXd p, int k, int l) {
-  
-  int K = p.size();
-
-  double result = 0.0;
-
-  for (int j = 0; j < K; j++) {
-    double mask = (j == k || j == l) ? 1.0 : 0.0;
-    double diff = R(k, j) - R(l, j);
-    result += (p[j] - mask) * diff * diff;
-  }
-
-  return result;
-}
-
-// [[Rcpp::export]]
-Eigen::MatrixXd distance_matrix(Eigen::MatrixXd R, List clusters) {
-    /* Compute the squared distance matrix of the clustered precision matrix
+double D_tilde2_r_term(Eigen::MatrixXd R_matrix, Eigen::VectorXd p_vector, int cluster_k, int cluster_l) {
+    /* Compute the squared distance between two clusters
      *
      * Inputs :
      * R : a matrix, the reduced matrix
+     * p_vector : a vector, the size of each cluster
+     *
+     * Ouput :
+     * A distance
+     */
+  // ---- INITIALIZATION ---- //
+  int K_CLUSTER = p_vector.size();    // Number of cluster
+  double distance = 0.0;              // Distance initialization
+
+  // ---- COMPUTATION ---- //
+  for (int cluster_j = 0; cluster_j < K_CLUSTER; cluster_j++) {
+    // Ponderated distance which depends of the index values
+    double mask = (cluster_j == cluster_k || cluster_j == cluster_l) ? 1.0 : 0.0;  // p_k - 1 if the index is k (or l)
+    double diff = R_matrix(cluster_k, cluster_j) - R_matrix(cluster_l, cluster_j);
+
+    distance += (p_vector[cluster_j] - mask) * diff * diff;
+  }
+
+  // ---- OUTPUT ---- //
+  return distance;
+}
+
+// [[Rcpp::export(.distance_matrix)]]
+Eigen::MatrixXd distance_matrix(Eigen::MatrixXd R_matrix, List clusters) {
+    /* Compute the squared distance matrix of the clustered precision matrix
+     *
+     * Inputs :
+     * R_matrix : a matrix, the reduced matrix
      * clusters : a list of list, the list of clusters
      *
      * Ouput :
      * A distance matrix
      */
-    int K = clusters.size();
+    // ---- INITIALIZATION ---- //
+    int K_CLUSTER = clusters.size();                        // Number of cluster
+    Eigen::VectorXd p_vector = cluster_number(clusters);    // Vector with cluster's size
+    Eigen::MatrixXd result(K_CLUSTER, K_CLUSTER);
 
-    Eigen::VectorXd p = cluster_number(clusters);
-
-    Eigen::MatrixXd  out(K, K);
-
-    for (int k = 0; k < K; k++) {
-        for (int l = k; l < K; l++) {
-                double tmp = D_tilde2_r_term(R, p, k, l);
-                out(k, l) = tmp;
-                out(l, k) = tmp;
+    // ---- COMPUTATION ---- //
+    for (int k = 0; k < K_CLUSTER; k++) {
+        for (int l = k; l < K_CLUSTER; l++) {
+                double distance = D_tilde2_r_term(R_matrix, p_vector, k, l);   // Compute the distance
+                result(k, l) = distance;
+                result(l, k) = distance;
         }
     }
-    return out;
+
+    // ---- OUTPUT ---- //
+    return result;
 }

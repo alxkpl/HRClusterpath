@@ -19,198 +19,230 @@ Eigen::MatrixXd Gradient_base(
      * P : a matrix, computed with non_sigular_P in the right dimension
      * 
      * Output :
-     * Gradient
+     * General gradient
      */
-    // Log-determinant part
+    // ---- COMPUTATION --- //
+    // Log-determinant part of the likelihood
     Eigen::MatrixXd dlog = - P * inverse(P.transpose() * Theta * P) * P.transpose();
-    // Trace part
+    // Trace part of the likelihood
     Eigen::MatrixXd dtr = - 0.5 * P * P.transpose() * Gamma * P * P.transpose();
+
+    // ---- OUTPUT ---- //
     return dlog + dtr;
 }
 
 
 Eigen::VectorXd Gradient_block(
-    Eigen::MatrixXd R,
+    Eigen::MatrixXd R_matrix,
     List clusters,
     Eigen::MatrixXd Gamma,
     Eigen::MatrixXd P,
-    int m
+    int idx_m
 ) {
     /* Compute the column gradient in a block structure with only URU^t part
      * 
      * Input :
-     * R : a matrix, the reduced matrix
+     * R_matrix : a matrix, the reduced matrix
      * clusters : a list of list, the list of the clusters
      * Gamma : a matrix, the fixed variogram
      * P : a matrix, computed with non_sigular_P in the right dimension
-     * m : an integer, the column of the gradient
+     * idx_m : an integer, the column of the gradient
      *
      * Output :
      * The column gradient
      */
-    const int K = clusters.size();
-    Eigen::MatrixXd U = create_U(clusters);
-    Eigen::MatrixXd D = Eigen::MatrixXd::Identity(K, K);
-    D(m, m) = 0.5;
+    // ---- INITIALIZATION ---- //
+    const int D_VARIABLE = Gamma.rows();
+    const int K_CLUSTER = clusters.size();                                          // Number of clusters
+    Eigen::MatrixXd U_matrix = create_U(D_VARIABLE, clusters);                                  // Matrix of clusters U
+    Eigen::MatrixXd diag_matrix = Eigen::MatrixXd::Identity(K_CLUSTER, K_CLUSTER);  // Symmetry multiplicator
+    diag_matrix(idx_m, idx_m) = 0.5;
 
-    return 2 * D * U.transpose() * Gradient_base(build_theta_cpp(R, clusters), Gamma, P) * U.col(m);
+    // ---- COMPUTATION ---- //
+    Eigen::MatrixXd gradient = Gradient_base(build_theta_cpp(D_VARIABLE, R_matrix, clusters), Gamma, P);
+
+    // ---- OUTPUT ---- //
+    return 2 * diag_matrix * U_matrix.transpose() * gradient * U_matrix.col(idx_m);
 }
 
-Eigen::VectorXd correction_gradient(Eigen::MatrixXd R, List clusters, Eigen::MatrixXd Gamma, Eigen::MatrixXd P, int m) {
+Eigen::VectorXd correction_gradient(
+    Eigen::MatrixXd R_matrix,
+    List clusters,
+    Eigen::MatrixXd Gamma,
+    Eigen::MatrixXd P,
+    int idx_m) {
 
     /* Compute the column gradient in a block structure with only the A part
      * 
      * Input :
-     * R : a matrix, the reduced matrix
+     * R_matrix : a matrix, the reduced matrix
      * clusters : a list of list, the list of the clusters
      * Gamma : a matrix, the fixed variogram
      * P : a matrix, computed with non_sigular_P in the right dimension
-     * m : an integer, the column of the gradient
+     * idx_m : an integer, the column of the gradient
      *
      * Output :
      * The correction gradient for the block gradient descent
      */
-    int K = clusters.size();
-    Eigen::MatrixXd U = create_U(clusters);
-    Eigen::MatrixXd p = cluster_number(clusters);
-    Eigen::MatrixXd M = P * inverse(P.transpose() * build_theta_cpp(R, clusters) * P) * P.transpose();
-    Eigen::MatrixXd Gamma_P = P * P.transpose() * Gamma * P * P.transpose();
-    Eigen::VectorXd correction = Eigen::VectorXd::Zero(K);
+    // ---- INITIALIZATION ---- //
+    const int D_VARIABLE = Gamma.rows();                          // Number of variables
+    const int K_CLUSTER = clusters.size();                        // Number of clusters
+    const Eigen::MatrixXd U_matrix = create_U(D_VARIABLE, clusters);          // Matrix of clusters U
+    const Eigen::MatrixXd p_vector = cluster_number(clusters);    // Vector with cluster's size
+    Eigen::MatrixXd M = P * inverse(P.transpose() * build_theta_cpp(D_VARIABLE, R_matrix, clusters) * P) * P.transpose();      // Gradient log-determinant 
+    Eigen::MatrixXd Gamma_P = P * P.transpose() * Gamma * P * P.transpose();                                // Gradient trace
+    Eigen::VectorXd result = Eigen::VectorXd::Zero(K_CLUSTER);      // Output initialization
 
-    // Correction =  pm * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii)
-    correction(m) = p(m) * ((U.col(m).asDiagonal() * M).trace() + 0.5 * (U.col(m).asDiagonal() * Gamma_P).trace());
+    // ---- COMPUTATION ---- //
+    // d/dr_m =  p_m * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii)
+    result(idx_m) = p_vector(idx_m) * (U_matrix.col(idx_m).asDiagonal() * (M + 0.5 * Gamma_P)).trace();
 
-    for(int k = 0; k < K; k++) {
-        if (k == m) continue; // already done for m
+    for(int k = 0; k < K_CLUSTER; k++) {
+        if (k == idx_m) continue; // Already done for m
 
-        // Correction = pk * sum_(i \in C_m) (M_ii + 0.5 * Gamma_P_ii) + pm * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii)
-        correction(k) = p(k) * ((U.col(m).asDiagonal() * M).trace() + 0.5 * (U.col(m).asDiagonal() * Gamma_P).trace()) + p(m) * ((U.col(k).asDiagonal() * M).trace() + 0.5 * (U.col(k).asDiagonal() * Gamma_P).trace());
+        // d/dr_k = pk * sum_(i \in C_m) (M_ii + 0.5 * Gamma_P_ii) + pm * sum_(i \in C_k) (M_ii + 0.5 * Gamma_P_ii) for k != m
+        result(k) = p_vector(k) * (U_matrix.col(idx_m).asDiagonal() * (M + 0.5 * Gamma_P)).trace() + p_vector(idx_m) * (U_matrix.col(k).asDiagonal() * (M + 0.5 * Gamma_P)).trace();
     }
 
-    return correction;
+    // ---- OUTPUT ---- //
+    return result;
 }
 
 Eigen::VectorXd penalty_gradient(
-    Eigen::MatrixXd R,
+    Eigen::MatrixXd R_matrix,
     List clusters,
-    Eigen::MatrixXd tildeW,
-    int m // careful it is indexed with minus 1 in C++
+    Eigen::MatrixXd W_cc,
+    int idx_m
 ) {
     /* Compute the block gradient of the penalty
      * 
      * Input :
-     * R : a matrix, the reduced matrix
+     * R_matrix : a matrix, the reduced matrix
      * clusters : a list of list, the list of the clusters
-     * tildeW : a matrix, the cumulative weights per cluster
-     * m : an integer, the column of the gradient
+     * W_cc : a matrix, the cumulative weights per cluster
+     * idx_m : an integer, the column of the gradient
      * 
      * Output :
-     * Gradient
+     * Gradient for the penalty
      */
-    int K = R.rows();
-    Eigen::VectorXd p = cluster_number(clusters);
-    Eigen::VectorXd results = Eigen::VectorXd::Zero(K);
-    for(int k = 0; k < K; k++){
-        if(k == m) continue;
+    
+    // ---- INITIALIZATION ---- //
+    const int K_CLUSTER = R_matrix.rows();                            // Number of clusters
+    const Eigen::VectorXd p_vector = cluster_number(clusters);        // Vector with cluster's size
+    Eigen::VectorXd results = Eigen::VectorXd::Zero(K_CLUSTER); // Output initialization
+
+    // ---- COMPUTATION ---- //
+    for(int k = 0; k < K_CLUSTER; k++){
+        if(k == idx_m) continue;
         // Gradient for dd_km / dr_mi
-        for(int i = 0; i < K; i++){
-            if(i==k || i==m) continue;
-            results(i) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * p(i) * (R(m, i) - R(k, i));
+        for(int i = 0; i < K_CLUSTER; i++){
+            if(i==k || i==idx_m) continue;
+            results(i) += 2 * W_cc(min_indx_cpp(k, idx_m), max_indx_cpp(k, idx_m)) * p_vector(i) * (R_matrix(idx_m, i) - R_matrix(k, i));
         }
 
-        results(m) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * (p(m) - 1) * (R(m, m) - R(k, m));
-        results(k) += 2 * tildeW(min_indx_cpp(k, m), max_indx_cpp(k, m)) * ((p(k) - 1) * (R(k, m) - R(k, k)) + (p(m) - 1) * (R(k, m) - R(m, m)));
+        results(idx_m) += 2 * W_cc(min_indx_cpp(k, idx_m), max_indx_cpp(k, idx_m)) * (p_vector(idx_m) - 1) * (R_matrix(idx_m, idx_m) - R_matrix(k, idx_m));
+        results(k) += 2 * W_cc(min_indx_cpp(k, idx_m), max_indx_cpp(k, idx_m)) * ((p_vector(k) - 1) * (R_matrix(k, idx_m) - R_matrix(k, k)) + (p_vector(idx_m) - 1) * (R_matrix(k, idx_m) - R_matrix(idx_m, idx_m)));
 
-        if(k == K - 1) continue;
+        if(k == K_CLUSTER - 1) continue;
         // Gradient for dd_kl / dr_m.
-        for(int l = k + 1; l < K; l++) {
-            if(l == m) continue;
+        for(int l = k + 1; l < K_CLUSTER; l++) {
+            if(l == idx_m) continue;
 
-            results(k) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(m) * (R(k, m) - R(l, m));
-            results(l) += 2 * tildeW(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p(m) * (R(l, m) - R(k, m));
+            results(k) += 2 * W_cc(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p_vector(idx_m) * (R_matrix(k, idx_m) - R_matrix(l, idx_m));
+            results(l) += 2 * W_cc(min_indx_cpp(k, l), max_indx_cpp(k, l)) * p_vector(idx_m) * (R_matrix(l, idx_m) - R_matrix(k, idx_m));
         }
     }
+
+    // ---- OUTPUT ---- //
     return results;
 }
 
 Eigen::VectorXd lasso_gradient(
-    Eigen::MatrixXd R,
-    Eigen::MatrixXd tildeZ,
-    double epsilon,
-    int m
+    Eigen::MatrixXd R_matrix,
+    Eigen::MatrixXd W_lc,
+    double eps_smooth,
+    int idx_m
 ) {
     /* Compute the block gradient of the lasso penalty
      * 
      * Input :
-     * R : a matrix, the reduced matrix
-     * tildeZ : a matrix, the cumulative lasso weights per cluster
+     * R_matrix : a matrix, the reduced matrix
+     * W_lc : a matrix, the cumulative lasso weights per cluster
      * epsilon : a double, the regularization parameter
      * m : an integer, the column of the gradient
      * 
      * Output :
      * Gradient
      */
-    int K = R.rows();
+    // ---- INITIALIZATION ---- //
+    const int K_CLUSTER = R_matrix.rows();                // Number of clusters
+    Eigen::VectorXd results = W_lc.col(idx_m);      // Output initialization 
 
-    Eigen::VectorXd results = tildeZ.col(m);
-    for(int k = 0; k < K; k++){
-        if(R(m, k) >= -epsilon && R(m, k) <= epsilon){
-            results(k) = tildeZ(m,k) * R(m, k) / epsilon;
+    // ---- COMPUTATION ---- //
+    for(int k = 0; k < K_CLUSTER; k++){
+        // Alternative gradient if the value of the coefficient is under the smoothness threshold
+        if(R_matrix(idx_m, k) >= - eps_smooth && R_matrix(idx_m, k) <= eps_smooth){
+            results(k) = W_lc(idx_m, k) * W_lc(idx_m, k) / eps_smooth;
         } else {
-            results(k) = (2 - (k==m)) * tildeZ(m,k) * ((R(m, k) > 0) - (R(m, k) < 0));
+            results(k) = (2 - (k == idx_m)) * W_lc(idx_m, k) * ((R_matrix(idx_m, k) > 0) - (R_matrix(idx_m, k) < 0));
         }
     }
+
+    // ---- OUTPUT ---- //
     return results;
 }
 
 Eigen::MatrixXd Gradient_penalised(
-    Eigen::MatrixXd R,
+    Eigen::MatrixXd R_matrix,
     List clusters,
     const Eigen::MatrixXd Gamma,
     const Eigen::MatrixXd P,
-    const Eigen::MatrixXd tildeW,
-    const Eigen::MatrixXd tildeZ,
+    const Eigen::MatrixXd W_cc,
+    const Eigen::MatrixXd W_lc,
     double lambda,
     double mu,
     double eps_lasso,
-    int m
+    int idx_m
 ){
-    /* Compute the gradient matrix for a column/row
+    /* Compute the gradient matrix for a column/row of the penalized likelihood
      *
      * Input :
      * R : a matrix, the reduced matrix
      * clusters : a list of list, the list of clusters
      * Gamma : a matrix, the fixed variogram
      * P : a matrix, computed with non_sigular_P in the right dimension
-     * tildeW : a matrix, the cumulative weights per cluster
-     * tildeZ : a matrix, the lasso weights per cluster
+     * W_cc : a matrix, the cumulative weights per cluster
+     * W_lc : a matrix, the lasso weights per cluster
      * lambda : a double, the regularisation parameter
      * mu : a double, the lasso parameter
      * eps_lasso : a double, the smooth parameter for the absolute value
-     * m : an integer, the column of the gradient
+     * idx_m : an integer, the column of the gradient
      *
      * Output :
-     * Gradient matrix
+     * Block Gradient matrix
      */
-    // Initialization
-    int K = clusters.size();   // Dimension of the matrix (number of cluster)
-    Eigen::MatrixXd results = Eigen::MatrixXd::Zero(K, K);   // Zeros everywhere
+    // ---- INITIALIZATION ---- //
+    const int K_CLUSTER = clusters.size();                                   // Number of clusters
+    Eigen::MatrixXd results = Eigen::MatrixXd::Zero(K_CLUSTER, K_CLUSTER);   // Output Initialization
 
-    Eigen::VectorXd d_llh = Gradient_block(R, clusters, Gamma, P, m);  // Gradient of the likelihood
-    Eigen::VectorXd d_pen = penalty_gradient(R, clusters, tildeW, m);  // Gradient of the penalty 
-    Eigen::MatrixXd correction = correction_gradient(R, clusters, Gamma, P, m);  // Correction for the block gradient descent with A matrix
-    Eigen::VectorXd gradient = correction + d_llh + lambda * d_pen;     // Gradient in the row/column
+    // ---- COMPUTATION ---- //
+    Eigen::VectorXd d_llh = Gradient_block(R_matrix, clusters, Gamma, P, idx_m);  // Gradient of the likelihood
+    d_llh += correction_gradient(R_matrix, clusters, Gamma, P, idx_m);            // Correction for the block gradient descent with A matrix
+    Eigen::VectorXd d_pen = penalty_gradient(R_matrix, clusters, W_cc, idx_m);    // Gradient of the penalty 
+    Eigen::VectorXd gradient = d_llh + lambda * d_pen;                            // Gradient in the row/column
 
     if (mu > 0) {
-        gradient += mu * lasso_gradient(R, tildeZ, eps_lasso, m); // Gradient of the lasso penalty
+        // Add the gradient of the lasso penalty
+        gradient += mu * lasso_gradient(R_matrix, W_lc, eps_lasso, idx_m);        
     }
 
-    Eigen::MatrixXd hessian = Hessian(R, clusters, P, tildeW, tildeZ, lambda, mu, eps_lasso, m); // Hessian int the m-th column
+    Eigen::MatrixXd hessian = Hessian(R_matrix, clusters, P, W_cc, W_lc, lambda, mu, eps_lasso, idx_m); // Hessian int the m-th column
 
-    Eigen::VectorXd value = inverse(hessian) * gradient;
+    Eigen::VectorXd value = inverse(hessian) * gradient;   // Newton-Raphson direction for the gradient descent
 
-    results.col(m) = value;
-    results.row(m) = value;
+    results.col(idx_m) = value;
+    results.row(idx_m) = value;
 
+    // ---- OUTPUT ---- //
     return results;
 }

@@ -6,6 +6,6 @@ using namespace Rcpp;
 
 // déclaration des fonctions
 
-void cluster_fusion(Eigen::MatrixXd& R, List& clusters, int k, int l);
+void cluster_fusion(Eigen::MatrixXd& R_matrix, List& clusters, int k, int l);
 
 #endif

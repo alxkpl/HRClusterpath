@@ -6,10 +6,10 @@
 using namespace Rcpp;      // to use Liste as Rcpp::List
 
 double max_step(
-    Eigen::MatrixXd R,
+    Eigen::MatrixXd R_matrix,
     List clusters,
     Eigen::MatrixXd gradient,
-    int m
+    int idx_m
 );
 
 double Gradient_step_cpp(
@@ -17,8 +17,8 @@ double Gradient_step_cpp(
     List clusters,
     Eigen::MatrixXd Gamma,
     Eigen::MatrixXd P,
-    Eigen::MatrixXd W,
-    Eigen::MatrixXd Z,
+    Eigen::MatrixXd W_cluster,
+    Eigen::MatrixXd W_lasso,
     double lambda,
     double mu,
     double eps_lasso,

@@ -107,7 +107,7 @@ NegLikelihood_HR <- function(r_matrix, clusters, Gamma) {
   # Computed with Rcpp function (see src/likelihood.cpp)
   return(
     .Likelihood_HR(
-      R        = r_matrix,
+      R_matrix = r_matrix,
       clusters = clusters,
       Gamma    = Gamma,
       P        = P_matrix
@@ -125,9 +125,9 @@ penalty <- function(r_matrix, clusters, W_cluster) {
   # Computed with Rcpp function (see src/likelihood.cpp)
   return(
     .Penalty(
-      R        = r_matrix,
-      clusters = clusters,
-      W        = W_cluster
+      R_matrix  = r_matrix,
+      clusters  = clusters,
+      W_cluster = W_cluster
     )
   )
 }
@@ -166,12 +166,12 @@ NegLikelihood_penalised <- function(
   # Computed with Rcpp function (see src/likelihood.cpp)
   return(
     .Likelihood_penalised(
-      R         = r_matrix,
+      R_init    = r_matrix,
       clusters  = clusters,
       Gamma     = Gamma,
       P         = P_matrix,
-      W         = W_cluster,
-      Z         = W_lasso,
+      W_cluster = W_cluster,
+      W_lasso   = W_lasso,
       lambda    = lambda,
       mu        = mu,
       eps_lasso = eps_lasso

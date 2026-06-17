@@ -4,151 +4,180 @@
 #include "model.hpp"
 
 Eigen::MatrixXd Hessian_base(
-    Eigen::MatrixXd R,
+    Eigen::MatrixXd R_matrix,
     List clusters,
     Eigen::MatrixXd P,
-    int m
+    int idx_m
 ) {
     /* Compute the Hessian of the likelihood
      * 
      * Input :
-     * Theta : a matrix, the precision matrix
-     * Gamma : a matrix, the fixed variogram
+     * R_matrix : a matrix, the reduced matrix
+     * clusters : a list of list, the list of the clusters
      * P : a matrix, computed with non_sigular_P in the right dimension
-     * m : an integer, the column of the gradient
+     * idx_m : an integer, the column of the gradient
      * 
      * Output :
-     * Hessian
+     * Hessian of the likelihood
      */
-    //Initialization
-    const int K = clusters.size();
-    Eigen::MatrixXd p = cluster_number(clusters);
-    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(K, K);
-    Eigen::MatrixXd U = create_U(clusters);
-    Eigen::MatrixXd D = Eigen::MatrixXd::Identity(K, K);
-    D(m, m) = 0.5;
+    // ---- INITIALIZATION ---- //
+    const int D_VARIABLE = P.rows();                                        // Number of variables
+    const int K_CLUSTER = clusters.size();                                  // Number of clusters
+    const Eigen::MatrixXd p_vector = cluster_number(clusters);              // Vector with cluster's size
+    const Eigen::MatrixXd U_matrix = create_U(D_VARIABLE, clusters);                    // Matrix of clusters U
+    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(K_CLUSTER, K_CLUSTER);        // Output Initialization
+    Eigen::MatrixXd D = Eigen::MatrixXd::Identity(K_CLUSTER, K_CLUSTER);    // Symmetry multiplicator
+    D(idx_m, idx_m) = 0.5;
+
+    // ---- COMPUTATION ---- //
 
     // Gradient of the log-determinant part
-    Eigen::MatrixXd M = P * inverse(P.transpose() * build_theta_cpp(R, clusters) * P) * P.transpose();
-    // 5 * sum(diag(U[, 1]) * Mkl) + 5 * sum(diag(U[, 2]) * Mkl) - 2 * (t(U) %*% Mkl %*% U)[1, 2] dr_ml dr_ml l!=m
+    Eigen::MatrixXd M = P * inverse(P.transpose() * build_theta_cpp(D_VARIABLE, R_matrix, clusters) * P) * P.transpose();
 
-    for(int l = 0; l < K; l++){
-        if(l == m) continue;
-        Eigen::MatrixXd E_ml = E_matrix(K, m, l);
-        Eigen::MatrixXd B_ml = - p(m) * U.col(l).asDiagonal() - p(l) * U.col(m).asDiagonal();
-        Eigen::MatrixXd M_ml = - M * (B_ml + U * E_ml * U.transpose()) * M;
-        Eigen::MatrixXd UMU = U.transpose() * M_ml * U;
+    for(int l = 0; l < K_CLUSTER; l++){
+        if(l == idx_m) continue;
+        Eigen::MatrixXd E_ml = E_matrix(K_CLUSTER, idx_m, l);
+        Eigen::MatrixXd B_ml = - p_vector(idx_m) * U_matrix.col(l).asDiagonal() - p_vector(l) * U_matrix.col(idx_m).asDiagonal();
+        Eigen::MatrixXd M_ml = - M * (B_ml + U_matrix * E_ml * U_matrix.transpose()) * M;
+        Eigen::MatrixXd UMU = U_matrix.transpose() * M_ml * U_matrix;
 
         // Hessian for k,l != m
-        for(int k = l; k < K; k++){
-            if (k == m) continue;
-            double value = p(m) * (M_ml * U.col(k).asDiagonal()).trace() +  p(k) * (M_ml * U.col(m).asDiagonal()).trace() - 2 * UMU(m, k);
+        for(int k = l; k < K_CLUSTER; k++){
+            if (k == idx_m) continue;
+            double value = p_vector(idx_m) * (M_ml * U_matrix.col(k).asDiagonal()).trace() +  p_vector(k) * (M_ml * U_matrix.col(idx_m).asDiagonal()).trace() - 2 * UMU(idx_m, k);
             H(l, k) = value;
             H(k, l) = value;
         }
 
         // Hessian for k = m, l != m
-        double value_ml = p(m) * (M_ml * U.col(m).asDiagonal()).trace() - UMU(m, m);
-        H(m, l) = value_ml;
-        H(l, m) = value_ml;
+        double value_ml = p_vector(idx_m) * (M_ml * U_matrix.col(idx_m).asDiagonal()).trace() - UMU(idx_m, idx_m);
+        H(idx_m, l) = value_ml;
+        H(l, idx_m) = value_ml;
     }
 
     // Hessian for l = k = m
-    Eigen::MatrixXd E_mm = E_matrix(K, m, m);
-    Eigen::MatrixXd B_mm = - p(m) * U.col(m).asDiagonal();
-    Eigen::MatrixXd N_mm = - M * (B_mm + U * E_mm * U.transpose()) * M;
-    H(m, m) = p(m) * (N_mm * U.col(m).asDiagonal()).trace() - (U.transpose() * N_mm * U)(m, m);
+    Eigen::MatrixXd E_mm = E_matrix(K_CLUSTER, idx_m, idx_m);
+    Eigen::MatrixXd B_mm = - p_vector(idx_m) * U_matrix.col(idx_m).asDiagonal();
+    Eigen::MatrixXd N_mm = - M * (B_mm + U_matrix * E_mm * U_matrix.transpose()) * M;
+    H(idx_m, idx_m) = p_vector(idx_m) * (N_mm * U_matrix.col(idx_m).asDiagonal()).trace() - (U_matrix.transpose() * N_mm * U_matrix)(idx_m, idx_m);
 
-    
+    // ---- OUTPUT ---- //
     return H;
 
 }
 
 Eigen::MatrixXd Hessian_penalty(
-    Eigen::MatrixXd R,
+    Eigen::MatrixXd R_matrix,
     List clusters,
-    Eigen::MatrixXd tildeW,
-    int m
+    Eigen::MatrixXd W_cc,
+    int idx_m
 ) {
     /* Compute the Hessian of the penalty
      * 
      * Input :
-     * R : a matrix, the reduced matrix
+     * R_matrix : a matrix, the reduced matrix
      * clusters : a list of list, the list of the clusters
-     * tildeW : a matrix, the cumulative weights per cluster
-     * m : an integer, the column of the gradient
+     * W_cc : a matrix, the cumulative weights per cluster
+     * idx_m : an integer, the column of the gradient
      * 
      * Output :
-     * Hessian
+     * Hessian of the clusterpath penalty
      */
-    const int K = R.rows();
-    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(K, K);
-    Eigen::VectorXd p = cluster_number(clusters);
+    // ---- INITIALIZATION ---- //
+    const int K_CLUSTER = R_matrix.rows();                           // Number of clusters
+    const Eigen::VectorXd p_vector = cluster_number(clusters);       // Vector with cluster's size
+    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(K_CLUSTER, K_CLUSTER); // Output Initialization
     
-    double sum_W = tildeW.col(m).sum() - tildeW(m, m);
+    // ---- COMPUTATION ---- //
+    double sum_W = W_cc.col(idx_m).sum() - W_cc(idx_m, idx_m);
 
     // The value of H out diagonal with column/row != m
-    H = - 2 * p(m) * tildeW;
+    H = - 2 * p_vector(idx_m) * W_cc;
 
     // The value of H in the m-th column and row (symmetric)
-    H.col(m) = - tildeW.col(m) * 2 * (p(m) - 1);
-    H.row(m) = - tildeW.col(m) * 2 * (p(m) - 1);
+    H.col(idx_m) = - W_cc.col(idx_m) * 2 * (p_vector(idx_m) - 1);
+    H.row(idx_m) = - W_cc.col(idx_m) * 2 * (p_vector(idx_m) - 1);
 
     // A different value for the diagonal element (m, m)
-    H(m, m) =  2 * (p(m) - 1) * sum_W;
+    H(idx_m, idx_m) =  2 * (p_vector(idx_m) - 1) * sum_W;
 
     // The others values are 0 otherwise
-    for(int q = 0; q < K; q ++){
-        if (q == m) continue;
-        double sum_q = tildeW.col(q).sum() - tildeW(q, q) - tildeW(q, m);
-        H(q, q) = 2 * p(q) * (sum_W - tildeW(m, q)) + 2 * (p(m) + p(q) - 2) * tildeW(q, m) + 2 * p(m) * sum_q;
+    for(int q = 0; q < K_CLUSTER; q ++){
+        if (q == idx_m) continue;
+        double sum_q = W_cc.col(q).sum() - W_cc(q, q) - W_cc(q, idx_m);
+        H(q, q) = 2 * p_vector(q) * (sum_W - W_cc(idx_m, q)) + 2 * (p_vector(idx_m) + p_vector(q) - 2) * W_cc(q, idx_m) + 2 * p_vector(idx_m) * sum_q;
     }
 
+    // ---- OUTPUT ---- //
     return H;
-    
 }
 
 Eigen::MatrixXd Hessian_lasso(
-    Eigen::MatrixXd R,
-    Eigen::MatrixXd tildeZ,
-    double epsilon,
-    int m
+    Eigen::MatrixXd R_matrix,
+    Eigen::MatrixXd W_lc,
+    double eps_smooth,
+    int idx_m
 ) {
     /* Compute the Hessian of the lasso penalty
      * 
      * Input :
-     * R : a matrix, the reduced matrix
-     * tildeZ : a matrix, the cumulative lasso weights per cluster
-     * epsilon : a double, the smooth parameter for the absolute value
-     * m : an integer, the column of the gradient
+     * R_matrix : a matrix, the reduced matrix
+     * W_lc : a matrix, the cumulative lasso weights per cluster
+     * eps_smooth : a double, the smooth parameter for the absolute value
+     * idx_m : an integer, the column of the gradient
      * 
      * Output :
-     * Hessian
+     * Hessian of the lasso penalty
      */
-    const int K = R.rows();
-    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(K, K);
-    for (int k = 0; k < K; k++){
-        if(R(m, k) >= -epsilon && R(m, k) <= epsilon) H(k, k) = tildeZ(m, k) / epsilon;
+    // ---- INITIALIZATION ---- //
+    const int K_CLUSTER = R_matrix.rows();                              // Number of clusters
+    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(K_CLUSTER, K_CLUSTER);    // Output Initialization
+
+    // ---- COMPUTATION ---- //
+    for (int k = 0; k < K_CLUSTER; k++){
+        // Non null if the coefficient is under the smoothness threshold
+        if(R_matrix(idx_m, k) >= -eps_smooth && R_matrix(idx_m, k) <= eps_smooth) H(k, k) = W_lc(idx_m, k) / eps_smooth;
     }
 
+    // ---- OUTPUT ---- //
     return H;
 }
 
 Eigen::MatrixXd Hessian(
-    Eigen::MatrixXd R,
+    Eigen::MatrixXd R_matrix,
     List clusters,
     Eigen::MatrixXd P,
-    Eigen::MatrixXd tildeW,
-    Eigen::MatrixXd tildeZ,
+    Eigen::MatrixXd W_cc,
+    Eigen::MatrixXd W_lc,
     double lambda,
     double mu,
     double eps_lasso,
-    int m
+    int idx_m
 ) {
-    Eigen::MatrixXd H_base = Hessian_base(R, clusters, P, m);
-    Eigen::MatrixXd H_pen = Hessian_penalty(R, clusters, tildeW, m);
+    /* Compute the Hessian of the penalised likelihood
+     * 
+     * Input :
+     * R_matrix : a matrix, the reduced matrix
+     * clusters : a list of list, the list of the clusters
+     * P : a matrix, computed with non_sigular_P in the right dimension
+     * W_cc : a matrix, the cumulative weights per cluster
+     * W_lc : a matrix, the cumulative lasso weights per cluster
+     * lambda : a double, the regularisation parameter
+     * mu : a double, the lasso parameter
+     * eps_lasso : a double, the smooth parameter for the absolute value
+     * idx_m : an integer, the column of the gradient
+     * 
+     * Output :
+     * Hessian of the lasso penalty
+     */
+    // ---- COMPUTATION ---- //
+    Eigen::MatrixXd H_base = Hessian_base(R_matrix, clusters, P, idx_m);           // Hessian of the likelihood
+    Eigen::MatrixXd H_pen = Hessian_penalty(R_matrix, clusters, W_cc, idx_m);      // Hessian of the clusterpath penalty
+
+    // ---- OUTPUT ---- //
     if (mu > 0) {
-        Eigen::MatrixXd H_lasso = Hessian_lasso(R, tildeZ, eps_lasso, m);
+        // Add the lasso penalty if mu > 0
+        Eigen::MatrixXd H_lasso = Hessian_lasso(R_matrix, W_lc, eps_lasso, idx_m);  // Hessians of the lasso penalty
         return H_base + lambda * H_pen + mu * H_lasso;
     } else {
         return H_base + lambda * H_pen;

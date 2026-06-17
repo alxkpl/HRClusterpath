@@ -111,8 +111,6 @@ NULL
 
 #' @rdname hr-clusterpath
 #'
-#' @importFrom graphicalExtremes emp_vario Gamma2Theta
-#'
 #' @export
 HR_Clusterpath <- function(
   data, lambda, mu = 0, zeta, W_cluster = NULL,
@@ -138,8 +136,8 @@ HR_Clusterpath <- function(
         zeta      = zeta,
         lambda    = lambda_par,
         mu        = mu,
-        W         = W_cluster,
-        Z         = W_lasso,
+        W_cluster = W_cluster,
+        W_lasso   = W_lasso,
         kappa     = kappa,
         eps_lasso = eps_lasso,
         eps_f     = eps_f,

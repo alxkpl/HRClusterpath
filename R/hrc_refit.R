@@ -4,10 +4,10 @@
 #'
 .HRC_refit_wrapper <- function(clusters, init_r_matrix, Gamma) {
   # ---- INITIALIZATION ----
-  D_VARIABLE <- ncol(Gamma)         # Number of variables
-  P_matrix <- .non_singular_P(D_VARIABLE)  # Projection matrix
-  cluster_matrix <- .create_U(clusters)          # Cluster matrix
-  CLUSTER_NUMBER <- ncol(cluster_matrix)                      # Number of clusters
+  D_VARIABLE <- ncol(Gamma)                 # Number of variables
+  P_matrix <- .non_singular_P(D_VARIABLE)   # Projection matrix
+  cluster_matrix <- .create_U(D_VARIABLE, clusters)     # Cluster matrix
+  CLUSTER_NUMBER <- ncol(cluster_matrix)    # Number of clusters
 
 
   # ---- COMPUTATION ----
@@ -32,9 +32,13 @@
   objective <- CVXR::Minimize(llh)                    # Minimization of the likelihood
   constraints <- list(                                                       # Constraints :
     P_matrix %*% t(P_matrix) %*% Theta %*% P_matrix %*% t(P_matrix) == Theta,  # Theta in SP_d^1
-    Theta == CVXR::DiagVec(A) + cluster_matrix %*% R %*% t(cluster_matrix),    # Theta with fixed block matrix structure
-    R[init_r_matrix == 0] == 0
+    Theta == CVXR::DiagVec(A) + cluster_matrix %*% R %*% t(cluster_matrix)     # Theta with fixed block matrix structur
   )
+
+  # Constraints if null coefficient are estimated with the lasso
+  if (sum(init_r_matrix == 0)) {
+    constraints[[3]] <- R[init_r_matrix == 0] == 0
+  }
 
   # Problem definition and computation of the solution
   problem <- CVXR::Problem(objective, constraints)   # Problem definition

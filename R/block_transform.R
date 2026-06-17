@@ -66,8 +66,16 @@ NULL
 #' @export
 build_Theta <- function(r_matrix, clusters) {
   # Theta matrix built with the Rcpp function (see src/model.cpp)
+  # ---- INITIALIZATION ----
+  D_VARIABLE <- sum(sapply(clusters, length))
+
+  # ---- OUTPUT ----
   return(
-    .build_theta(r_matrix, clusters)
+    .build_theta(
+      D_VARIABLE = D_VARIABLE,
+      R_matrix   = r_matrix,
+      clusters   = clusters
+    )
   )
 }
 
@@ -105,5 +113,7 @@ extract_R_matrix <- function(theta, clusters) {
   }
 
   # ---- OUTPUT ----
-  r_matrix
+  return(
+    r_matrix
+  )
 }

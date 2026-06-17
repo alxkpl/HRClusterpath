@@ -10,16 +10,16 @@ int min_indx_cpp(int k, int l);
 
 int max_indx_cpp(int k, int l);
 
-Eigen::VectorXi which_min_upper(Eigen::MatrixXd mat);
+Eigen::VectorXi which_min_upper(Eigen::MatrixXd matrix);
 
 Eigen::MatrixXd inverse(Eigen::MatrixXd A);
 
-Eigen::MatrixXd non_singular_P(int d);
+Eigen::MatrixXd non_singular_P(int dim);
 
-List simple_list(int d);
+List simple_list(int dim);
 
-Eigen::MatrixXd E_matrix(int d, int k, int l);
+Eigen::MatrixXd E_matrix(int dim, int idx_1, int idx_2);
 
-double abs_penalty(double x, double epsilon);
+double abs_penalty(double value, double eps_smooth);
 
 #endif

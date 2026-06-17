@@ -5,30 +5,21 @@
 using namespace Rcpp;     // for using List as Rcpp::List
 
 //[[Rcpp::export(.create_U)]]
-Eigen::MatrixXd create_U(List clusters) {
+Eigen::MatrixXd create_U(const int D_VARIABLE, List clusters) {
      /* Compute the cluster matrix
      * 
      * Input :
+     * D_VARIABLE : an integer, the number of variables
      * clusters : a list of list, the list of the clusters
      * 
      * Output :
      * A matrix
      */
-    // Extraction of the number of variable
-    List all_ind;
-    int K = clusters.size();
-    for(int k =0; k < K; k++){
-        List current_list = clusters(k);
-        for(int i = 0; i < current_list.size(); i++){
-            all_ind.push_back(current_list(i));
-        }
-    }
-    int d = all_ind.size();
+    // ---- INITIALIZATION ---- //
+    int K_CLUSTER = clusters.size();
+    Eigen::MatrixXd U = Eigen::MatrixXd::Zero(D_VARIABLE, K_CLUSTER);
 
-    // Building of the matrix of clusters U
-    Eigen::MatrixXd U = Eigen::MatrixXd::Zero(d, K);
-
-    for(int k = 0; k < K; k++){
+    for(int k = 0; k < K_CLUSTER; k++){
         List current_list = clusters(k);
         for(int i = 0; i < current_list.size(); i++){
             // Indicate if the variable j belongs to cluster k
@@ -40,15 +31,16 @@ Eigen::MatrixXd create_U(List clusters) {
 }
 
 
-
 // [[Rcpp::export(.build_theta)]]
 Eigen::MatrixXd build_theta_cpp(
-    Eigen::MatrixXd R,
+    const int D_VARIABLE,
+    Eigen::MatrixXd R_matrix,
     List clusters
 ) {
      /* Compute the precision matrix
      * 
      * Input :
+     * D_VARIABLE : an integer, the number of variables
      * R : a matrix, the reduced matrix
      * clusters : a list of list, the list of the clusters
      * 
@@ -56,11 +48,12 @@ Eigen::MatrixXd build_theta_cpp(
      * The associated precision matrix
      */
     
-    // Initialization
-    Eigen::MatrixXd Theta;
+    // ---- INITIALIZATION ---- //
+    Eigen::MatrixXd Theta(D_VARIABLE, D_VARIABLE);
 
+    // ---- COMPUTATION ---- //
     // Adaptation if there is only one cluster
-    if (R.rows() == 1) {
+    if (R_matrix.rows() == 1) {
         int K;
         // If the format of the cluster list is different
         if (clusters.size() > 1) {
@@ -72,22 +65,24 @@ Eigen::MatrixXd build_theta_cpp(
         }
         // In that case, there is only the value of R in the non diagonal
         Eigen::VectorXd ones = Eigen::VectorXd::Ones(K);
-        Theta = R(0, 0) * (ones * ones.transpose());
+        Theta = R_matrix(0, 0) * (ones * ones.transpose());
     }
     else
     { 
         // Expression in the non diagonal comes from URU^t
-        Eigen::MatrixXd U = create_U(clusters);
-        Theta = U * R * U.transpose();
+        Eigen::MatrixXd U = create_U(D_VARIABLE, clusters);
+        Theta = U * R_matrix * U.transpose();
     }
 
     // To get null row/column sum
-    Eigen::VectorXd ones = Eigen::VectorXd::Ones(Theta.rows());
+    Eigen::VectorXd ones = Eigen::VectorXd::Ones(D_VARIABLE);
     Eigen::VectorXd diag = Theta * ones;
 
-    for(int i = 0; i < Theta.rows(); i++){
+    for(int i = 0; i < D_VARIABLE; i++){
         Theta(i, i) -= diag(i);
     }
+
+    // ---- OUTPUT ---- //
     return Theta;
 }
 
@@ -101,24 +96,40 @@ Eigen::VectorXd cluster_number(List clusters) {
      * Output:
      * Vector
      */
-    const int K = clusters.size();
-    Eigen::VectorXd results(K);
+    // ---- INITIALIZATION ---- //
+    const int K_CLUSTER = clusters.size();      // Number of clusters
+    Eigen::VectorXd results(K_CLUSTER);         // Output initialization
 
-    for(int k = 0; k < K; k++){
+    // ---- COMPUTATION ---- //
+    for(int k = 0; k < K_CLUSTER; k++){
         List current_list = clusters[k];
-        results(k) = current_list.size();
+        results(k) = current_list.size();      // Size of cluster k
     }
 
+    // ---- OUTPUT ---- //
     return results;
 }
 
-//[[Rcpp::export(.cw)]]
-Eigen::MatrixXd clustered_weights(Eigen::MatrixXd W, List clusters){
-    Eigen::MatrixXd U = create_U(clusters);
-    int d = W.rows();
 
-    for(int i = 0; i < d; i++){
-        W(i, i) = 0;
+Eigen::MatrixXd clustered_weights(Eigen::MatrixXd weights, List clusters){
+    /* Compute cumulative weights per cluster
+     *
+     * Inputs:
+     * weights : a matrix, weights
+     * clusters : a list of list, the list of the clusters
+     *
+     * Output:
+     * The matrix of cumulative weights
+     */
+    // ---- INITIALIZATION ---- //
+    int D_VARIABLE = weights.rows();                              // Number of variables
+    Eigen::MatrixXd U = create_U(D_VARIABLE, clusters);     // Cluster matrix U
+
+    // Null diagonal constraint to get real weight matrix
+    for(int i = 0; i < D_VARIABLE; i++){
+        weights(i, i) = 0;
     }
-    return U.transpose() * W * U;
+
+    // ---- OUTPUT ---- //
+    return U.transpose() * weights * U;
 }

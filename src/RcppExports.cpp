@@ -12,128 +12,118 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // distance_matrix
-Eigen::MatrixXd distance_matrix(Eigen::MatrixXd R, List clusters);
-RcppExport SEXP _HRClusterpath_distance_matrix(SEXP RSEXP, SEXP clustersSEXP) {
+Eigen::MatrixXd distance_matrix(Eigen::MatrixXd R_matrix, List clusters);
+RcppExport SEXP _HRClusterpath_distance_matrix(SEXP R_matrixSEXP, SEXP clustersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R_matrix(R_matrixSEXP);
     Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
-    rcpp_result_gen = Rcpp::wrap(distance_matrix(R, clusters));
+    rcpp_result_gen = Rcpp::wrap(distance_matrix(R_matrix, clusters));
     return rcpp_result_gen;
 END_RCPP
 }
 // HRClusterpath_unique
-List HRClusterpath_unique(Eigen::MatrixXd R_init, List clusters_init, const Eigen::MatrixXd Gamma, const Eigen::MatrixXd W, const Eigen::MatrixXd Z, double lambda, double mu, double eps_lasso, double eps_f, double eps_conv, double tol_opt, int iter_max);
-RcppExport SEXP _HRClusterpath_HRClusterpath_unique(SEXP R_initSEXP, SEXP clusters_initSEXP, SEXP GammaSEXP, SEXP WSEXP, SEXP ZSEXP, SEXP lambdaSEXP, SEXP muSEXP, SEXP eps_lassoSEXP, SEXP eps_fSEXP, SEXP eps_convSEXP, SEXP tol_optSEXP, SEXP iter_maxSEXP) {
+List HRClusterpath_unique(Eigen::MatrixXd R_init, List clusters_init, const Eigen::MatrixXd Gamma, const Eigen::MatrixXd W_cluster, const Eigen::MatrixXd W_lasso, double lambda, double mu, double eps_lasso, double eps_f, double EPS_CONV, double TOL_OPT, int MAX_ITER);
+RcppExport SEXP _HRClusterpath_HRClusterpath_unique(SEXP R_initSEXP, SEXP clusters_initSEXP, SEXP GammaSEXP, SEXP W_clusterSEXP, SEXP W_lassoSEXP, SEXP lambdaSEXP, SEXP muSEXP, SEXP eps_lassoSEXP, SEXP eps_fSEXP, SEXP EPS_CONVSEXP, SEXP TOL_OPTSEXP, SEXP MAX_ITERSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R_init(R_initSEXP);
     Rcpp::traits::input_parameter< List >::type clusters_init(clusters_initSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type Gamma(GammaSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W(WSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W_cluster(W_clusterSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W_lasso(W_lassoSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< double >::type mu(muSEXP);
     Rcpp::traits::input_parameter< double >::type eps_lasso(eps_lassoSEXP);
     Rcpp::traits::input_parameter< double >::type eps_f(eps_fSEXP);
-    Rcpp::traits::input_parameter< double >::type eps_conv(eps_convSEXP);
-    Rcpp::traits::input_parameter< double >::type tol_opt(tol_optSEXP);
-    Rcpp::traits::input_parameter< int >::type iter_max(iter_maxSEXP);
-    rcpp_result_gen = Rcpp::wrap(HRClusterpath_unique(R_init, clusters_init, Gamma, W, Z, lambda, mu, eps_lasso, eps_f, eps_conv, tol_opt, iter_max));
+    Rcpp::traits::input_parameter< double >::type EPS_CONV(EPS_CONVSEXP);
+    Rcpp::traits::input_parameter< double >::type TOL_OPT(TOL_OPTSEXP);
+    Rcpp::traits::input_parameter< int >::type MAX_ITER(MAX_ITERSEXP);
+    rcpp_result_gen = Rcpp::wrap(HRClusterpath_unique(R_init, clusters_init, Gamma, W_cluster, W_lasso, lambda, mu, eps_lasso, eps_f, EPS_CONV, TOL_OPT, MAX_ITER));
     return rcpp_result_gen;
 END_RCPP
 }
 // Likelihood_raw
-double Likelihood_raw(Eigen::MatrixXd R, List clusters, const Eigen::MatrixXd Gamma, const Eigen::MatrixXd P);
-RcppExport SEXP _HRClusterpath_Likelihood_raw(SEXP RSEXP, SEXP clustersSEXP, SEXP GammaSEXP, SEXP PSEXP) {
+double Likelihood_raw(Eigen::MatrixXd R_matrix, List clusters, const Eigen::MatrixXd Gamma, const Eigen::MatrixXd P);
+RcppExport SEXP _HRClusterpath_Likelihood_raw(SEXP R_matrixSEXP, SEXP clustersSEXP, SEXP GammaSEXP, SEXP PSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R_matrix(R_matrixSEXP);
     Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type Gamma(GammaSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type P(PSEXP);
-    rcpp_result_gen = Rcpp::wrap(Likelihood_raw(R, clusters, Gamma, P));
+    rcpp_result_gen = Rcpp::wrap(Likelihood_raw(R_matrix, clusters, Gamma, P));
     return rcpp_result_gen;
 END_RCPP
 }
 // Penalty
-double Penalty(Eigen::MatrixXd R, List clusters, const Eigen::MatrixXd W);
-RcppExport SEXP _HRClusterpath_Penalty(SEXP RSEXP, SEXP clustersSEXP, SEXP WSEXP) {
+double Penalty(Eigen::MatrixXd R_matrix, List clusters, const Eigen::MatrixXd W_cluster);
+RcppExport SEXP _HRClusterpath_Penalty(SEXP R_matrixSEXP, SEXP clustersSEXP, SEXP W_clusterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R_matrix(R_matrixSEXP);
     Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W(WSEXP);
-    rcpp_result_gen = Rcpp::wrap(Penalty(R, clusters, W));
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W_cluster(W_clusterSEXP);
+    rcpp_result_gen = Rcpp::wrap(Penalty(R_matrix, clusters, W_cluster));
     return rcpp_result_gen;
 END_RCPP
 }
 // Likelihood_penalised
-double Likelihood_penalised(Eigen::MatrixXd R, List clusters, const Eigen::MatrixXd Gamma, const Eigen::MatrixXd P, const Eigen::MatrixXd W, const Eigen::MatrixXd Z, double lambda, double mu, double eps_lasso);
-RcppExport SEXP _HRClusterpath_Likelihood_penalised(SEXP RSEXP, SEXP clustersSEXP, SEXP GammaSEXP, SEXP PSEXP, SEXP WSEXP, SEXP ZSEXP, SEXP lambdaSEXP, SEXP muSEXP, SEXP eps_lassoSEXP) {
+double Likelihood_penalised(Eigen::MatrixXd R_init, List clusters, const Eigen::MatrixXd Gamma, const Eigen::MatrixXd P, const Eigen::MatrixXd W_cluster, const Eigen::MatrixXd W_lasso, double lambda, double mu, double eps_lasso);
+RcppExport SEXP _HRClusterpath_Likelihood_penalised(SEXP R_initSEXP, SEXP clustersSEXP, SEXP GammaSEXP, SEXP PSEXP, SEXP W_clusterSEXP, SEXP W_lassoSEXP, SEXP lambdaSEXP, SEXP muSEXP, SEXP eps_lassoSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R_init(R_initSEXP);
     Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type Gamma(GammaSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type P(PSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W(WSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W_cluster(W_clusterSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type W_lasso(W_lassoSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< double >::type mu(muSEXP);
     Rcpp::traits::input_parameter< double >::type eps_lasso(eps_lassoSEXP);
-    rcpp_result_gen = Rcpp::wrap(Likelihood_penalised(R, clusters, Gamma, P, W, Z, lambda, mu, eps_lasso));
+    rcpp_result_gen = Rcpp::wrap(Likelihood_penalised(R_init, clusters, Gamma, P, W_cluster, W_lasso, lambda, mu, eps_lasso));
     return rcpp_result_gen;
 END_RCPP
 }
 // create_U
-Eigen::MatrixXd create_U(List clusters);
-RcppExport SEXP _HRClusterpath_create_U(SEXP clustersSEXP) {
+Eigen::MatrixXd create_U(const int D_VARIABLE, List clusters);
+RcppExport SEXP _HRClusterpath_create_U(SEXP D_VARIABLESEXP, SEXP clustersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const int >::type D_VARIABLE(D_VARIABLESEXP);
     Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_U(clusters));
+    rcpp_result_gen = Rcpp::wrap(create_U(D_VARIABLE, clusters));
     return rcpp_result_gen;
 END_RCPP
 }
 // build_theta_cpp
-Eigen::MatrixXd build_theta_cpp(Eigen::MatrixXd R, List clusters);
-RcppExport SEXP _HRClusterpath_build_theta_cpp(SEXP RSEXP, SEXP clustersSEXP) {
+Eigen::MatrixXd build_theta_cpp(const int D_VARIABLE, Eigen::MatrixXd R_matrix, List clusters);
+RcppExport SEXP _HRClusterpath_build_theta_cpp(SEXP D_VARIABLESEXP, SEXP R_matrixSEXP, SEXP clustersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< const int >::type D_VARIABLE(D_VARIABLESEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type R_matrix(R_matrixSEXP);
     Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
-    rcpp_result_gen = Rcpp::wrap(build_theta_cpp(R, clusters));
-    return rcpp_result_gen;
-END_RCPP
-}
-// clustered_weights
-Eigen::MatrixXd clustered_weights(Eigen::MatrixXd W, List clusters);
-RcppExport SEXP _HRClusterpath_clustered_weights(SEXP WSEXP, SEXP clustersSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type W(WSEXP);
-    Rcpp::traits::input_parameter< List >::type clusters(clustersSEXP);
-    rcpp_result_gen = Rcpp::wrap(clustered_weights(W, clusters));
+    rcpp_result_gen = Rcpp::wrap(build_theta_cpp(D_VARIABLE, R_matrix, clusters));
     return rcpp_result_gen;
 END_RCPP
 }
 // non_singular_P
-Eigen::MatrixXd non_singular_P(int d);
-RcppExport SEXP _HRClusterpath_non_singular_P(SEXP dSEXP) {
+Eigen::MatrixXd non_singular_P(int dim);
+RcppExport SEXP _HRClusterpath_non_singular_P(SEXP dimSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type d(dSEXP);
-    rcpp_result_gen = Rcpp::wrap(non_singular_P(d));
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    rcpp_result_gen = Rcpp::wrap(non_singular_P(dim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -144,9 +134,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HRClusterpath_Likelihood_raw", (DL_FUNC) &_HRClusterpath_Likelihood_raw, 4},
     {"_HRClusterpath_Penalty", (DL_FUNC) &_HRClusterpath_Penalty, 3},
     {"_HRClusterpath_Likelihood_penalised", (DL_FUNC) &_HRClusterpath_Likelihood_penalised, 9},
-    {"_HRClusterpath_create_U", (DL_FUNC) &_HRClusterpath_create_U, 1},
-    {"_HRClusterpath_build_theta_cpp", (DL_FUNC) &_HRClusterpath_build_theta_cpp, 2},
-    {"_HRClusterpath_clustered_weights", (DL_FUNC) &_HRClusterpath_clustered_weights, 2},
+    {"_HRClusterpath_create_U", (DL_FUNC) &_HRClusterpath_create_U, 2},
+    {"_HRClusterpath_build_theta_cpp", (DL_FUNC) &_HRClusterpath_build_theta_cpp, 3},
     {"_HRClusterpath_non_singular_P", (DL_FUNC) &_HRClusterpath_non_singular_P, 1},
     {NULL, NULL, 0}
 };

@@ -13,7 +13,7 @@
   # Default clusterpath weights : exponential weights with parameter zeta
   if (is.null(W)) {
     W <- exp(
-      - zeta * sqrt(distance_matrix(Gamma, as.list(1:D_VARIABLE)))
+      - zeta * sqrt(.distance_matrix(Gamma, as.list(1:D_VARIABLE)))
     )
   }
 
@@ -21,7 +21,7 @@
   if (is.null(eps_f)) {
     # Base on data : median computed from the first guess for the precision matrix
     distance_median <- median(
-      x     = sqrt(distance_matrix(R.init, as.list(1:D_VARIABLE))) + diag(rep(NA, D_VARIABLE)),
+      x     = sqrt(.distance_matrix(R.init, as.list(1:D_VARIABLE))) + diag(rep(NA, D_VARIABLE)),
       na.rm = TRUE
     )
     eps_f <-  kappa * distance_median
@@ -41,26 +41,26 @@
     R_init        = R.init,
     clusters_init = clusters.init,
     Gamma         = Gamma,
-    W             = W_cluster,
-    Z             = W_lasso,
+    W_cluster     = W_cluster,
+    W_lasso       = W_lasso,
     lambda        = lambda,
     mu            = mu,
     eps_lasso     = eps_lasso,
     eps_f         = eps_f,
-    eps_conv      = EPS_CONV,
-    tol_opt       = TOL_OPT,
-    iter_max      = MAX_ITER
+    EPS_CONV      = EPS_CONV,
+    TOL_OPT       = TOL_OPT,
+    MAX_ITER      = MAX_ITER
   )
 
   # ---- OUTPUT ----
   # Keep the results in the output results
   HRC_results$likelihood <- .Likelihood_penalised(
-    R         = HRC_results$R,
+    R_matrix  = HRC_results$R,
     clusters  = HRC_results$clusters,
     Gamma     = Gamma,
     P         = P,
-    W         = W_cluster,
-    Z         = W_lasso,
+    W_cluster = W_cluster,
+    W_lasso   = W_lasso,
     lambda    = lambda,
     mu        = mu,
     eps_lasso = eps_lasso

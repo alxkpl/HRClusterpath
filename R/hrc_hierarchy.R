@@ -111,14 +111,14 @@ HR_Clusterpath_hierarchy <- function(
   D_VARIABLE <- ncol(Gamma)     # Number of variables
 
   # Intermediate result
-  inter_result <- list()                          # Initialisation
-  inter_result$R <- Gamma2Theta(Gamma)            # First guess for the R matrix
-  inter_result$clusters <- as.list(1:D_VARIABLE)  # Initial clusters
+  inter_result <- list()                                  # Initialisation
+  inter_result$R <- graphicalExtremes::Gamma2Theta(Gamma) # First guess for the R matrix
+  inter_result$clusters <- as.list(1:D_VARIABLE)          # Initial clusters
 
   # Default clusterpath weights : exponential weights with parameter zeta
   if (is.null(W_cluster)) {
     W_cluster <- exp(
-      -zeta * sqrt(distance_matrix(Gamma, as.list(1:D_VARIABLE)))
+      - zeta * sqrt(.distance_matrix(Gamma, as.list(1:D_VARIABLE)))
     )
   }
 
@@ -126,7 +126,7 @@ HR_Clusterpath_hierarchy <- function(
   if (is.null(eps_f)) {
     # Base on data : median computed from the first guess for the precision matrix
     distance_median <- median(
-      x     = sqrt(distance_matrix(inter_result$R, as.list(1:D_VARIABLE))) + diag(rep(NA, D_VARIABLE)),
+      x     = sqrt(.distance_matrix(inter_result$R, as.list(1:D_VARIABLE))) + diag(rep(NA, D_VARIABLE)),
       na.rm = TRUE
     )
     eps_f <-  kappa * distance_median
@@ -151,15 +151,15 @@ HR_Clusterpath_hierarchy <- function(
       R_init        = inter_result$R,
       clusters_init = inter_result$clusters,
       Gamma         = Gamma,
-      W             = W_cluster,
-      Z             = W_lasso,
+      W_cluster     = W_cluster,
+      W_lasso       = W_lasso,
       lambda        = lambda[i],
       mu            = mu,
       eps_lasso     = eps_lasso,
       eps_f         = eps_f,
-      eps_conv      = EPS_CONV,
-      tol_opt       = TOL_OPT,
-      iter_max      = MAX_ITER
+      EPS_CONV      = EPS_CONV,
+      TOL_OPT       = TOL_OPT,
+      MAX_ITER      = MAX_ITER
     )
 
     # Keep the results in the global variable
@@ -168,12 +168,12 @@ HR_Clusterpath_hierarchy <- function(
 
     # Take usefull values
     hierarchy$results[[i]]$likelihood <- .Likelihood_penalised(
-      R         = inter_result$R,
+      R_init    = inter_result$R,
       clusters  = inter_result$clusters,
       Gamma     = Gamma,
       P         = P,
-      W         = W_cluster,
-      Z         = W_lasso,
+      W_cluster = W_cluster,
+      W_lasso   = W_lasso,
       lambda    = lambda[i],
       mu        = mu,
       eps_lasso = eps_lasso
