@@ -88,7 +88,7 @@ Eigen::VectorXd correction_gradient(
     const int D_VARIABLE = Gamma.rows();                          // Number of variables
     const int K_CLUSTER = clusters.size();                        // Number of clusters
     const Eigen::MatrixXd U_matrix = create_U(D_VARIABLE, clusters);          // Matrix of clusters U
-    const Eigen::MatrixXd p_vector = cluster_number(clusters);    // Vector with cluster's size
+    const Eigen::VectorXd p_vector = cluster_number(clusters);    // Vector with cluster's size
     Eigen::MatrixXd M = P * inverse(P.transpose() * build_theta_cpp(D_VARIABLE, R_matrix, clusters) * P) * P.transpose();      // Gradient log-determinant 
     Eigen::MatrixXd Gamma_P = P * P.transpose() * Gamma * P * P.transpose();                                // Gradient trace
     Eigen::VectorXd result = Eigen::VectorXd::Zero(K_CLUSTER);      // Output initialization

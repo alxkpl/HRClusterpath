@@ -117,7 +117,7 @@ List HRClusterpath_unique(
     int K_max = R.cols();                   // Current number of cluster
 
     // ---- COMPUTATION ---- //
-    while(std::abs((l_old / l_new) - 1.0) > EPS_CONV & count < MAX_ITER) {
+    while(std::abs((l_old / l_new) - 1.0) > EPS_CONV & count < MAX_ITER & std::isfinite(l_new)) {
         int k = 0;
         l_old = l_new;
         while (k < K_max){
