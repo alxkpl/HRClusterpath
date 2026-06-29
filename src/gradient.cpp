@@ -182,7 +182,7 @@ Eigen::VectorXd lasso_gradient(
     for(int k = 0; k < K_CLUSTER; k++){
         // Alternative gradient if the value of the coefficient is under the smoothness threshold
         if(R_matrix(idx_m, k) >= - eps_smooth && R_matrix(idx_m, k) <= eps_smooth){
-            results(k) = W_lc(idx_m, k) * W_lc(idx_m, k) / eps_smooth;
+            results(k) = W_lc(idx_m, k) * R_matrix(idx_m, k) / eps_smooth;
         } else {
             results(k) = (2 - (k == idx_m)) * W_lc(idx_m, k) * ((R_matrix(idx_m, k) > 0) - (R_matrix(idx_m, k) < 0));
         }
