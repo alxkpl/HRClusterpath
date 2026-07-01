@@ -33,7 +33,7 @@ double Likelihood_raw(
     // ---- COMPUTATION ---- //
     Eigen::MatrixXd Theta = build_theta_cpp(D_VARIABLE, R_matrix, clusters);   // Rebuild Theta from R and the list of clusters
     Eigen::MatrixXd det_mat = P.transpose() * Theta * P;    // Reduce dimension of Theta for the determinant
-    Eigen::MatrixXd tr_mat = Theta * Gamma;                 // Matrix in the trace
+    Eigen::MatrixXd tr_mat = P * P.transpose() * Theta * P * P.transpose() * Gamma; // Matrix in the trace
 
     double det_value = det_mat.determinant();       // Compute determinant
     double tr_value = tr_mat.trace();               // Compute trace

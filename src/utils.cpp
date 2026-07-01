@@ -53,6 +53,9 @@ Eigen::VectorXi which_min_upper(Eigen::MatrixXd matrix) {
      */
     // ---- INITIALIZATION ---- //
     int n_size = matrix.rows();
+    if (n_size <= 1) {
+        return Eigen::VectorXi::Constant(2, 0);
+    }
     int min_i = -1;
     int min_j = -1;
     double min_val = R_PosInf;      // Infinity initialization
